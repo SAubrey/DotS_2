@@ -213,12 +213,12 @@ PrefabInstance:
         type: 3}
       propertyPath: zone_rear.Array.data[0]
       value: 
-      objectReference: {fileID: 1960038742650966699}
+      objectReference: {fileID: 3004315509029764185}
     - target: {fileID: 7509377035230579897, guid: ec7b2da0813cc584d88c9a5bbc14b1ae,
         type: 3}
       propertyPath: zone_rear.Array.data[1]
       value: 
-      objectReference: {fileID: 3004315509029764185}
+      objectReference: {fileID: 1960038742650966699}
     - target: {fileID: 7509377035230579897, guid: ec7b2da0813cc584d88c9a5bbc14b1ae,
         type: 3}
       propertyPath: zone_rear.Array.data[2]
@@ -233,12 +233,12 @@ PrefabInstance:
         type: 3}
       propertyPath: zone_front_sword.Array.data[0]
       value: 
-      objectReference: {fileID: 3118854999926609159}
+      objectReference: {fileID: 1898513345957925896}
     - target: {fileID: 7509377035230579897, guid: ec7b2da0813cc584d88c9a5bbc14b1ae,
         type: 3}
       propertyPath: zone_front_sword.Array.data[1]
       value: 
-      objectReference: {fileID: 1898513345957925896}
+      objectReference: {fileID: 3118854999926609159}
     - target: {fileID: 7509377035230579897, guid: ec7b2da0813cc584d88c9a5bbc14b1ae,
         type: 3}
       propertyPath: zone_front_sword.Array.data[2]
@@ -248,12 +248,12 @@ PrefabInstance:
         type: 3}
       propertyPath: zone_front_polearm.Array.data[0]
       value: 
-      objectReference: {fileID: 498859233680180847}
+      objectReference: {fileID: 986897873246319036}
     - target: {fileID: 7509377035230579897, guid: ec7b2da0813cc584d88c9a5bbc14b1ae,
         type: 3}
       propertyPath: zone_front_polearm.Array.data[1]
       value: 
-      objectReference: {fileID: 986897873246319036}
+      objectReference: {fileID: 498859233680180847}
     - target: {fileID: 7509377035230579897, guid: ec7b2da0813cc584d88c9a5bbc14b1ae,
         type: 3}
       propertyPath: zone_front_polearm.Array.data[2]

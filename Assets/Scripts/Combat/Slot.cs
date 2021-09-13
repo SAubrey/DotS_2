@@ -61,7 +61,7 @@ public class Slot : MonoBehaviour {
         healthbar_bg.color = statbar_bg_color;
         defensebar_fill.color = defensebar_fill_color;
         defensebar_bg.color = statbar_bg_color;
-        PlayerDeployment.I.on_velocity_change += toggle_dust_ps;
+        deployment.on_velocity_change += toggle_dust_ps;
         dust_ps.enableEmission = false;
     }
 

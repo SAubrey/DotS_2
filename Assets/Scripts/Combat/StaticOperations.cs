@@ -25,7 +25,7 @@ public static class StaticOperations {
         return closest;
     }
 
-    public static Vector2 TargetUnitVec(Vector2 v, Vector2 target) {
+    public static Vector2 target_unit_vec(Vector2 v, Vector2 target) {
         return (target - v).normalized;
     }
 

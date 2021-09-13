@@ -46,11 +46,13 @@ public abstract class Deployment : MonoBehaviour
 
     protected void set_position(Vector2 pos) {
         position = pos;
-        on_position_change(position);
+        if (on_position_change != null)
+            on_position_change(position);
     }
     
 
     public void move(Vector2 movement) {
+        movement.Normalize();
         movement *= MAX_VEL * Time.deltaTime;
         if (movement.magnitude == 0) {
             on_velocity_change(0);
@@ -160,5 +162,9 @@ public abstract class Deployment : MonoBehaviour
 
     protected void trigger_end_rotation_event() {
         on_end_rotation(MAX_VEL);
+    }
+
+    public virtual void delete() {
+        GameObject.Destroy(gameObject);
     }
 }

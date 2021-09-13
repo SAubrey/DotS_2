@@ -127,10 +127,6 @@ public class Enemy : Unit {
         return health - dmg <= 0 ? DEAD : INJURED;
     }
 
-    public void clear_target() {
-        target = null;
-    }
-
     public int take_xp_from_death() {
         if (!xp_taken) {
             xp_taken = true;

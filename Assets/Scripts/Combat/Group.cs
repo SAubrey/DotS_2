@@ -69,6 +69,12 @@ public class Group : MonoBehaviour {
         get_highest_empty_slot().fill(unit);
     }
 
+    public void place_units(List<Unit> units) {
+        foreach (Unit u in units) {
+            place_unit(u);
+        }
+    }
+
     public void pair_slot_point_group() {
         foreach (Transform child in slot_group.transform) {
             slots.Add(child.gameObject.GetComponent<Slot>());   

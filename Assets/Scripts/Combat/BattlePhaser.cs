@@ -80,7 +80,7 @@ public class BattlePhaser : MonoBehaviour {
             EnemyLoader.I.generate_new_enemies(cell, cell.travelcard.enemy_count);
         }
         Debug.Log("loading enemies");
-        EnemyLoader.I.load_enemies(cell.get_enemies());
+        EnemyLoader.I.load_enemies(cell.get_enemies(), 9);
         PlayerDeployment.I.place_units(active_bat);
         cell.has_seen_combat = true;
 

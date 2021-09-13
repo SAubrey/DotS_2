@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 605503786543534115}
   - component: {fileID: 6928956094902717708}
   - component: {fileID: 7399157508826641408}
+  - component: {fileID: 4693467255682781958}
   m_Layer: 8
   m_Name: SmallEnemySPDeployment
   m_TagString: Group
@@ -76,6 +77,39 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4693467255682781958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8840387647567175239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfef2e5845cc05547af1663c87919a52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showingDamage: 0
+  staminaBar: {fileID: 0}
+  MAX_STAMINA: 100
+  stamina: 0
+  healthbar: {fileID: 0}
+  healthbarBGColor: {r: 0, g: 0, b: 0, a: 0}
+  unit_img_dir: 0
+  player_pos: {x: 0, y: 0}
+  player_distance: 0
+  search_distance: 30
+  act_distance: 10
+  zone_front:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  zone_rear:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  zone:
+  - {fileID: 0}
 --- !u!1001 &3331417890668430955
 PrefabInstance:
   m_ObjectHideFlags: 0

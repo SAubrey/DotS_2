@@ -3,66 +3,106 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemyDeployment : Deployment {
-    public Vector2 player_pos;
-    public float player_distance;
-    public float search_distance = 30f;
-    public float act_distance = 10f;
+public abstract class EnemyDeployment : Deployment {
+    protected Vector2 player_pos;
+    protected float _player_distance;
+    protected float player_distance {
+        get { return _player_distance; }
+        set {
+            _player_distance = Mathf.Max(0, value - player_distance_offset);
+        }
+    }
+    protected float player_distance_offset = 250f;
+    protected float search_distance = 1000f;
+    protected float chase_distance = 700f;
+    protected float act_distance = 15f;
+    protected bool locked_on = false;
+    protected Vector2 target = Vector2.zero;
+    
+    public virtual void place_unit(Unit unit) { }
 
-    public Group[] zone_front = new Group[3];
-    public Group[] zone_rear = new Group[3];
-
-    void Start() {
+    protected void init() {
         PlayerDeployment.I.on_position_change += update_player_pos;
         isEnemy = true;
-        groups.Add(zone_front);
-        groups.Add(zone_rear);
-    }
-
-    void Update() {
-        decision_tree();
     }
 
     private void update_player_pos(Vector2 pos) {
         player_pos = pos;
     }
 
-    public void decision_tree() {
+    public virtual void decision_tree() {
+        set_player_distance(player_pos);
+        if (player_distance == 0) {
+            back_up();
+        }
+        if (locked_on) {
+            rotate_towards_target(player_pos);
+        }
         if (player_distance < search_distance) {
-            if (player_distance < act_distance) {
-                act();
+            if (player_distance < chase_distance) {
+                if (player_distance < act_distance) {
+                    act();
+                    return;
+                }
+                chase();
                 return;
             }
+            locked_on = false;
             search();
             return;
-        }
-    }
-
-    public void place_unit(Unit unit) {
-        Group[] zone = null;
-        if (unit.is_melee) {
-            zone = zone_front;
         } else {
-            zone = zone_rear;
-        } 
-
-        Group g = get_highest_empty_group(zone);
-        if (g != null) {
-            g.place_unit(unit);
+            wander();
         }
     }
 
-    public void search() {
+    protected Quaternion target_rotation;
+    protected void rotate_towards_target(Vector3 pos) {
 
-        // Move to a random target location at a random distance
+        target_rotation = Quaternion.Euler(new Vector3(0, 0, Mathf.Atan2((pos.y - transform.position.y), 
+            (pos.x - transform.position.x)) * Mathf.Rad2Deg - 90f));
+        
+        Vector3 variance = gameObject.transform.rotation.eulerAngles - get_direction_to_player();
+        Debug.Log(variance);
+        variance.Normalize();
+        if (variance.x < 0.1f && variance.y < 0.1f) {
+            return;
+        }
+        
+        // Lerp smooths and thus limits rotation speed.
+        float str = Mathf.Min(5 * Time.deltaTime, 1);
+        gameObject.transform.rotation = Quaternion.Lerp(gameObject.transform.rotation, target_rotation, str);
     }
 
-    public void act() {
-        //agent.SetDestination(player_pos);
+    public virtual void search() {
+
+    }
+
+    public void chase() {
+        locked_on = true;
+        gameObject.transform.position = 
+            Vector2.MoveTowards(gameObject.transform.position, player_pos, MAX_VEL/100f);
+    }
+
+    public virtual void act() {
+        // Attack
+        
+    }
+
+    public virtual void back_up() {
+        move(-get_direction_to_player());
+    }
+
+    public void wander() {
+        // Move to a random target location at a random distance
+
     }
 
     protected void set_player_distance(Vector3 pos) {
         player_distance = Vector2.Distance(transform.position, pos);
+    }
+
+    protected Vector3 get_direction_to_player() {
+        return StaticOperations.target_unit_vec(gameObject.transform.position, player_pos);
     }
 }
 
