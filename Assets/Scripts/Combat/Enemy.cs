@@ -79,14 +79,6 @@ public class Enemy : Unit {
         return e;
     }
 
-    public bool attempt_move(Slot dest) {
-        if (!can_move(dest))
-            return false;
-        move(dest);
-        get_slot().get_group().rotate_towards_target(target.get_group());
-        return true;
-    }
-
     public bool can_target(Slot punit) {
         if (!punit.has_punit) 
             return false;
@@ -96,35 +88,17 @@ public class Enemy : Unit {
         return melee_vs_flying ? false : true;
     }
 
-    public override int take_damage(int dmg) {
-        health = Mathf.Max(0, health - dmg);
-        slot.update_healthbar();
-        slot.update_defensebar();
-
-        if (health <= 0) {
-            dead = true;
-            slot.show_dead();
-        }
-        return health <= 0 ? DEAD : INJURED;
-    }
-
-    private string get_attack_animation_ID() {
+    protected override string get_attack_animation_ID() {
         if (combat_style == RANGE) {
             return AnimationPlayer.ARROW_FIRE;
         } else {
             return AnimationPlayer.SLASH;
         }
     }
-
-    public override int calc_dmg_taken(int dmg, bool piercing=false) {
-        // adjust for defensive attributes?
-        if (!piercing)
-            dmg -= defense;
-        return dmg > 0 ? dmg : 0;
-    }
-
-    public override int get_post_dmg_state(int dmg) {
-        return health - dmg <= 0 ? DEAD : INJURED;
+    
+    public override void die() { 
+        Map.I.get_current_cell().kill_enemy(this);
+        slot.empty();
     }
 
     public int take_xp_from_death() {
@@ -138,149 +112,149 @@ public class Enemy : Unit {
 
 // Plains
 public class Galtsa : Enemy {
-    public Galtsa() : base("Galtsa", GALTSA, 2, 0, 2, 2, MELEE, CHARGE, GROUPING_2) {
+    public Galtsa() : base("Galtsa", GALTSA, 20, 0, 100, 2, MELEE, CHARGE, GROUPING_2) {
     }
 }
 public class Grem : Enemy {
-    public Grem() : base("Grem", GREM, 1, 0, 1, 1, MELEE) {
+    public Grem() : base("Grem", GREM, 10, 0, 100, 1, MELEE) {
     }
 }
 public class Endu : Enemy {
-    public Endu() : base("Endu", ENDU, 4, 0, 2, 3, MELEE, CHARGE) {
+    public Endu() : base("Endu", ENDU, 40, 0, 100, 3, MELEE, CHARGE) {
     }
 }
 public class Korote : Enemy {
-    public Korote() : base("Korote", KOROTE, 1, 0, 2, 2, MELEE, FLANKING, GROUPING_2) {
+    public Korote() : base("Korote", KOROTE, 10, 0, 100, 2, MELEE, FLANKING, GROUPING_2) {
     }
 }
 public class Molner : Enemy {
-    public Molner() : base("Molner", MOLNER, 2, 0, 2, 2, MELEE, FLANKING, CHARGE, GROUPING_2) {
+    public Molner() : base("Molner", MOLNER, 20, 0, 100, 2, MELEE, FLANKING, CHARGE, GROUPING_2) {
     }
 }
 public class Etuena : Enemy {
-    public Etuena() : base("Etuena", ETUENA, 2, 0, 3, 3, MELEE, FLYING, CHARGE, GROUPING_2) {
+    public Etuena() : base("Etuena", ETUENA, 20, 0, 100, 3, MELEE, FLYING, CHARGE, GROUPING_2) {
     }
 }
 public class Clypte : Enemy {
-    public Clypte() : base("Clypte", CLYPTE, 3, 0, 5, 3, RANGE, TARGET_RANGE) {
+    public Clypte() : base("Clypte", CLYPTE, 30, 0, 100, 3, RANGE, TARGET_RANGE) {
     }
 }
 public class Goliath : Enemy {
-    public Goliath() : base("Goliath", GOLIATH, 12, 0, 8, 6, MELEE, TERROR_3, CHARGE) {
+    public Goliath() : base("Goliath", GOLIATH, 100, 0, 250, 12, MELEE, TERROR_3, CHARGE) {
     }
 }
 
 // Forest
 public class Kverm : Enemy {
-    public Kverm() : base("Kverm", KVERM, 2, 0, 1, 1, MELEE, STALK) {
+    public Kverm() : base("Kverm", KVERM, 20, 0, 100, 1, MELEE, STALK) {
     }
 }
 public class Latu : Enemy {
-    public Latu() : base("Latu", LATU, 3, 0, 3, 3, MELEE, STALK, AGGRESSIVE) {
+    public Latu() : base("Latu", LATU, 30, 0, 100, 3, MELEE, STALK, AGGRESSIVE) {
     }
 }
 public class Eke_tu : Enemy {
-    public Eke_tu() : base("Eke Tu", EKE_TU, 1, 0, 2, 2, MELEE, TARGET_RANGE, AGGRESSIVE) {
+    public Eke_tu() : base("Eke Tu", EKE_TU, 10, 0, 100, 2, MELEE, TARGET_RANGE, AGGRESSIVE) {
     }
 }
 public class Oetem : Enemy {
-    public Oetem() : base("Oetem", OETEM, 4, 0, 3, 3, MELEE, GROUPING_2) {
+    public Oetem() : base("Oetem", OETEM, 40, 0, 100, 3, MELEE, GROUPING_2) {
     }
 }
 public class Eke_fu : Enemy {
-    public Eke_fu() : base("Eke Fu", EKE_FU, 3, 0, 2, 2, MELEE, GROUPING_2, FLANKING) {
+    public Eke_fu() : base("Eke Fu", EKE_FU, 30, 0, 100, 2, MELEE, GROUPING_2, FLANKING) {
     }
 }
 public class Eke_shi_ami : Enemy {
-    public Eke_shi_ami() : base("Eke Shi Ami", EKE_SHI_AMI, 3, 0, 5, 4, RANGE, PIERCING, STUN, TARGET_HEAVY) {
+    public Eke_shi_ami() : base("Eke Shi Ami", EKE_SHI_AMI, 30, 0, 100, 4, RANGE, PIERCING, STUN, TARGET_HEAVY) {
     }
 }
 public class Eke_Lord : Enemy {
-    public Eke_Lord() : base("Eke Lord", EKE_LORD, 6, 0, 12, 12, MELEE, ARCING_STRIKE, STUN, TARGET_HEAVY) {
+    public Eke_Lord() : base("Eke Lord", EKE_LORD, 6, 0, 1100, 12, MELEE, ARCING_STRIKE, STUN, TARGET_HEAVY) {
     }
 }
 public class Ketemcol : Enemy {
-    public Ketemcol() : base("Ketemcol", KETEMCOL, 2, 1, 8, 6, MELEE, ARCING_STRIKE, STUN) {
+    public Ketemcol() : base("Ketemcol", KETEMCOL, 2, 1, 100, 6, MELEE, ARCING_STRIKE, STUN) {
     }
 }
 
 // Titrum
 public class Mahukin : Enemy {
-    public Mahukin() : base("Mahukin", MAHUKIN, 2, 2, 3, 4, MELEE, GROUPING_2) {
+    public Mahukin() : base("Mahukin", MAHUKIN, 2, 2, 100, 4, MELEE, GROUPING_2) {
     }
 }
 public class Drongo : Enemy {
-    public Drongo() : base("Drongo", DRONGO, 3, 3, 6, 6, MELEE) {
+    public Drongo() : base("Drongo", DRONGO, 3, 3, 100, 6, MELEE) {
     }
 }
 public class Maheket : Enemy {
-    public Maheket() : base("Maheket", MAHEKET, 3, 2, 3, 5, MELEE, GROUPING_2) {
+    public Maheket() : base("Maheket", MAHEKET, 3, 2, 100, 5, MELEE, GROUPING_2) {
     }
 }
 public class Calute : Enemy {
-    public Calute() : base("Calute", CALUTE, 6, 0, 6, 5, MELEE, STALK, AGGRESSIVE) {
+    public Calute() : base("Calute", CALUTE, 6, 0, 100, 5, MELEE, STALK, AGGRESSIVE) {
     }
 }
 public class Etalket : Enemy {
-    public Etalket() : base("Etalket", ETALKET, 2, 0, 5, 4, MELEE, STALK, TERROR_3) {
+    public Etalket() : base("Etalket", ETALKET, 2, 0, 100, 4, MELEE, STALK, TERROR_3) {
     }
 }
 public class Muatem : Enemy {
-    public Muatem() : base("Muatem", MUATEM, 7, 5, 4, 12, MELEE, CRUSHING_BLOW) {
+    public Muatem() : base("Muatem", MUATEM, 7, 5, 100, 12, MELEE, CRUSHING_BLOW) {
     }
 }
 
 // Mountain/Cliff
 public class Drak : Enemy {
-    public Drak() : base("Drak", DRAK, 3, 0, 5, 3, MELEE, TERROR_2, FLYING) {
+    public Drak() : base("Drak", DRAK, 3, 0, 100, 3, MELEE, TERROR_2, FLYING) {
     }
 }
 public class Zerrku : Enemy {
-    public Zerrku() : base("Zerrku",ZERRKU, 3, 0, 3, 4, RANGE, GROUPING_2) {
+    public Zerrku() : base("Zerrku",ZERRKU, 3, 0, 100, 4, RANGE, GROUPING_2) {
     }
 }
 public class Gokin : Enemy {
-    public Gokin() : base("Gokin", GOKIN, 2, 0, 2, 2, MELEE, FLANKING, GROUPING_2) {
+    public Gokin() : base("Gokin", GOKIN, 2, 0, 100, 2, MELEE, FLANKING, GROUPING_2) {
     }
 }
 
 // Cave
 public class Tajaqar : Enemy {
-    public Tajaqar() : base("Tajaqar", TAJAQAR, 3, 1, 3, 5, MELEE, FLANKING, GROUPING_2) {
+    public Tajaqar() : base("Tajaqar", TAJAQAR, 3, 1, 100, 5, MELEE, FLANKING, GROUPING_2) {
     }
 }
 public class Tajaero : Enemy {
-    public Tajaero() : base("Tajaero", TAJAERO, 3, 0, 2, 4, RANGE, FLYING) {
+    public Tajaero() : base("Tajaero", TAJAERO, 3, 0, 100, 4, RANGE, FLYING) {
     }
 }
 public class Terra_Qual : Enemy {
-    public Terra_Qual() : base("Terra Qual", TERRA_QUAL, 5, 2, 10, 12, MELEE, ARCING_STRIKE) {
+    public Terra_Qual() : base("Terra Qual", TERRA_QUAL, 5, 2, 1100, 12, MELEE, ARCING_STRIKE) {
     }
 }
 public class Duale : Enemy {
-    public Duale() : base("Duale", DUALE, 2, 0, 6, 5, RANGE, AGGRESSIVE, FLANKING) {
+    public Duale() : base("Duale", DUALE, 2, 0, 100, 5, RANGE, AGGRESSIVE, FLANKING) {
     }
 }
 
 public class Meld_Warrior : Enemy {
-    public Meld_Warrior() : base("Meld Warrior", MELD_WARRIOR, 1, 1, 3, 3, MELEE, CHARGE, GROUPING_1) {
+    public Meld_Warrior() : base("Meld Warrior", MELD_WARRIOR, 1, 1, 100, 3, MELEE, CHARGE, GROUPING_1) {
     }
 }
 
 public class Meld_Spearman : Enemy {
-    public Meld_Spearman() : base("Meld Spearman", MELD_SPEARMAN, 1, 2, 2, 3, MELEE, CHARGE) {
+    public Meld_Spearman() : base("Meld Spearman", MELD_SPEARMAN, 1, 2, 100, 3, MELEE, CHARGE) {
     }
 }
 
 public class t1_Guardian : Enemy {
-    public t1_Guardian() : base("Guardian", T1_GUARDIAN, 6, 0, 25, 30, MELEE, TERROR_3) {
+    public t1_Guardian() : base("Guardian", T1_GUARDIAN, 100, 0, 1000, 30, MELEE, TERROR_3) {
         // 5 terror
         // swipes front and left tile, hits front and behind
     }
 }
 
 public class t2_Guardian : Enemy {
-    public t2_Guardian() : base("Deep Guardian", T2_GUARDIAN, 10, 5, 40, 60, RANGE, TERROR_3) {
+    public t2_Guardian() : base("Deep Guardian", T2_GUARDIAN, 130, 5, 4000, 60, RANGE, TERROR_3) {
 
     }
 }

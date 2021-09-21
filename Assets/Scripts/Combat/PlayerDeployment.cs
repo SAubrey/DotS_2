@@ -12,7 +12,6 @@ public class PlayerDeployment : Deployment {
     public bool attacking = false;
 
     // Movement
-    public bool stunned = false;
 
     public Group[] zone_front_sword = new Group[3];
     public Group[] zone_front_polearm = new Group[3];
@@ -20,6 +19,12 @@ public class PlayerDeployment : Deployment {
     public Group[] zone_rear = new Group[3];
 
     public bool swordsmen_forward = true;
+    public Group[] forward_zone {
+        get { 
+            if (swordsmen_forward) return zone_front_sword;
+            else return zone_front_polearm; 
+        }
+    }
 
     public bool canMove {
         get { return !attacking; }
@@ -35,23 +40,39 @@ public class PlayerDeployment : Deployment {
     }
 
     void Start() {   
-        groups.Add(zone_front_sword);
-        groups.Add(zone_front_polearm);
-        groups.Add(zone_center);
-        groups.Add(zone_rear);
+        zones.Add(zone_front_sword);
+        zones.Add(zone_front_polearm);
+        zones.Add(zone_center);
+        zones.Add(zone_rear);
         stamina = MAX_STAMINA;
         isPlayer = true;
     }
 
     protected void init() {
         update_healthbar();
-        update_stamina();
+        update_staminabar();
     }
 
-    void Update() {
+    protected override void Update() {
+        base.Update();
+
         if (Input.GetMouseButtonDown(0)) { // Left click
-            if (stamina > 0)
-                melee_attack();
+            if (stamina > 0) {
+                melee_attack(forward_zone);
+            }
+        }
+        else if (Input.GetMouseButtonDown(1)) {
+            if (stamina > 0) {
+                block();
+            }
+        } else if (Input.GetKeyDown(KeyCode.Space)) {
+            // show range_attack landing zone
+        }
+        if (Input.GetKeyUp(KeyCode.Space)) {
+            Vector3 p = Input.mousePosition;
+            p.z = 2000f;
+            p = CamSwitcher.I.battle_cam.ScreenToWorldPoint(p);
+            range_attack(zone_rear, p);
         } else if (Input.GetKey(KeyCode.Q)) {
             rotate(-1);    
         } else if (Input.GetKey(KeyCode.E)) {
@@ -95,16 +116,7 @@ public class PlayerDeployment : Deployment {
         return vec;
     }
 
-
-    public void place_units(Battalion b) {
-        foreach (List<PlayerUnit> pu in b.units.Values) {
-            foreach (Unit u in pu) {
-                place_unit(u);
-            }
-        }
-    }
-
-    public void place_unit(Unit unit) {
+    public override void place_unit(Unit unit) {
         Group[] zone = null;
         if (unit.is_melee) {
             if (unit.has_attribute(Unit.PIERCING)) {
@@ -124,64 +136,34 @@ public class PlayerDeployment : Deployment {
         }
     }
 
-    public void take_damage(int dmg) {
-        if (invulnerable)
-            return;
-        
-   
-   //     stun(timers.normalStunTime);
-    }
-
-    public void melee_attack() {
-        //animation_player.play(AnimationPlayer.SWORD_SLASH);
-        animate_slot_attack(true);
-    }
-
-    public void range_attack() {
-        animate_slot_attack(false);
-    }
-
-    public void animate_slot_attack(bool melee) {
-        Group[] gs;
-        string anim;
-        if (melee) {
-            if (swordsmen_forward) {
-                gs = zone_front_sword;
-                anim = AnimationPlayer.SWORD_SLASH;
-            } else {
-                gs = zone_front_polearm;
-                anim = AnimationPlayer.SPEAR_THRUST;
+    public void place_units(Battalion b) {
+        foreach (List<PlayerUnit> pu in b.units.Values) {
+            foreach (Unit u in pu) {
+                place_unit(u);
             }
-        } else {
-            gs = zone_rear;
-            anim = AnimationPlayer.ARROW_FIRE;
         }
+        MapUI.I.update_deployment(b);
+    }
 
-        foreach (Group g in gs) {
+
+
+    protected void block() {
+        foreach (Group g in forward_zone) {
             for (int i = 0; i < 3; i++) {
                 if (g.slots[i].has_unit) {
-                    g.slots[i].play_animation(anim);
+                    Unit u = g.slots[i].get_unit();
+                    u.blocking = true;
                 }
             }
         }
     }
 
     public Group[] determine_attacking_zone(bool melee) {
-        Group[] gs;
-        if (melee) {
-            if (swordsmen_forward) {
-                gs = zone_front_sword;
-            } else {
-                gs = zone_front_polearm;
-            }
-        } else {
-            gs = zone_rear;
-        }
-        return gs;
+        return melee ? forward_zone : zone_rear;
     }
 
 
-    private GameObject FindNearestEnemyInSight() {
+    private GameObject find_nearest_enemy_in_sight() {
         int mask = 1 << 9;
         // Scan for enemies with enemy layer mask.
         Collider2D[] enemiesInRange = Physics2D.OverlapCircleAll(
@@ -201,10 +183,9 @@ public class PlayerDeployment : Deployment {
         }
     }
 
-
     public float get_stam_regen_amount() {
         float vel = 0;//Mathf.Abs(body.velocity.x) + Mathf.Abs(body.velocity.y);
         // Double regeneration when not moving.
-        return vel < MAX_VEL / 10 ? stamRegenAmount * 2 : stamRegenAmount;
+        return vel < MAX_VEL / 10 ? stam_regen_amount * 2 : stam_regen_amount;
     }
 }

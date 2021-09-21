@@ -70,17 +70,7 @@ public class TurnPhaser : MonoBehaviour, ISaveLoad {
             active_disc.respawn();
         }
 
-        // If leader of a battle, bypass stages and enter battle.
-        Battle b = Map.I.get_current_cell().battle;
-        if (b != null) {
-            if (active_disc == b.leader) {
-                BattlePhaser.I.resume_battle(Map.I.get_current_cell());
-            // If in battle but not leader, skip turn. (Turn used in group battle)
-            } else {
-                advance_player();
-                return;
-            }
-        }
+        
         reset();
         CamSwitcher.I.set_active(CamSwitcher.MAP, true);
     }

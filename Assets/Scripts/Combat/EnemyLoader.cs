@@ -14,8 +14,6 @@ public class EnemyLoader : MonoBehaviour {
     public static int RARE_THRESH = 90;
     public static int MAX_ROLL = 100;
 
-    // Spawning zones - 2 x,y coordinates from low to high.
-
     public const int T1 = 1;
     public const int T2 = 2;
     public const int T3 = 3;
@@ -37,13 +35,10 @@ public class EnemyLoader : MonoBehaviour {
     public List<List<List<int>>> meld_tiers = new List<List<List<int>>>();
 
     
-    Zone zone = new Zone(new Vector2(100, 500), new Vector2(3300, 2900));
+    public SpawnZone spawn_zone;    
     public List<EnemyDeployment> enemy_deployments = new List<EnemyDeployment>();
-    //public List<GameObject> enemy_deployments = new List<GameObject>();
     public GameObject small_enemy_deployment_prefab;
     public GameObject field_panel;
-    //public List<EnemyDeployment> enemy_melee_deployments = new List<EnemyDeployment>();
-    //public List<EnemyDeployment> enemy_melee_deployments = new List<EnemyDeployment>();
 
     void Awake() {
         if (I == null) {
@@ -108,7 +103,7 @@ public class EnemyLoader : MonoBehaviour {
             }
             cell.add_enemy(Enemy.create_enemy(enemyID));
         }
-        reset();
+        //reset();
     }
 
     public void load_enemies(List<Enemy> enemies, int group_size) {
@@ -120,36 +115,32 @@ public class EnemyLoader : MonoBehaviour {
         int num_range_groups = 
             (int)UnityEngine.Random.Range(range_enemies.Count / group_size, range_enemies.Count / 2f) + 1;
 
-        int num_enemies;
-        int num_groups;
-        if (melee_enemies.Count > 0) {
-            // Half of groups take 3/4 of enemies. 
-            num_enemies = Mathf.Max((int)(melee_enemies.Count * .75f), 1);
-            num_groups = Mathf.Max((int)(num_melee_groups / 2f), 1);
-            melee_enemies = spawn_deployments(melee_enemies, num_enemies, num_groups);
-            
-            if (num_groups > 1) {
-                // Other half takes 1/4 of enemies. 
-                num_enemies = melee_enemies.Count - num_enemies;
-                num_groups = num_melee_groups - num_groups;
-                melee_enemies = spawn_deployments(melee_enemies, num_enemies, num_groups);
-                Debug.Log("Should equal zero: " + melee_enemies.Count);
-            }
-        }
-        
-        if (range_enemies.Count > 0) {
-            // Again for ranged units.
-            num_enemies = Mathf.Max((int)(range_enemies.Count * .75f), 1);
-            num_groups = Mathf.Max((int)(num_range_groups / 2f), 1);
-            range_enemies = spawn_deployments(range_enemies, num_enemies, num_groups);
+        distribute_enemies_to_groups(melee_enemies, num_melee_groups);
+        distribute_enemies_to_groups(range_enemies, num_range_groups);
+    }
 
-            if (num_groups > 1) {
-                num_enemies = range_enemies.Count - num_enemies;
-                num_groups = num_range_groups - num_groups;
-                range_enemies = spawn_deployments(range_enemies, num_enemies, num_groups);
-            }
+    public void distribute_enemies_to_groups(List<Enemy> enemies, int num_groups) {
+        if (enemies.Count <= 0 || num_groups <= 0) {
+            Debug.Log("ERROR: CANNOT TAKE 0 AS INPUT");
+            return;
         }
-        //reset();
+        if (num_groups == 1) {
+            Debug.Log("Spawning a single group w/ enemies: " + enemies.Count);
+            spawn_deployments(enemies, enemies.Count, num_groups);
+            return;
+        }
+        // Half of groups take 3/4 of enemies. 
+        int num_enemies = Mathf.Max((int)(enemies.Count * .75f), 1);
+        int num_some_groups = Mathf.Max((int)(num_groups / 2f), 1);
+        Debug.Log("num groups: " + num_groups + "num_some_groups: " + num_some_groups);
+        enemies = spawn_deployments(enemies, num_enemies, num_some_groups);
+        
+        if (enemies.Count > 0) {
+            // Other half takes 1/4 of enemies. 
+            num_some_groups = num_groups - num_some_groups;
+            enemies = spawn_deployments(enemies, enemies.Count, num_some_groups);
+            Debug.Log("Should equal zero: " + enemies.Count);
+        }
     }
 
     // Returns the remaining enemies not placed.
@@ -160,25 +151,20 @@ public class EnemyLoader : MonoBehaviour {
 
         int enemies_placed = 0;
         for (int i = 0; i < num_groups; i++) {
-            ed = Instantiate(small_enemy_deployment_prefab);
+            ed = Instantiate(small_enemy_deployment_prefab, field_panel.transform);
             ed_script = ed.GetComponentInChildren<SmallEnemyDeployment>();
             for (int j = 0; j < enemies_per_group; j++) {
                 ed_script.place_unit(enemies[(i * enemies_per_group) + j]);
                 enemies_placed++;
             }
             enemy_deployments.Add(ed_script);
-            place_deployment(ed_script, zone);
+            spawn_zone.place_deployment(ed, field_panel);
         }
         // Remove placed enemies.
+        Debug.Log("before: " + enemies.Count);
         enemies.RemoveRange(0, enemies_placed);
+        Debug.Log("after: " + enemies.Count);
         return enemies;
-    }
-
-    public void place_deployment(EnemyDeployment ed_script, Zone zone) {
-        ed_script.gameObject.transform.parent.transform.SetParent(field_panel.transform);
-        float x = UnityEngine.Random.Range(zone.low.x, zone.high.x);
-        float y = UnityEngine.Random.Range(zone.low.y, zone.high.y);
-        ed_script.gameObject.transform.parent.position = new Vector3(x, y, 0);
     }
 
     public List<Enemy> extract_enemies_of_type(List<Enemy> enemies, int type) {
@@ -317,28 +303,5 @@ public class EnemyLoader : MonoBehaviour {
         biomes[MapCell.MELD_ID][T2][Enemy.COMMON].Add(Enemy.MELD_SPEARMAN);
         biomes[MapCell.MELD_ID][T3][Enemy.COMMON].Add(Enemy.MELD_WARRIOR);
         biomes[MapCell.MELD_ID][T3][Enemy.COMMON].Add(Enemy.MELD_SPEARMAN);
-    }
-}
-
-public class Zone {
-    public Vector2 low;
-    public Vector2 high;
-    //public Pos current_pos;
-    int enemies_slotted = 0;
-
-    public Zone(Vector2 low, Vector2 high) {
-        this.low = low;
-        this.high = high;
-    }
-
-    public Vector2 get_spawn_pos() {
-        float x = UnityEngine.Random.Range(low.x, high.x);
-        float y = UnityEngine.Random.Range(low.y, high.y);
-        return new Vector2(x, y);
-    }
-
-    public void reset() {
-        low = Vector2.zero;
-        high = Vector2.zero;
     }
 }

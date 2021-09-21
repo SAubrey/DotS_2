@@ -58,6 +58,7 @@ public class Discipline : Storeable, ISaveLoad {
         resources[STAR_CRYSTALS] = 1;
         resources[EXPERIENCE] = 500;
         cell = Map.I.city_cell;
+        MapUI.I.update_deployment(bat);
     }
 
     public override void register_turn() {
@@ -95,10 +96,9 @@ public class Discipline : Storeable, ISaveLoad {
         if (!cell.battle.is_group) {
             cell.battle.end();
         }
-        bat.kill_injured_units();
         remove_resources_lost_on_death();
         Map.I.get_cell(pos).drop_XP(resources[EXPERIENCE]);
-        Debug.Log(pos);
+        Debug.Log("Dropped XP at: " + pos);
         pos = new Vector3(-100, -100, 0);
         dead = true;
     }

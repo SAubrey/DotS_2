@@ -8,10 +8,11 @@ public class SmallEnemyDeployment : EnemyDeployment {
 
     void Start() {
         base.init();
-        groups.Add(zone);
+        zones.Add(zone);
     }
 
-    void Update() {
+    protected override void Update() {
+        base.Update();
         decision_tree();
     }
 
@@ -23,7 +24,7 @@ public class SmallEnemyDeployment : EnemyDeployment {
     }
     
     public override void place_unit(Unit unit) {
-        Group g = get_highest_empty_group(zone);
+        Group g = zone[0];
         if (g != null) {
             g.place_unit(unit);
         }

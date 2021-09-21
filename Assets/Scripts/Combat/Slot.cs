@@ -7,8 +7,8 @@ using TMPro;
 
 public class Slot : MonoBehaviour {
     public Image img, unit_img;
-    private Unit unit;
-    private Camera cam;
+    protected Unit unit;
+    protected Camera cam;
 
     // --VISUAL-- 
     public TextMeshProUGUI name_T;
@@ -48,6 +48,9 @@ public class Slot : MonoBehaviour {
     public ParticleSystem dust_ps;
     public Transform slot_point_transform;
     public Deployment deployment;
+    public Collider2D melee_collider;
+    public GameObject arrow_prefab;
+    private bool rotating = false;
     
     void Awake() {
         cam = GameObject.Find("BattleCamera").GetComponent<Camera>();
@@ -62,12 +65,17 @@ public class Slot : MonoBehaviour {
         defensebar_fill.color = defensebar_fill_color;
         defensebar_bg.color = statbar_bg_color;
         deployment.on_velocity_change += toggle_dust_ps;
+        deployment.on_begin_rotation += begin_rotation;
+        deployment.on_end_rotation += end_rotation;
         dust_ps.enableEmission = false;
     }
 
     public float move_timer = 0;
     void Update() {
         move();
+        if (rotating) {
+            gameObject.transform.rotation = deployment.gameObject.transform.rotation;
+        }
     }
 
     public void click() {
@@ -92,12 +100,21 @@ public class Slot : MonoBehaviour {
         //transform.position = StaticOperations.GetSmoothedNextPosition(transform.position, desired_pos, smooth_speed);
     }
 
-    public bool fill(Unit u) {
+    private void begin_rotation(float v) {
+        rotating = true;
+    }
+
+    private void end_rotation(float v) {
+        rotating = false;
+    }
+
+    public virtual bool fill(Unit u) {
         if (u == null)
             return false;
         set_unit(u);
         init_UI(u);
         unit_img.color = Color.white;
+        Debug.Log(BatLoader.I.get_unit_img(u, 0));
         unit_img.sprite = BatLoader.I.get_unit_img(u, 0);
         if (u.is_playerunit)
             toggle_light(true);
@@ -112,7 +129,7 @@ public class Slot : MonoBehaviour {
             unit = null;
         }
 
-        update_unit_img(group.direction);
+        update_unit_img(0);
         set_active_UI(false);
         set_nameT("");
         //show_selection(false);
@@ -125,7 +142,7 @@ public class Slot : MonoBehaviour {
         return removed_unit;
     }
 
-    private void set_unit(Unit u) {
+    protected virtual void set_unit(Unit u) {
         if (u == null) 
             return;
         if (u.is_playerunit) {
@@ -140,12 +157,20 @@ public class Slot : MonoBehaviour {
         return unit;
     }
 
+    public void range_attack(LayerMask mask, Vector2 target_pos) {
+        GameObject a = Instantiate(arrow_prefab, gameObject.transform);
+        a.gameObject.transform.position = gameObject.transform.position;
+        Arrow a_script = a.GetComponent<Arrow>();
+        Vector2 launch_pos = new Vector2(gameObject.transform.position.x, 
+                                        gameObject.transform.position.y);
+        a_script.init(mask, launch_pos, target_pos);
+    }
+
     public bool disabled {
         get { return _disabled; }
         set { 
             _disabled = value;
             set_active_UI(_disabled);
-            //button.interactable = !_disabled;
         }
     }
 
@@ -196,14 +221,11 @@ public class Slot : MonoBehaviour {
         //update_attack();
     }
 
-    public void update_healthbar(Unit preview_unit=null) {
+    public void update_healthbar() {
         healthbar.maxValue = get_unit().get_dynamic_max_health();
-        
-        int final_hp = 100;
-        healthbar.value = final_hp;
+        healthbar.value = get_unit().health;
         update_healthbar_color();
-        
-        hpT.text = build_health_string(final_hp, 0);
+        hpT.text = build_health_string(get_unit().health, 0);
     }
 
     public string build_health_string(float hp, float preview_damage) {
@@ -220,14 +242,8 @@ public class Slot : MonoBehaviour {
     }
 
     private void update_healthbar_color() {
-        if (unit.is_playerunit) {
-            if (healthbar.value < healthbar.maxValue / 2f)
-                healthbar.fillRect.GetComponent<Image>().color = healthbar_injured_fill_color;
-        } else {
-            //float red = ((float)get_enemy().health / (float)get_enemy().max_health);
-            //healthbar.fillRect.GetComponent<Image>().color = new Color(1, red, red, 1);
-            healthbar.fillRect.GetComponent<Image>().color = healthbar_fill_color;
-        }
+        //healthbar.fillRect.GetComponent<Image>().color = new Color(1, red, red, 1);
+        healthbar.fillRect.GetComponent<Image>().color = healthbar_fill_color;
     }
 
     public void update_defensebar(Unit preview_unit=null) {

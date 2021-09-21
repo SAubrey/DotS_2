@@ -6,7 +6,6 @@ public class Battalion {
     public IDictionary<int, List<PlayerUnit>> units = 
         new Dictionary<int, List<PlayerUnit>>() { };
     private List<PlayerUnit> dead_units = new List<PlayerUnit>();
-    private List<PlayerUnit> injured_units = new List<PlayerUnit>();
     // Unit selected for placement in battle view
     public bool in_battle = false;
     public MapCell pending_group_battle_cell = null;
@@ -30,7 +29,7 @@ public class Battalion {
     }
 
     public void add_default_troops() {
-        add_units(PlayerUnit.ARCHER, 3);
+        add_units(PlayerUnit.ARCHER, 1);
         add_units(PlayerUnit.WARRIOR, 2);
         add_units(PlayerUnit.SPEARMAN, 2);
         add_units(PlayerUnit.INSPIRATOR, 1);
@@ -163,18 +162,11 @@ public class Battalion {
         return false;
     }
 
-    public void add_dead_unit(PlayerUnit du) {
-        if (!dead_units.Contains(du)) 
-            dead_units.Add(du);
-    }
-
-    public void add_injured_unit(PlayerUnit iu) {
-        if (!injured_units.Contains(iu)) 
-            injured_units.Add(iu);
+    public void remove_dead_unit(PlayerUnit du) {
+        units[du.get_ID()].Remove(du);
     }
 
     public void post_battle() {
-        remove_expired_units();
         if (count_healthy() <= 0) {
             disc.die();
             return;
@@ -183,31 +175,6 @@ public class Battalion {
         foreach (PlayerUnit pu in get_all_placed_units()) {
             pu.health = pu.get_dynamic_max_health();
             pu.get_slot().update_text_UI();
-        }
-    }
- 
-    private void remove_expired_units() {
-        // Remove duplicates. A dead unit isn't injured.
-        foreach (PlayerUnit du in dead_units) {
-            foreach (PlayerUnit iu in injured_units) {
-                if (du == iu)
-                    injured_units.Remove(iu);
-            }
-        }
-        remove_dead_units();
-    }
-
-    private void remove_dead_units() {
-        foreach (PlayerUnit du in dead_units) {
-            du.get_slot().empty(false);
-            units[du.get_ID()].Remove(du);
-        }
-        dead_units.Clear();
-    }
-
-    public void kill_injured_units() {
-        foreach (PlayerUnit iu in injured_units) {
-            units[iu.get_ID()].Remove(iu);
         }
     }
 

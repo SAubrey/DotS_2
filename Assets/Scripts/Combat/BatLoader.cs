@@ -259,7 +259,6 @@ public class BatLoader : MonoBehaviour {
             return "";
         string num = b.count_placeable(ID).ToString();
         int total_num = b.units[ID].Count;
-        int num_injured = b.count_injured(ID);
-        return num + " / " + total_num.ToString() + "    " + num_injured;
+        return num + " / " + total_num.ToString();
     }
 }

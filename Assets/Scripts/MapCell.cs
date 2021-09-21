@@ -145,7 +145,6 @@ public class MapCell {
         discovered = true;
         Map.I.tm.SetTile(new Vector3Int((int)pos.x, (int)pos.y, 0), tile);
         MapUI.I.place_cell_light(this);
-        //MapUI.I.remove_fog(this);
         GameObject.Destroy(fog);
         if (ID == STAR_ID) {
             MapUI.I.place_sparkle_ps(this);
@@ -153,28 +152,15 @@ public class MapCell {
     }
 
     public void post_battle() {
-        clear_dead();
         foreach (Enemy e in enemies)
             e.get_slot().update_text_UI();
     }
-
-    private void clear_dead() {
-        // Don't modify enemies while iterating.
-        List<Enemy> dead = new List<Enemy>();
-        foreach (Enemy e in enemies) {
-            if (e.is_dead)
-                dead.Add(e);
-        }
-        foreach (Enemy e in dead) 
-            kill_enemy(e);
-
-        set_tile_color();
-    }
  
-    private void kill_enemy(Enemy enemy) {
-        if (enemy.get_slot() != null)
-            enemy.get_slot().empty(); // validate as you go?
+    public void kill_enemy(Enemy enemy) {
         enemies.Remove(enemy);
+        if (enemies.Count == 0) {
+            set_tile_color();
+        }
     }
 
     public void set_tile_color() {

@@ -8,12 +8,13 @@ public class LargeEnemyDeployment : EnemyDeployment {
     public Group[] zone_rear = new Group[3];
     
     void Start() {
-        groups.Add(zone_front);
-        groups.Add(zone_rear);
+        zones.Add(zone_front);
+        zones.Add(zone_rear);
         base.init();
     }
 
-    void Update() {
+    protected override void Update() {
+        base.Update();
         decision_tree();
     }
 

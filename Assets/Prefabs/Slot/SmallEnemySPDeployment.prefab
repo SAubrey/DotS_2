@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6928956094902717708}
   - component: {fileID: 7399157508826641408}
   - component: {fileID: 4693467255682781958}
-  m_Layer: 8
+  m_Layer: 13
   m_Name: SmallEnemySPDeployment
   m_TagString: Group
   m_Icon: {fileID: 0}
@@ -89,27 +89,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfef2e5845cc05547af1663c87919a52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showingDamage: 0
-  staminaBar: {fileID: 0}
+  staminabar: {fileID: 0}
   MAX_STAMINA: 100
-  stamina: 0
+  stunned: 0
   healthbar: {fileID: 0}
   healthbarBGColor: {r: 0, g: 0, b: 0, a: 0}
   unit_img_dir: 0
-  player_pos: {x: 0, y: 0}
-  player_distance: 0
-  search_distance: 30
-  act_distance: 10
-  zone_front:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  zone_rear:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  target_layer_mask:
+    serializedVersion: 2
+    m_Bits: 16384
   zone:
   - {fileID: 0}
+  combat_style: 1
 --- !u!1001 &3331417890668430955
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -117,6 +108,41 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 605503786543534115}
     m_Modifications:
+    - target: {fileID: 831395942983135531, guid: 2f467bc7f3fcb3241a248b1f222beee6,
+        type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 1046051795704811476, guid: 2f467bc7f3fcb3241a248b1f222beee6,
+        type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 3089079999879385008, guid: 2f467bc7f3fcb3241a248b1f222beee6,
+        type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 3525030040765055887, guid: 2f467bc7f3fcb3241a248b1f222beee6,
+        type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 4012697631084868315, guid: 2f467bc7f3fcb3241a248b1f222beee6,
+        type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 4167324743506842586, guid: 2f467bc7f3fcb3241a248b1f222beee6,
+        type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 4524519519455213217, guid: 2f467bc7f3fcb3241a248b1f222beee6,
+        type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
     - target: {fileID: 4701275357608127343, guid: 2f467bc7f3fcb3241a248b1f222beee6,
         type: 3}
       propertyPath: m_Pivot.x
@@ -222,10 +248,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6222286668594974387, guid: 2f467bc7f3fcb3241a248b1f222beee6,
+        type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 7015734769048710987, guid: 2f467bc7f3fcb3241a248b1f222beee6,
+        type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
     - target: {fileID: 8626948578760765313, guid: 2f467bc7f3fcb3241a248b1f222beee6,
         type: 3}
       propertyPath: m_Name
       value: SlotPointGroup
+      objectReference: {fileID: 0}
+    - target: {fileID: 8626948578760765313, guid: 2f467bc7f3fcb3241a248b1f222beee6,
+        type: 3}
+      propertyPath: m_Layer
+      value: 13
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2f467bc7f3fcb3241a248b1f222beee6, type: 3}

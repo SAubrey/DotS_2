@@ -9,9 +9,6 @@ using System;
 public class BattlePhaser : MonoBehaviour {
     public static BattlePhaser I { get; private set; }
 
-    public Button adv_stageB;
-    public TextMeshProUGUI stageT, phaseT; 
-
     private List<Image> disc_icons = new List<Image>();
     public Image disc_icon1, disc_icon2, disc_icon3;
     // <discipline ID, disc Sprite>
@@ -57,9 +54,6 @@ public class BattlePhaser : MonoBehaviour {
 
     // Called at the end of 3 phases.
     public void reset(bool reset_battlefield=true) {
-        phase = 1;
-        can_skip = false;
-
         if (reset_battlefield) {
             battle = null;
         }
@@ -79,14 +73,14 @@ public class BattlePhaser : MonoBehaviour {
             Debug.Log("generating enemies");
             EnemyLoader.I.generate_new_enemies(cell, cell.travelcard.enemy_count);
         }
+        MapUI.I.close_cell_UI();
+        setup_participant_UI(cell);
+        
         Debug.Log("loading enemies");
+        CamSwitcher.I.set_active(CamSwitcher.BATTLE, true);
         EnemyLoader.I.load_enemies(cell.get_enemies(), 9);
         PlayerDeployment.I.place_units(active_bat);
         cell.has_seen_combat = true;
-
-        setup_participant_UI(cell);
-        MapUI.I.close_cell_UI();
-        CamSwitcher.I.set_active(CamSwitcher.BATTLE, true);
     }
 
     // First determine if a battle is grouped or not, then either resume or reload.
@@ -155,28 +149,9 @@ public class BattlePhaser : MonoBehaviour {
         update_participant_UI();
     }
 
-    private int _phase = 1;
-    // After 3 phases, battle yields until the next turn.
-    private int phase {
-        get { return _phase; }
-        set {
-            _phase = value; 
-            phaseT.text = "Phase " + phase;
-
-            if (_phase > 3) {
-                battle.post_phases();
-            }
-        }
-    }
-
-
-    private void enter_battle() {
-        can_skip = false;
-    }
-
     // Only called by AttackQueuer after battle animations have finished.
     public void post_battle() {
-        can_skip = true;
+        battle.post_phases();
         
         if (battle.post_battle()) {
             reset();
@@ -198,21 +173,5 @@ public class BattlePhaser : MonoBehaviour {
     // battalion_dead implies enemy_won, enemy_won does not imply battalion_dead.
     private bool battalion_dead {
         get => active_bat.count_healthy() <= 0;
-    }
-
-    private bool _can_skip = false;
-    public bool can_skip {
-        get { return _can_skip; }
-        set { 
-            _can_skip = value;
-            adv_stageB.interactable = _can_skip;
-        }
-    }
-
-    public void check_all_units_placed() {
-
-        // EDIT FOR TESTING------------------------------------------------------------------------------------?
-        can_skip = true;
-        //can_skip = units_in_reserve ? false : true; // use 
     }
 }

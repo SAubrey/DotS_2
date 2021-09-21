@@ -60,12 +60,23 @@ public class MapUI : MonoBehaviour {
         ruins_color;
     public Dictionary<int, Color> cell_light_colors;
 
+    public PlayerDeploymentUI astra_player_deployment_UI;
+    public PlayerDeploymentUI martial_player_deployment_UI;
+    public PlayerDeploymentUI endura_player_deployment_UI;
+    private PlayerDeploymentUI[] deployment_UIs;
+
     void Awake() {
         if (I == null) {
             I = this;
         } else {
             Destroy(gameObject);
         }
+
+        deployment_UIs = new PlayerDeploymentUI[3] {
+            astra_player_deployment_UI,
+            martial_player_deployment_UI,
+            endura_player_deployment_UI
+        };
 
         cell_light_colors = new Dictionary<int, Color>() {
             {MapCell.STAR_ID, star_light_color},
@@ -192,6 +203,15 @@ public class MapUI : MonoBehaviour {
         if (TurnPhaser.I.active_disc_ID != ID)
             return;
         update_capacity_text(bat_capacityT, sum, capacity);
+    }
+
+    public void update_deployment(Battalion bat) {
+        PlayerDeploymentUI pd = deployment_UIs[bat.disc.ID];
+        foreach (List<PlayerUnit> pu in bat.units.Values) {
+            foreach (Unit u in pu) {
+                pd.place_unit(u);
+            }
+        }
     }
     
     public void adjust_light_size(MapCell cell) {

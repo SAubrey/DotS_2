@@ -55,18 +55,17 @@ public class Group : MonoBehaviour {
         init();
     }
 
-    public static int init_groups = 0;
     public void init() {
         direction = default_direction;
-        //Debug.Log(direction + " " + init_groups);
-        init_groups++;
         set_color(type);
         //reorder_slots_visually(direction);
         initialized = true;
     }
 
     public void place_unit(Unit unit) {
-        get_highest_empty_slot().fill(unit);
+        Slot s = get_highest_empty_slot();
+        if (s != null)
+            s.fill(unit);
     }
 
     public void place_units(List<Unit> units) {
@@ -260,9 +259,10 @@ public class Group : MonoBehaviour {
     }
 
     public Slot get_highest_empty_slot() {
-        for (int i = 0; i < MAX; i++) 
+        for (int i = 0; i < MAX; i++) {
             if (slots[i].is_empty)
                 return slots[i];
+        }
         return null;
     }
 

@@ -227,7 +227,7 @@ public class Map : MonoBehaviour, ISaveLoad {
         
         map.Add(pos, cell);
         place_tile(shadow, pos.x, pos.y);
-        //cell.fog = MapUI.I.place_fog_ps(cell);
+        cell.fog = MapUI.I.place_fog_ps(cell);
         tile.color = Color.white;
 
         if (cell.creates_travelcard) {

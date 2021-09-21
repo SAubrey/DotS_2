@@ -4,33 +4,41 @@ using UnityEngine;
 using System;
 using UnityEngine.UI;
 
-public abstract class Deployment : MonoBehaviour
-{
-    
+public abstract class Deployment : MonoBehaviour {
     protected static Vector2 VEC_UP = new Vector2(0, 1f);
     protected static Vector2 VEC_DOWN = new Vector2(0, -1f);
     protected static Vector2 VEC_RIGHT = new Vector2(1f, 0);
     protected static Vector2 VEC_LEFT = new Vector2(-1f, 0);
 
-
     public bool isPlayer { get; protected set; } = false;
     public bool isEnemy { get; protected set; } = false;
 
     protected float MAX_VEL = 250;
-    protected float velocity = 0f;
     private Vector3 rotation_left = new Vector3(0, 0, -1.1f);
     private Vector3 rotation_right = new Vector3(0, 0, 1.1f);
-    protected float MAX_HP = 100f;
-    public bool showingDamage = false;
     protected bool invulnerable;
 
     // Stamina
-    public Slider staminaBar;
+    public Slider staminabar;
     public float MAX_STAMINA = 100f;
-    public float stamina;
-    protected float stamRegenAmount = .25f;
-    protected float stamDashCost = 30f;
+    private float _stamina = 100f;
+    public float stamina {
+        get { return _stamina; }
+        set { _stamina = Mathf.Max(value, 0f);
+            if (staminabar != null) {
+                update_staminabar(); 
+            }
+        }
+    }
+    private Timer stam_regen_timer = new Timer(.025f);
+    protected float stam_regen_amount = .05f;
+    protected float stam_dash_cost = 30f;
+    protected float stam_attack_cost = 20f;
+    protected float stam_range_cost = 20f;
+    public bool stunned = false;
 
+
+    protected float MAX_HP = 100f;
     public Slider healthbar;
     private Color healthbarFillColor = new Color(1, 1, 1, .8f);
     public Color healthbarBGColor;
@@ -42,7 +50,30 @@ public abstract class Deployment : MonoBehaviour
     Vector2 position;
     public float unit_img_dir = Group.UP;
 
-    protected List<Group[]> groups = new List<Group[]>();
+    protected List<Group[]> zones = new List<Group[]>();
+    public LayerMask target_layer_mask;
+
+    public abstract void place_unit(Unit unit);
+
+    protected virtual void animate_slot_attack(bool melee) { }
+
+    protected virtual void Update() {
+        update_timers(Time.deltaTime);
+        if (stam_regen_timer.increase(Time.deltaTime) && stamina <= MAX_STAMINA - stam_regen_amount) {
+            regen_stamina(stam_regen_amount);
+        }
+    }
+    
+    public void update_timers(float dt) {
+        foreach (Group[] gs in zones) {
+            foreach (Group g in gs) {
+                foreach (Slot s in g.slots) {
+                    if (s.has_unit)
+                        s.get_unit().update_timers(dt);
+                } 
+            }
+        }    
+    }
 
     protected void set_position(Vector2 pos) {
         position = pos;
@@ -50,7 +81,6 @@ public abstract class Deployment : MonoBehaviour
             on_position_change(position);
     }
     
-
     public void move(Vector2 movement) {
         movement.Normalize();
         movement *= MAX_VEL * Time.deltaTime;
@@ -65,6 +95,30 @@ public abstract class Deployment : MonoBehaviour
         set_position(new_pos);
     }
 
+    public void melee_attack(Group[] zone) {
+        stamina -= stam_attack_cost;
+        foreach (Group g in zone) {
+            for (int i = 0; i < 3; i++) {
+                if (g.slots[i].has_unit) {
+                    g.slots[i].get_unit().melee_attack(target_layer_mask);
+                }
+            }
+        }
+    }
+
+    
+    public void range_attack(Group[] zone, Vector3 target_pos) {
+        stamina -= stam_range_cost;
+        foreach (Group g in zone) {
+            for (int i = 0; i < 3; i++) {
+                if (g.slots[i].has_unit) {
+                    Unit u = g.slots[i].get_unit();
+                    u.range_attack(target_layer_mask, target_pos);
+                }
+            }
+        }
+    }
+
     public Group get_highest_empty_group(Group[] groups) {
         foreach (Group g in groups) {
             if (!g.is_full) {
@@ -75,17 +129,16 @@ public abstract class Deployment : MonoBehaviour
     }
     
     public void regen_stamina(float amount) {
-        stamina += StaticOperations.GetAdjustedIncrease(stamina, amount, MAX_STAMINA);
-        update_stamina();
+        //stamina += StaticOperations.GetAdjustedIncrease(stamina, amount, MAX_STAMINA);
+        stamina += amount;
     }
 
-    
-    public void update_stamina() {
-        staminaBar.maxValue = MAX_STAMINA;
-        staminaBar.value = stamina;
+    public void update_staminabar() {
+        staminabar.maxValue = MAX_STAMINA;
+        staminabar.value = stamina;
 
         float green = ((float)stamina / (float)MAX_STAMINA);
-        staminaBar.fillRect.GetComponent<Image>().color = new Color(.1f, .8f, .1f, green);
+        staminabar.fillRect.GetComponent<Image>().color = new Color(.1f, .65f, .1f, green);
     }
 
     public void rotate(int dir) {
@@ -111,7 +164,7 @@ public abstract class Deployment : MonoBehaviour
     public int hp {
         get { 
             int sum = 0;
-            foreach (Group[] zone in groups) {
+            foreach (Group[] zone in zones) {
                 foreach (Group g in zone) {
                     sum += g.sum_unit_health();
                 }
@@ -129,7 +182,7 @@ public abstract class Deployment : MonoBehaviour
 
     
     protected void flip_slot_imgs(int dir) {
-        foreach (Group[] zone in groups) {
+        foreach (Group[] zone in zones) {
             foreach (Group g in zone) {
                 g.rotate(dir);
             }
@@ -137,7 +190,7 @@ public abstract class Deployment : MonoBehaviour
     }
 
     protected void face_slots_to_camera() {
-        foreach (Group[] zone in groups) {
+        foreach (Group[] zone in zones) {
             foreach (Group g in zone) {
                 foreach (Slot s in g.slots) {
                     s.face_cam();
@@ -147,7 +200,7 @@ public abstract class Deployment : MonoBehaviour
     }
 
     protected void toggle_slot_dust_ps(int active) {
-        foreach (Group[] zone in groups) {
+        foreach (Group[] zone in zones) {
             foreach (Group g in zone) {
                 foreach (Slot s in g.slots) {
                     s.toggle_dust_ps(active);
@@ -155,6 +208,16 @@ public abstract class Deployment : MonoBehaviour
             }
         }
     }
+
+    /*protected void play_animation_on_forward_slots(Group[] gs, string anim) {
+        foreach (Group g in gs) {
+            for (int i = 0; i < 3; i++) {
+                if (g.slots[i].has_unit) {
+                    g.slots[i].play_animation(anim);
+                }
+            }
+        }
+    }*/
 
     protected void trigger_begin_rotation_event() {
         on_begin_rotation(MAX_VEL);

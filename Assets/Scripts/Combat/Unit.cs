@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class Unit {
+public abstract class Unit {
     public const int PLAYER = 0, ENEMY = 1;
 
     // Used to determine post-damage decision making. 
@@ -51,13 +51,20 @@ public class Unit {
     public bool passive_attribute = false;
 
     // Combat fields
-    public const int MELEE = 1, RANGE = 2;
+    public const int MELEE = 1, RANGE = 2, WEAK_MELEE = 3;
     protected int attack_dmg;
     protected int defense;
+    protected float block_rating = 0.5f;
     public int health, max_health;
     public int combat_style;
     public int movement_range = 1;
     public int attack_range = 1;
+    public bool blocking = false;
+    protected float block_time = 1f;
+    protected Timer block_timer;
+    protected float range_time = 1f;
+    protected Timer range_timer;
+    protected bool can_fire = true;
 
     protected int type; // Player or Enemy
     protected int ID; // Code for the particular unit type. (not unique to unit)
@@ -65,7 +72,6 @@ public class Unit {
 
     protected string name;
     // Unique identifier for looking up drawn attack lines and aggregating attacks.
-    public int attack_id;
 
     protected Slot slot = null;
     protected bool dead = false; // Used to determine what to remove in the Battalion.
@@ -73,13 +79,21 @@ public class Unit {
     private static int static_unique_ID = 0;
     private int unique_ID = static_unique_ID;
 
-    public virtual int take_damage(int dmg) { return 0; }
-    public virtual int calc_dmg_taken(int dmg, bool piercing=false) { return 0; }
     public virtual int calc_hp_remaining(int dmg) { return Mathf.Max(health - dmg, 0); }
-    public virtual int get_post_dmg_state(int dmg_after_def) { return 0; }
     public virtual int get_attack_dmg() { return attack_dmg; }
     public virtual int get_defense() { return defense; }
     public virtual int get_health() { return health; }
+    public virtual void remove_boost() { }
+    public abstract void die();
+    public virtual void animate_attack() {
+        slot.play_animation(get_attack_animation_ID());
+    }
+    protected abstract string get_attack_animation_ID();
+
+    // Passed damage should have already accounted for possible defense reduction.
+    public virtual int get_post_dmg_state(int dmg_after_def) {
+        return calc_hp_remaining(dmg_after_def) > 0 ? ALIVE : DEAD;
+    }
     public virtual bool set_attribute_active(bool state) {
         attribute_active = state && can_activate_attribute();
         if (is_placed) {
@@ -87,8 +101,6 @@ public class Unit {
         }
         return attribute_active;
     }
-
-    public virtual void remove_boost() { }
 
     public Unit(string name, int ID, int att, int def, int hp, int style, 
             int atr1=0, int atr2=0, int atr3=0) {
@@ -107,6 +119,9 @@ public class Unit {
         attribute1 = atr1;
         attribute2 = atr2;
         attribute3 = atr3;
+
+        block_timer = new Timer(block_time);
+        range_timer = new Timer(range_time);
     }
 
     public bool has_attribute(int atr_ID) {
@@ -115,19 +130,58 @@ public class Unit {
                 attribute3 == atr_ID);
     }
 
-    public bool can_move(Slot dest) {
-        bool out_of_range = !in_range(movement_range, 
-                slot.col, slot.row,
-                dest.col, dest.row);
-        bool opposite_unit = false;
-        if (dest.has_unit)
-            opposite_unit = dest.get_unit().type != type;
-
-        return !(opposite_unit || out_of_range);
+    
+    public void update_timers(float dt) {
+        if (get_slot() == null)
+            return;
+        if (block_timer.increase(dt)) {
+            blocking = false;
+        }
+        if (range_timer.increase(dt)) {
+            can_fire = true;
+        }
     }
 
-    public virtual void attack() {
+    public void melee_attack(LayerMask layer_mask) {
+        if (get_slot() == null)
+            return;
+        if (slot.melee_collider == null)
+            return;
 
+        animate_attack();
+        Collider2D[] hits = 
+            Physics2D.OverlapCircleAll(slot.melee_collider.transform.position, attack_range, layer_mask);
+            Debug.Log("Num hits: " + hits.Length);
+        foreach (Collider2D h in hits) {
+            Slot s = h.GetComponent<Slot>();
+            if (s == null)
+                continue;
+            Unit u = s.get_unit();
+            if (u == null)
+                continue;
+            u.take_damage(get_attack_dmg() * 10);
+        }
+    }
+
+    public void range_attack(LayerMask mask, Vector3 target_pos) {
+        if (get_slot() == null) 
+            return;
+
+
+        get_slot().range_attack(mask, target_pos);
+    }
+
+    public virtual int take_damage(int dmg) {
+        int final_dmg = calc_dmg_taken(dmg, has_attribute(Unit.PIERCING));
+        int state = get_post_dmg_state(final_dmg);
+        health = (int)calc_hp_remaining(final_dmg);
+        Debug.Log("hp left: " + health);
+        slot.update_healthbar();
+       
+        if (state == DEAD) {
+            die();
+        }
+        return state;
     }
     
     protected void move(Slot end) {
@@ -136,17 +190,13 @@ public class Unit {
         end.get_group().validate_unit_order();
     }
 
-    // Moving within a group does not cost stamina.
-    protected bool swap_places(Slot s) {
-        if (!can_move(s) || !s.get_unit().can_move(slot))
-            return false;
-
-        //s.get_unit().num_actions--;
-        //num_actions--;
-        Unit u = s.empty(false); 
-        slot.fill(u);
-        s.fill(this);
-        return true;
+    
+    protected virtual int calc_dmg_taken(int dmg, bool piercing=false) {
+        dmg -= get_defense();
+        if (blocking && !piercing) {
+            dmg = (int)(dmg * block_rating);
+        }
+        return dmg > 0 ? dmg : 0;
     }
 
     public bool can_attack() {
@@ -155,20 +205,6 @@ public class Unit {
 
     public bool can_defend() {
         return defense > 0;
-    }
-
-    // Checks range for each direction additively, forming a diamond.
-    public static bool in_range(int range, int x, int y, int x1, int y1) {
-        int dx = Mathf.Abs(x - x1);
-        int dy = Mathf.Abs(y - y1);
-        return dx + dy <= range;
-    }
-
-    // Checks range for each direction separately, forming a square.
-    public static bool in_range_of_reach(int range, int x, int y, int x1, int y1) {
-        int dx = Mathf.Abs(x - x1);
-        int dy = Mathf.Abs(y - y1);
-        return dx <= range && dy <= range;
     }
 
     public virtual int get_dynamic_max_health( ) {

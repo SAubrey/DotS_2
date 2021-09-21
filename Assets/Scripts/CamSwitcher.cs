@@ -30,7 +30,7 @@ public class CamSwitcher : MonoBehaviour {
         pause_panel.SetActive(false);
         battle_pause_panel.SetActive(false);
         set_active(MENU, true);
-        PlayerDeployment.I.on_position_change += move_battle_camera;
+        Controller.I.get_deployment().on_position_change += move_battle_camera;
     }
 
     void Update() {

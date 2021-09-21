@@ -19,6 +19,7 @@ public class Controller : MonoBehaviour {
 
     public IDictionary<int, Discipline> discs = new Dictionary<int, Discipline>();
     public event Action<bool> init;
+    public PlayerDeployment player_deployment;
 
     void Awake() {
         if (I == null) {
@@ -140,6 +141,10 @@ public class Controller : MonoBehaviour {
 
     public void show_warning_panel(bool active) {
         save_warningP.SetActive(active);
+    }
+
+    public PlayerDeployment get_deployment() {
+        return player_deployment;
     }
 
     public Discipline get_disc(int ID) {

@@ -4,6 +4,16 @@ using UnityEngine;
 using UnityEngine.AI;
 
 public abstract class EnemyDeployment : Deployment {
+    // Melee enemy will chase to safe distance then move in for attack.
+    protected enum State {
+        Roaming, Chasing, Attacking, BackingUp
+    }
+    //protected abstract void roam();
+    //protected abstract void chase();
+    //protected abstract void attack();
+    //protected virtual void back_up();
+    protected State state;
+
     protected Vector2 player_pos;
     protected float _player_distance;
     protected float player_distance {
@@ -18,8 +28,11 @@ public abstract class EnemyDeployment : Deployment {
     protected float act_distance = 15f;
     protected bool locked_on = false;
     protected Vector2 target = Vector2.zero;
+
     
-    public virtual void place_unit(Unit unit) { }
+    protected override void Update() {
+        base.Update();
+    }
 
     protected void init() {
         PlayerDeployment.I.on_position_change += update_player_pos;
@@ -41,7 +54,7 @@ public abstract class EnemyDeployment : Deployment {
         if (player_distance < search_distance) {
             if (player_distance < chase_distance) {
                 if (player_distance < act_distance) {
-                    act();
+                    //act();
                     return;
                 }
                 chase();
@@ -55,22 +68,21 @@ public abstract class EnemyDeployment : Deployment {
         }
     }
 
-    protected Quaternion target_rotation;
-    protected void rotate_towards_target(Vector3 pos) {
+    
+    public virtual void act_on_state() {
+        switch(state) {
+        default: 
+        case State.Roaming:
+            break;
+        case State.Chasing:
+            break;
+        case State.Attacking:
+            break;
+        case State.BackingUp:
+            back_up();
+            break;
 
-        target_rotation = Quaternion.Euler(new Vector3(0, 0, Mathf.Atan2((pos.y - transform.position.y), 
-            (pos.x - transform.position.x)) * Mathf.Rad2Deg - 90f));
-        
-        Vector3 variance = gameObject.transform.rotation.eulerAngles - get_direction_to_player();
-        Debug.Log(variance);
-        variance.Normalize();
-        if (variance.x < 0.1f && variance.y < 0.1f) {
-            return;
         }
-        
-        // Lerp smooths and thus limits rotation speed.
-        float str = Mathf.Min(5 * Time.deltaTime, 1);
-        gameObject.transform.rotation = Quaternion.Lerp(gameObject.transform.rotation, target_rotation, str);
     }
 
     public virtual void search() {
@@ -83,10 +95,11 @@ public abstract class EnemyDeployment : Deployment {
             Vector2.MoveTowards(gameObject.transform.position, player_pos, MAX_VEL/100f);
     }
 
-    public virtual void act() {
+    public virtual void act(Group[] zone) {
         // Attack
-        
+        melee_attack(zone);
     }
+
 
     public virtual void back_up() {
         move(-get_direction_to_player());
@@ -95,6 +108,24 @@ public abstract class EnemyDeployment : Deployment {
     public void wander() {
         // Move to a random target location at a random distance
 
+    }
+
+    protected Quaternion target_rotation;
+    protected void rotate_towards_target(Vector3 pos) {
+
+        target_rotation = Quaternion.Euler(new Vector3(0, 0, Mathf.Atan2((pos.y - transform.position.y), 
+            (pos.x - transform.position.x)) * Mathf.Rad2Deg - 90f));
+        
+        Vector3 variance = gameObject.transform.rotation.eulerAngles - get_direction_to_player();
+        variance.Normalize();
+        //if (variance.x < 0.1f && variance.y < 0.1f) {
+          //  return;
+        //}
+        
+        // Lerp smooths and thus limits rotation speed.
+        float str = Mathf.Min(5 * Time.deltaTime, 1);
+        gameObject.transform.rotation = Quaternion.Lerp(gameObject.transform.rotation, target_rotation, str);
+        face_slots_to_camera();
     }
 
     protected void set_player_distance(Vector3 pos) {
