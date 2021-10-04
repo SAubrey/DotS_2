@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class Discipline : Storeable, ISaveLoad {
+public class Discipline : Storeable, ISaveLoad
+{
     public const string EXPERIENCE = "experience";
     public const int ASTRA = 0, ENDURA = 1, MARTIAL = 2;
     public GameObject piece;
@@ -11,16 +12,19 @@ public class Discipline : Storeable, ISaveLoad {
     public bool active = false;
     public bool restart_battle_from_drawn_card = false;
     private int mine_qty_multiplier = 3;
-    public int mine_qty {
+    public int mine_qty
+    {
         get => mine_qty_multiplier *= bat.count_placeable(PlayerUnit.MINER);
     }
     public bool has_mined_in_turn, has_moved_in_turn, has_scouted_in_turn = false;
     public bool has_acted_in_turn { get => has_moved_in_turn || has_scouted_in_turn; }
     public bool dead { get; private set; } = false;
     private MapCell _cell;
-    public MapCell cell {
+    public MapCell cell
+    {
         get => _cell;
-        set {
+        set
+        {
             if (value == null)
                 return;
             previous_cell = cell;
@@ -30,25 +34,29 @@ public class Discipline : Storeable, ISaveLoad {
     }
     public MapCell previous_cell { get; private set; }
     private Vector3 _pos;
-    public Vector3 pos {
+    public Vector3 pos
+    {
         get { return _pos; }
-        set {
+        set
+        {
             _pos = value;
             piece.transform.position = new Vector3(value.x, value.y, 0);
         }
     }
-    
+
     public EquipmentInventory equipment_inventory;
     public event Action on_unit_count_change;
     public void trigger_unit_count_change() { on_unit_count_change(); }
 
-    protected override void Start() {
+    protected override void Start()
+    {
         base.Start();
         resources.Add(EXPERIENCE, 0);
         mine_qty_multiplier = ID == ENDURA ? 4 : 3;
     }
 
-    public override void init(bool from_save) {
+    public override void init(bool from_save)
+    {
         base.init(from_save);
         bat = new Battalion(this);
         equipment_inventory = new EquipmentInventory(this);
@@ -61,8 +69,10 @@ public class Discipline : Storeable, ISaveLoad {
         MapUI.I.update_deployment(bat);
     }
 
-    public override void register_turn() {
-        if (!dead) {
+    public override void register_turn()
+    {
+        if (!dead)
+        {
             base.register_turn();
             check_insanity(get_res(UNITY));
         }
@@ -71,10 +81,11 @@ public class Discipline : Storeable, ISaveLoad {
         has_scouted_in_turn = false;
     }
 
-    public void move(MapCell cell) {
+    public void move(MapCell cell)
+    {
         // Offset position on cell to simulate human placement and prevent perfect overlap.
         this.cell = cell;
-        float randx = UnityEngine.Random.Range(-0.2f, 0.2f); 
+        float randx = UnityEngine.Random.Range(-0.2f, 0.2f);
         float randy = UnityEngine.Random.Range(-0.2f, 0.2f);
         pos = new Vector3(cell.pos.x + 0.5f + randx, cell.pos.y + 0.5f + randy, 0);
         has_moved_in_turn = true;
@@ -82,7 +93,8 @@ public class Discipline : Storeable, ISaveLoad {
         cell.enter();
     }
 
-    public void move_to_previous_cell() {
+    public void move_to_previous_cell()
+    {
         move(previous_cell);
     }
 
@@ -92,8 +104,10 @@ public class Discipline : Storeable, ISaveLoad {
     lose all resources,
     drop equipment and experience on the cell of death to be retrieved.
     */
-    public void die() {
-        if (!cell.battle.is_group) {
+    public void die()
+    {
+        if (!cell.battle.is_group)
+        {
             cell.battle.end();
         }
         remove_resources_lost_on_death();
@@ -103,40 +117,52 @@ public class Discipline : Storeable, ISaveLoad {
         dead = true;
     }
 
-    public void respawn() {
+    public void respawn()
+    {
         bat.add_default_troops();
         move(Map.I.city_cell);
         has_moved_in_turn = false;
         dead = false;
     }
 
-    private void check_insanity(int unity) {
+    private void check_insanity(int unity)
+    {
         // 5 == "wavering"
         // 4 == unable to build
-        if (unity == 3) {
+        if (unity == 3)
+        {
             roll_for_insanity(1, 20);
-        } else if (unity == 2) {
+        }
+        else if (unity == 2)
+        {
             roll_for_insanity(2, 50);
-        } else if (unity < 2) {
+        }
+        else if (unity < 2)
+        {
             roll_for_insanity(2, 80);
         }
     }
 
-    private void roll_for_insanity(int quantity, int chance) {
+    private void roll_for_insanity(int quantity, int chance)
+    {
         int roll = UnityEngine.Random.Range(1, 100);
-        if (roll <= chance) {
+        if (roll <= chance)
+        {
             // Units flee into the darkness.
-            for (int i = 0; i < quantity; i++) {
+            for (int i = 0; i < quantity; i++)
+            {
                 bat.lose_random_unit("Your ranks crumble without the light of the stars.");
             }
         }
     }
 
-    public void receive_travelcard_consequence() {
+    public void receive_travelcard_consequence()
+    {
         if (get_travelcard() == null)
             return;
         show_adjustments(cell.get_travelcard_consequence());
-        if (get_travelcard().equipment_reward_amount > 0) {
+        if (get_travelcard().equipment_reward_amount > 0)
+        {
             string name = equipment_inventory.add_random_equipment(cell.tier);
             Statics.create_rising_info_map(
                 RisingInfo.build_resource_text(name, 1),
@@ -147,32 +173,39 @@ public class Discipline : Storeable, ISaveLoad {
         cell.complete_travelcard();
     }
 
-    public void add_xp_in_battle(int xp, Enemy enemy) {
+    public void add_xp_in_battle(int xp, Enemy enemy)
+    {
         // Show xp rising over enemy
         change_var(Discipline.EXPERIENCE, xp, false);
         StartCoroutine(_add_xp_in_battle(xp, enemy));
     }
 
-    private IEnumerator _add_xp_in_battle(int xp, Enemy enemy) {
+    private IEnumerator _add_xp_in_battle(int xp, Enemy enemy)
+    {
         yield return new WaitForSeconds(1f);
         Statics.create_rising_info_battle(
             RisingInfo.build_resource_text("XP", xp),
             Statics.disc_colors[ID],
-            enemy.get_slot().transform, 
+            enemy.get_slot().transform,
             rising_info_prefab);
     }
 
-    public TravelCard get_travelcard() {
+    public TravelCard get_travelcard()
+    {
         return cell.travelcard;
     }
 
-    public void mine(MapCell cell) {
+    public void mine(MapCell cell)
+    {
         int mined = 0;
-        if (cell.ID == MapCell.TITRUM_ID || cell.ID == MapCell.MOUNTAIN_ID) {
+        if (cell.ID == MapCell.TITRUM_ID || cell.ID == MapCell.MOUNTAIN_ID)
+        {
             mined = Statics.valid_nonnegative_change(cell.minerals, mine_qty);
             show_adjustment(Storeable.MINERALS, mined);
             cell.minerals -= mined;
-        } else if (cell.ID == MapCell.STAR_ID) {
+        }
+        else if (cell.ID == MapCell.STAR_ID)
+        {
             mined = Statics.valid_nonnegative_change(cell.star_crystals, mine_qty);
             show_adjustment(Storeable.STAR_CRYSTALS, mined);
             cell.star_crystals -= mined;
@@ -182,18 +215,22 @@ public class Discipline : Storeable, ISaveLoad {
             MapUI.I.open_cell_UI_script.update_mineable_text();
     }
 
-    public void reset() {
+    public void reset()
+    {
         restart_battle_from_drawn_card = false;
-        foreach (int type in PlayerUnit.unit_types) {  
+        foreach (int type in PlayerUnit.unit_types)
+        {
             bat.units[type].Clear();
         }
     }
 
-    public override GameData save() {
+    public override GameData save()
+    {
         return new DisciplineData(this, name);
     }
 
-    public override void load(GameData generic) {
+    public override void load(GameData generic)
+    {
         DisciplineData data = generic as DisciplineData;
         reset();
         resources[LIGHT] = data.sresources.light;
@@ -211,12 +248,15 @@ public class Discipline : Storeable, ISaveLoad {
         // Create healthy units.
         Debug.Log("count:" + PlayerUnit.unit_types.Count);
         Debug.Log("count:" + data.sbat.healthy_types.Count);
-        foreach (int type in PlayerUnit.unit_types) {  
+        foreach (int type in PlayerUnit.unit_types)
+        {
             bat.add_units(type, data.sbat.healthy_types[type]);
         }
         // Create injured units.
-        foreach (int type in PlayerUnit.unit_types) {
-            for (int i = 0; i < data.sbat.injured_types[type]; i++) {
+        foreach (int type in PlayerUnit.unit_types)
+        {
+            for (int i = 0; i < data.sbat.injured_types[type]; i++)
+            {
                 PlayerUnit pu = PlayerUnit.create_punit(type, ID);
                 if (pu == null)
                     continue;
@@ -225,6 +265,6 @@ public class Discipline : Storeable, ISaveLoad {
             }
         }
 
-        
+
     }
 }

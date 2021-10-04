@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 6928956094902717708}
   - component: {fileID: 7399157508826641408}
   - component: {fileID: 4693467255682781958}
+  - component: {fileID: -8250457542128503805}
+  - component: {fileID: -2876309024082404404}
   m_Layer: 13
   m_Name: SmallEnemySPDeployment
   m_TagString: Group
@@ -89,6 +91,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfef2e5845cc05547af1663c87919a52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rb: {fileID: -8250457542128503805}
+  VEL_RUN: 250
+  VEL_WALK: 120
+  VEL_SPRINT: 550
   staminabar: {fileID: 0}
   MAX_STAMINA: 100
   stunned: 0
@@ -98,9 +104,48 @@ MonoBehaviour:
   target_layer_mask:
     serializedVersion: 2
     m_Bits: 16384
+  player_pos: {x: 0, y: 0}
+  attack_distance: 30
   zone:
   - {fileID: 0}
   combat_style: 1
+--- !u!50 &-8250457542128503805
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8840387647567175239}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
+--- !u!58 &-2876309024082404404
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8840387647567175239}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 100
 --- !u!1001 &3331417890668430955
 PrefabInstance:
   m_ObjectHideFlags: 0

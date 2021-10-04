@@ -34,8 +34,8 @@ public class AttachGameObjectsToParticles : MonoBehaviour
                     m_Instances[i].transform.position = m_Particles[i].position;
                 else
                     m_Instances[i].transform.localPosition = m_Particles[i].position;
-                
-                UnityEngine.Experimental.Rendering.Universal.Light2D l = 
+
+                UnityEngine.Experimental.Rendering.Universal.Light2D l =
                     m_Instances[i].GetComponent<UnityEngine.Experimental.Rendering.Universal.Light2D>();
                 l.intensity = m_Particles[i].GetCurrentColor(m_ParticleSystem).a / 100f;
 

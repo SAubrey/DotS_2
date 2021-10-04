@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using TMPro;
 
-public static class UpgradeWriter {
+public static class UpgradeWriter
+{
     public static string UNIT_UPGRADE = "Unlocks access to more unit types and other research tree upgrades.";
-    private static Dictionary<int, string> descriptions 
+    private static Dictionary<int, string> descriptions
         = new Dictionary<int, string>() {
         {CityUI.TEMPLE, UNIT_UPGRADE},
         {CityUI.TEMPLE2, UNIT_UPGRADE},
@@ -27,7 +28,7 @@ public static class UpgradeWriter {
         {CityUI.CRAFT_SHOP3, UNIT_UPGRADE},
         {CityUI.MASTERS_GUILD, "Allows the Endura Discipline to recruit unique Endura-only units to their battalion."},
         {CityUI.RESILIENT, ""},
-        {CityUI.RESTORE_GREAT_TORCH, "Restores the great Torch of Ayetzu to its former glory." + 
+        {CityUI.RESTORE_GREAT_TORCH, "Restores the great Torch of Ayetzu to its former glory." +
             "The light of each battalion can hold out 5 turns before using a star crystal instead of 4."},
         {CityUI.STOREHOUSE2, "Increases the capacity of the city inventory to 144."},
 
@@ -41,14 +42,16 @@ public static class UpgradeWriter {
         {CityUI.DOJO_CHOSEN, "Allows the Martial Discipline to recruit unique Martial-only units to their battalion."},
         {CityUI.REFINED, "Unlocks the heart of the Endura practice, Resilience. Resilience of all units is increased by 2."},
         {CityUI.BOW_ILUHATAR, ""},
-        {CityUI.BARRACKS2, UNIT_UPGRADE},  
+        {CityUI.BARRACKS2, UNIT_UPGRADE},
         };
 
-    public static void write_attribute_text(TextMeshProUGUI text, int upgrade_ID) {
+    public static void write_attribute_text(TextMeshProUGUI text, int upgrade_ID)
+    {
         text.text += get_description(upgrade_ID) + " \n";
     }
 
-    public static string get_description(int upgrade_ID) {
+    public static string get_description(int upgrade_ID)
+    {
         string s;
         descriptions.TryGetValue(upgrade_ID, out s);
         return s != null ? s : "";

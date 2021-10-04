@@ -3,13 +3,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-public class Controller : MonoBehaviour {
+public class Controller : MonoBehaviour
+{
     public static Controller I { get; private set; }
 
     public const string MAP = "Map";
     public const string CONTROLLER = "Controller";
-    public const string TRAVEL_DECK = "TravelDeck";
-
 
     public Button loadB, saveB, resumeB;
     public GameObject save_warningP, new_game_warningP, load_warningP;
@@ -21,10 +20,14 @@ public class Controller : MonoBehaviour {
     public event Action<bool> init;
     public PlayerDeployment player_deployment;
 
-    void Awake() {
-        if (I == null) {
+    void Awake()
+    {
+        if (I == null)
+        {
             I = this;
-        } else {
+        }
+        else
+        {
             Destroy(gameObject);
         }
         astra.ID = Discipline.ASTRA;
@@ -36,17 +39,23 @@ public class Controller : MonoBehaviour {
         discs.Add(Discipline.ENDURA, endura);
     }
 
-    void Start() {
+    void Start()
+    {
+        Physics2D.gravity = new Vector2(0, 0);
         save_warningP.SetActive(false);
         new_game_warningP.SetActive(false);
         load_warningP.SetActive(false);
     }
 
-    public void initialize(bool from_save) {
+    public void initialize(bool from_save)
+    {
         init(from_save);
-        if (from_save) {
+        if (from_save)
+        {
 
-        } else {
+        }
+        else
+        {
             astra.pos = new Vector3(12.5f, 12.9f, 0);
             martial.pos = new Vector3(12.1f, 12.1f, 0);
             endura.pos = new Vector3(12.9f, 12.1f, 0);
@@ -54,7 +63,7 @@ public class Controller : MonoBehaviour {
         }
         // Clear fields not overwritten by possible load.
         BattlePhaser.I.reset(from_save);
-        
+
         // Order matters
         Map.I.init(from_save);
         TurnPhaser.I.reset();
@@ -65,16 +74,18 @@ public class Controller : MonoBehaviour {
         game_has_begun = true;
     }
 
-    public void game_over() {
+    public void game_over()
+    {
         CamSwitcher.I.set_active(CamSwitcher.MENU, true);
         initialize(false);
     }
 
     // Called by save button
-    public void save_game() {
+    public void save_game()
+    {
         // Double check the user wants to overwrite their save.
         save_warningP.SetActive(false);
-        
+
         List<GameData> serializables = new List<GameData>() {
             { Map.I.save() },
             { astra.save() },
@@ -82,13 +93,15 @@ public class Controller : MonoBehaviour {
             { endura.save() },
             { city.save() },
         };
-        
-        foreach (var s in serializables) {
+
+        foreach (var s in serializables)
+        {
             FileIO.save_game(s, s.name);
         }
     }
 
-    public void load_game() {
+    public void load_game()
+    {
         TurnPhaserData data = FileIO.load_game("TurnPhaser") as TurnPhaserData;
         if (data == null)
             return;
@@ -104,78 +117,95 @@ public class Controller : MonoBehaviour {
         CamSwitcher.I.flip_menu_map();
     }
 
-    public void new_game() {
+    public void new_game()
+    {
         initialize(false);
         CamSwitcher.I.flip_menu_map();
     }
 
-    public void check_button_states() {
+    public void check_button_states()
+    {
         loadB.interactable = FileIO.load_file_exists();
         saveB.interactable = game_has_begun;
         resumeB.interactable = game_has_begun;
-    } 
+    }
 
-    public void save_button() {
+    public void save_button()
+    {
         //if (FileIO.load_file_exists()) {
-        save_warningP.SetActive(true);    
+        save_warningP.SetActive(true);
         //return;
         //}
         //save_game();
     }
 
-    public void load_button() {
-        if (game_has_begun) {
+    public void load_button()
+    {
+        if (game_has_begun)
+        {
             load_warningP.SetActive(true);
             return;
         }
         load_game();
     }
 
-    public void new_game_button() {
-        if (game_has_begun) {
+    public void new_game_button()
+    {
+        if (game_has_begun)
+        {
             new_game_warningP.SetActive(true);
             return;
         }
         new_game();
     }
 
-    public void show_warning_panel(bool active) {
+    public void show_warning_panel(bool active)
+    {
         save_warningP.SetActive(active);
     }
 
-    public PlayerDeployment get_deployment() {
+    public PlayerDeployment get_deployment()
+    {
         return player_deployment;
     }
 
-    public Discipline get_disc(int ID) {
+    public Discipline get_disc(int ID)
+    {
         return discs[ID];
     }
 
     // BUTTON HANDLES
-    public void inc_stat(string field) {
+    public void inc_stat(string field)
+    {
         TurnPhaser.I.active_disc.change_var(field, 1);
     }
 
-    public void dec_stat(string field) {
+    public void dec_stat(string field)
+    {
         TurnPhaser.I.active_disc.change_var(field, -1);
     }
 
-    public void inc_city_stat(string field) {
+    public void inc_city_stat(string field)
+    {
         city.change_var(field, 1);
     }
 
-    public void dec_city_stat(string field) {
+    public void dec_city_stat(string field)
+    {
         city.change_var(field, -1);
     }
 
-    public void quit_game() {
+    public void quit_game()
+    {
         Application.Quit();
     }
 }
 
-public struct Pos {
+public struct Pos
+{
     public int x, y;
-    public Pos(int x, int y) {
+    public Pos(int x, int y)
+    {
         this.x = x;
         this.y = y;
     }

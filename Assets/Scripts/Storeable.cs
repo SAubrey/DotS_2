@@ -4,10 +4,11 @@ using UnityEngine;
 using System;
 using System.Linq;
 
-public class Storeable : MonoBehaviour, ISaveLoad {
+public class Storeable : MonoBehaviour, ISaveLoad
+{
     public const string LIGHT = "light";
     public const string UNITY = "unity";
-    
+
     public const string STAR_CRYSTALS = "star crystals";
     public const string MINERALS = "minerals";
     public const string ARELICS = "Astra relics";
@@ -33,9 +34,11 @@ public class Storeable : MonoBehaviour, ISaveLoad {
     public int ID;
     public const int INITIAL_CAPACITY = 72;
     private int _capacity = INITIAL_CAPACITY;
-    public int capacity {
-        get { return _capacity; } 
-        set {
+    public int capacity
+    {
+        get { return _capacity; }
+        set
+        {
             _capacity = value;
             if (on_capacity_change != null)
                 on_capacity_change(ID, get_sum_storeable_resources(), value);
@@ -45,10 +48,11 @@ public class Storeable : MonoBehaviour, ISaveLoad {
     public int light_refresh_amount = INITIAL_LIGHT_REFRESH_AMOUNT;
 
     public event Action<int, string, int, int, int> on_resource_change; // Disc ID, res type, new amount
-    public event Action<int, int, int> on_capacity_change; 
+    public event Action<int, int, int> on_capacity_change;
     protected List<Adjustment> adjustments = new List<Adjustment>();
 
-    protected virtual void Start() {
+    protected virtual void Start()
+    {
         map_UI_canvas = GameObject.Find("MapUICanvas");
         TurnPhaser.I.on_turn_change += register_turn;
 
@@ -58,30 +62,37 @@ public class Storeable : MonoBehaviour, ISaveLoad {
     float time_elapsed = 0f;
     float time_interval = 0.5f;
 
-    void Update() {
+    void Update()
+    {
         /* Display adjusted resources in a timely sequence. */
-        if (adjustments.Count == 0) {
+        if (adjustments.Count == 0)
+        {
             return;
         }
 
         time_elapsed += Time.deltaTime;
-        if (time_elapsed >= time_interval) {
+        if (time_elapsed >= time_interval)
+        {
             time_elapsed = 0;
 
             Adjustment a = adjustments[0];
             adjustments.Remove(a);
-            if (resources.ContainsKey(a.resource)) {
+            if (resources.ContainsKey(a.resource))
+            {
                 change_var(a.resource, a.amount, true);
-            } else {
+            }
+            else
+            {
                 Statics.create_rising_info_map(
                     RisingInfo.build_resource_text(a.resource, a.amount),
                     Statics.disc_colors[ID],
-                    origin_of_rise_obj.transform, 
+                    origin_of_rise_obj.transform,
                     rising_info_prefab);
             }
             UIPlayer.I.play(UIPlayer.INV_IN);
             // Allow next adjustment to happen instantly.
-            if (adjustments.Count == 0) {
+            if (adjustments.Count == 0)
+            {
                 time_elapsed = time_interval;
             }
         }
@@ -90,23 +101,30 @@ public class Storeable : MonoBehaviour, ISaveLoad {
     public virtual GameData save() { return null; }
     public virtual void load(GameData generic) { }
 
-    public virtual void init(bool from_save) {
+    public virtual void init(bool from_save)
+    {
         capacity = INITIAL_CAPACITY;
         light_refresh_amount = INITIAL_LIGHT_REFRESH_AMOUNT;
     }
 
-    public virtual void register_turn() {
+    public virtual void register_turn()
+    {
         light_decay_cascade();
     }
 
-    public virtual void light_decay_cascade() {
+    public virtual void light_decay_cascade()
+    {
         Dictionary<string, int> d = new Dictionary<string, int>();
         d.Add(LIGHT, -1);
-        if (resources[LIGHT] <= 0) {
-            if (resources[STAR_CRYSTALS] > 0) {
+        if (resources[LIGHT] <= 0)
+        {
+            if (resources[STAR_CRYSTALS] > 0)
+            {
                 d.Add(STAR_CRYSTALS, -1);
                 d[LIGHT] = light_refresh_amount;
-            } else {
+            }
+            else
+            {
                 if (resources[UNITY] >= 2)
                     d.Add(UNITY, -2);
                 else if (resources[UNITY] == 1) // Can't have negative Unity.
@@ -116,21 +134,26 @@ public class Storeable : MonoBehaviour, ISaveLoad {
         show_adjustments(d);
     }
 
-    public void show_adjustments(Dictionary<string, int> adjs) {
-        foreach (KeyValuePair<string, int> a in adjs) {
-            if (a.Value != 0) {
+    public void show_adjustments(Dictionary<string, int> adjs)
+    {
+        foreach (KeyValuePair<string, int> a in adjs)
+        {
+            if (a.Value != 0)
+            {
                 adjustments.Add(new Adjustment(a.Key, a.Value));
             }
         }
     }
 
-    public void show_adjustment(string var, int val) {
+    public void show_adjustment(string var, int val)
+    {
         Dictionary<string, int> d = new Dictionary<string, int>();
         d.Add(var, val);
         show_adjustments(d);
     }
 
-    protected void remove_resources_lost_on_death() {
+    protected void remove_resources_lost_on_death()
+    {
         Dictionary<string, int> adjs = new Dictionary<string, int>();
         adjs.Add(STAR_CRYSTALS, -resources[STAR_CRYSTALS]);
         adjs.Add(MINERALS, -resources[MINERALS]);
@@ -145,21 +168,24 @@ public class Storeable : MonoBehaviour, ISaveLoad {
     }
 
     // Use != 0 with result to use as boolean.
-    public int get_valid_change_amount(string type, int change) {
+    public int get_valid_change_amount(string type, int change)
+    {
         // Return change without going lower than 0.
         //Debug.Log(type + " " + get_res(type) + " + " + change);
         int amount = Statics.valid_nonnegative_change(get_res(type), change);
 
-            //return change - (get_var(type) - change);
+        //return change - (get_var(type) - change);
         // Return change without going higher than cap.
         if (get_sum_storeable_resources() + change > capacity)
             return capacity - get_sum_storeable_resources();
         return amount;
     }
 
-    public int get_sum_storeable_resources() {
+    public int get_sum_storeable_resources()
+    {
         int sum = 0;
-        foreach (string res in resources.Keys) {
+        foreach (string res in resources.Keys)
+        {
             if (res == Discipline.EXPERIENCE ||
                 res == Storeable.UNITY ||
                 res == Storeable.LIGHT)
@@ -169,19 +195,22 @@ public class Storeable : MonoBehaviour, ISaveLoad {
         return sum;
     }
 
-    public int change_var(string var, int val, bool show=false) {
+    public int change_var(string var, int val, bool show = false)
+    {
         val = get_valid_change_amount(var, val);
         resources[var] += val;
-        
-        Debug.Log(ID + " " + var  + " " + get_res(var) + " " + 
+
+        Debug.Log(ID + " " + var + " " + get_res(var) + " " +
             get_sum_storeable_resources() + " " + capacity);
-        if (on_resource_change != null) {
-            on_resource_change(ID, var, get_res(var), 
+        if (on_resource_change != null)
+        {
+            on_resource_change(ID, var, get_res(var),
                 get_sum_storeable_resources(), capacity);
         }
-        if (show && val != 0) {
+        if (show && val != 0)
+        {
             Statics.create_rising_info_map(
-                RisingInfo.build_resource_text(var, val), 
+                RisingInfo.build_resource_text(var, val),
                 Statics.disc_colors[ID],
                 origin_of_rise_obj.transform,
                 rising_info_prefab);
@@ -189,19 +218,23 @@ public class Storeable : MonoBehaviour, ISaveLoad {
         return val;
     }
 
-    public void add_var_without_check(string var, int val) {
+    public void add_var_without_check(string var, int val)
+    {
         resources[var] += val;
     }
 
-    public void set_res(string res, int amount) {
+    public void set_res(string res, int amount)
+    {
         if (!resources.ContainsKey(res))
             return;
         resources[res] = amount;
     }
 
-    public int get_res(string var) {
+    public int get_res(string var)
+    {
         int r;
-        if (resources.TryGetValue(var, out r)) {
+        if (resources.TryGetValue(var, out r))
+        {
             return r;
         }
         Debug.Log("RESOURCE NOT FOUND IN DICTIONARY");
@@ -209,12 +242,13 @@ public class Storeable : MonoBehaviour, ISaveLoad {
     }
 }
 
-public class Adjustment {
+public class Adjustment
+{
     public string resource;
     public int amount;
-    public Adjustment(string resource, int amount) {
+    public Adjustment(string resource, int amount)
+    {
         this.resource = resource;
         this.amount = amount;
     }
 }
- 

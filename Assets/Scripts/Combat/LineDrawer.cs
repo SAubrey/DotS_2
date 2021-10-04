@@ -2,26 +2,34 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LineDrawer : MonoBehaviour {
+public class LineDrawer : MonoBehaviour
+{
     public static LineDrawer I { get; private set; }
     public GameObject LinePrefab;
     public PreviewLine preview_line;
     public Dictionary<int, Line> lines = new Dictionary<int, Line>();
-    void Awake() {
-        if (I == null) {
+    void Awake()
+    {
+        if (I == null)
+        {
             I = this;
-        } else {
+        }
+        else
+        {
             Destroy(gameObject);
         }
     }
 
-    void Start() {
+    void Start()
+    {
         preview_line = GetComponentInChildren<PreviewLine>();
         preview_line.init();
     }
 
-    public void draw_line(Unit start_u, Vector3 start_pos, Vector3 end_pos, int id) {
-        if (start_u == null) {
+    public void draw_line(Unit start_u, Vector3 start_pos, Vector3 end_pos, int id)
+    {
+        if (start_u == null)
+        {
             return;
         }
         GameObject L = GameObject.Instantiate(LinePrefab);
@@ -32,21 +40,26 @@ public class LineDrawer : MonoBehaviour {
         lines.Add(id, line);
     }
 
-    public Line get_line(int id) {
+    public Line get_line(int id)
+    {
         if (!lines.ContainsKey(id))
             return null;
         return lines[id];
     }
 
-    public void remove(int id) {
-        if (lines.ContainsKey(id)) {
+    public void remove(int id)
+    {
+        if (lines.ContainsKey(id))
+        {
             lines[id].remove();
             lines.Remove(id);
         }
     }
 
-    public void clear() {
-        foreach (Line l in lines.Values) {
+    public void clear()
+    {
+        foreach (Line l in lines.Values)
+        {
             if (l != null && l.gameObject != null)
                 l.remove();
         }

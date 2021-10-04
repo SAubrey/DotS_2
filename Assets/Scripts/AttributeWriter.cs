@@ -2,14 +2,15 @@
 using TMPro;
 using UnityEngine;
 
-public static class AttributeWriter {
+public static class AttributeWriter
+{
 
-    public static string GROUPING_DESC = 
+    public static string GROUPING_DESC =
     "Active. Unit's attack or defense increases by 1 for each unit in the same group up to the attribute level.";
     public static string TERROR_DESC = "";
     public static string HEAL_DESC = "Active. Select an injured unit from the selection bar for placement in a green reserve group.";
 
-    private static Dictionary<int, string> descriptions 
+    private static Dictionary<int, string> descriptions
         = new Dictionary<int, string>() {
             {Unit.FLANKING, "Flanking\nUnit spawns to the side of your battalion."},
             {Unit.FLYING, "Flying\nUnit cannot be hit by melee units that do not have Reach."},
@@ -38,13 +39,15 @@ public static class AttributeWriter {
             {Unit.COMBINED_EFFORT, "Combined Effort\n"},
         };
 
-    public static void write_attribute_text(TextMeshProUGUI text, Unit u) {
+    public static void write_attribute_text(TextMeshProUGUI text, Unit u)
+    {
         text.text = get_description(u.attribute1) + "\n" +
                     get_description(u.attribute2) + "\n" +
                     get_description(u.attribute3);
     }
 
-    public static string get_description(int attribute) {
+    public static string get_description(int attribute)
+    {
         string s;
         descriptions.TryGetValue(attribute, out s);
         return s != null ? s : "";

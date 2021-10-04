@@ -3,41 +3,47 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class GameData {
+public class GameData
+{
     public string name;
 }
 
-interface ISaveLoad {
+interface ISaveLoad
+{
     GameData save();
     void load(GameData generic);
 }
 
 [System.Serializable]
-public class TurnPhaserData : GameData {
+public class TurnPhaserData : GameData
+{
     public int turn;
     public int active_disc_ID;
 }
 
 [System.Serializable]
-public class MapData : GameData {
+public class MapData : GameData
+{
     public List<int> t1_bag = new List<int>();
     public List<int> t2_bag = new List<int>();
     public List<int> t3_bag = new List<int>();
     public List<SMapCell> cells = new List<SMapCell>();
-    public MapData(Map map, string name) {
+    public MapData(Map map, string name)
+    {
         this.name = name;
 
-        foreach (int num in map.bags[1]) 
+        foreach (int num in map.bags[1])
             t1_bag.Add(num);
-        foreach (int num in map.bags[2]) 
+        foreach (int num in map.bags[2])
             t2_bag.Add(num);
-        foreach (int num in map.bags[3]) 
+        foreach (int num in map.bags[3])
             t3_bag.Add(num);
 
-        foreach (MapCell mc in map.map.Values) {
-            SMapCell mcs = 
+        foreach (MapCell mc in map.map.Values)
+        {
+            SMapCell mcs =
                 new SMapCell(mc.ID,
-                        mc.pos.x, mc.pos.y, 
+                        mc.pos.x, mc.pos.y,
                         mc.tier, mc.discovered,
                         mc.minerals, mc.star_crystals);
             cells.Add(mcs);
@@ -46,15 +52,17 @@ public class MapData : GameData {
 }
 
 [System.Serializable]
-public struct SMapCell {
+public struct SMapCell
+{
     public int ID;
     public int x, y;
     public int tier;
     public bool discovered;
     public int minerals, star_crystals;
-    public SMapCell(int ID, int x, int y, 
+    public SMapCell(int ID, int x, int y,
             int tier, bool discovered,
-            int minerals, int star_crystals) {
+            int minerals, int star_crystals)
+    {
         this.ID = ID;
         this.x = x;
         this.y = y;
@@ -66,13 +74,15 @@ public struct SMapCell {
 }
 
 [System.Serializable]
-public class DisciplineData : GameData {
+public class DisciplineData : GameData
+{
     public SBattalion sbat;
     public SStoreableResources sresources;
     public float col, row;
     public int redrawn_travel_card_ID;
 
-    public DisciplineData(Discipline disc, string name) {
+    public DisciplineData(Discipline disc, string name)
+    {
         this.name = name;
         col = disc.pos.x;
         row = disc.pos.y;
@@ -84,9 +94,11 @@ public class DisciplineData : GameData {
 }
 
 [System.Serializable]
-public struct SStoreableResources {
+public struct SStoreableResources
+{
     public int light, unity, star_crystals, minerals, arelics, erelics, mrelics;
-    public SStoreableResources(Storeable s) {
+    public SStoreableResources(Storeable s)
+    {
         light = s.get_res(Storeable.LIGHT);
         unity = s.get_res(Storeable.UNITY);
         star_crystals = s.get_res(Storeable.STAR_CRYSTALS);
@@ -98,13 +110,16 @@ public struct SStoreableResources {
 }
 
 [System.Serializable]
-public struct SBattalion {
+public struct SBattalion
+{
     // Indices refer to the unit type, values refer to the amount.
     public List<int> healthy_types, injured_types;
-    public SBattalion(Battalion bat) {
+    public SBattalion(Battalion bat)
+    {
         healthy_types = new List<int>(PlayerUnit.unit_types.Count);
         injured_types = new List<int>(PlayerUnit.unit_types.Count);
-        foreach (int type in PlayerUnit.unit_types) {
+        foreach (int type in PlayerUnit.unit_types)
+        {
             int injured = bat.count_injured(type);
             int healthy = bat.units[type].Count - injured;
             healthy_types.Add(healthy);
@@ -114,18 +129,21 @@ public struct SBattalion {
 }
 
 [System.Serializable]
-public class CityData : GameData {
+public class CityData : GameData
+{
     public SStoreableResources sresources;
     public bool[] purchases;
 
-    public CityData(City city, string name) {
+    public CityData(City city, string name)
+    {
         this.name = name;
         sresources = new SStoreableResources(city);
 
         CityUI cui = CityUI.I;
         purchases = new bool[cui.upgrades.Count];
-        for (int i = 0; i < cui.upgrades.Count; i++) {
+        for (int i = 0; i < cui.upgrades.Count; i++)
+        {
             purchases[i] = cui.upgrades[i].purchased;
-        }   
+        }
     }
 }

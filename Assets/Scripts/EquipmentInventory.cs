@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EquipmentInventory {
+public class EquipmentInventory
+{
     // <equipment ID, List of equipment of that type>
     public Dictionary<string, List<Equipment>> equipment = new Dictionary<string, List<Equipment>>();
     public List<EquipmentSlot> equipment_slots = new List<EquipmentSlot>();
@@ -11,34 +12,42 @@ public class EquipmentInventory {
     };
     public Discipline disc;
 
-    public EquipmentInventory(Discipline disc) {
+    public EquipmentInventory(Discipline disc)
+    {
         this.disc = disc;
-        for (int i = 0; i < slot_experience_requirements.Length; i++) {
+        for (int i = 0; i < slot_experience_requirements.Length; i++)
+        {
             equipment_slots.Add(new EquipmentSlot(i));
         }
         add_to_inventory(Equipment.SHARPENED_BLADES, 2);
         add_to_inventory(Equipment.BOLSTERED_SHIELDS, 1);
     }
 
-    public EquipmentSlot get_slot(int i) {
+    public EquipmentSlot get_slot(int i)
+    {
         return equipment_slots[i];
     }
 
-    public int get_highest_unlocked_slot() {
-        for (int i = slot_experience_requirements.Length - 1; i >= 0; i--) {
-            if (disc.get_res(Discipline.EXPERIENCE) >= slot_experience_requirements[i]) {
+    public int get_highest_unlocked_slot()
+    {
+        for (int i = slot_experience_requirements.Length - 1; i >= 0; i--)
+        {
+            if (disc.get_res(Discipline.EXPERIENCE) >= slot_experience_requirements[i])
+            {
                 return i;
             }
         }
         return -1;
     }
-    
-    public string add_random_equipment(int tier) {
+
+    public string add_random_equipment(int tier)
+    {
         int choice_index = Random.Range(0, Equipment.equipment[tier].Length);
         return (add_to_inventory(Equipment.equipment[tier][choice_index]));
     }
 
-    public string add_to_inventory(string name, int amount=1) {
+    public string add_to_inventory(string name, int amount = 1)
+    {
         Equipment e = Equipment.make_equipment(name);
         if (!equipment.ContainsKey(name))
             equipment.Add(name, new List<Equipment>());
@@ -48,25 +57,29 @@ public class EquipmentInventory {
         return e == null ? "" : e.name;
     }
 
-    public void equip(string name, int slot_num) {
+    public void equip(string name, int slot_num)
+    {
         if (name == null || !equipment.ContainsKey(name))
             return;
-        
+
         equipment_slots[slot_num].fill(equipment[name][0]);
     }
 
-    public void unequip(int slot_num) {
+    public void unequip(int slot_num)
+    {
         if (slot_num < 0 || slot_num > equipment_slots.Count)
             return;
         equipment_slots[slot_num].clear();
     }
 
-    public int get_stat_boost_amount(int unit_ID, int stat_ID) {
+    public int get_stat_boost_amount(int unit_ID, int stat_ID)
+    {
         int sum = 0;
-        foreach (EquipmentSlot es in equipment_slots) {
+        foreach (EquipmentSlot es in equipment_slots)
+        {
             if (!es.full)
                 continue;
-            if (!check_compatible_unit(unit_ID, es.equipment) 
+            if (!check_compatible_unit(unit_ID, es.equipment)
                 || !check_compatible_stat(stat_ID, es.equipment))
                 continue;
             sum += es.equipment.affect_amount;
@@ -74,42 +87,54 @@ public class EquipmentInventory {
         return sum;
     }
 
-    private bool check_compatible_unit(int unit_ID, Equipment e) {
-        foreach (int type in e.affected_unit_types) {
-            if (unit_ID == type) {
+    private bool check_compatible_unit(int unit_ID, Equipment e)
+    {
+        foreach (int type in e.affected_unit_types)
+        {
+            if (unit_ID == type)
+            {
                 return true;
             }
         }
         return false;
     }
 
-    private bool check_compatible_stat(int stat_ID, Equipment e) {
-        foreach (int type in e.affected_stats) {
-            if (stat_ID == type) {
+    private bool check_compatible_stat(int stat_ID, Equipment e)
+    {
+        foreach (int type in e.affected_stats)
+        {
+            if (stat_ID == type)
+            {
                 return true;
             }
         }
         return false;
     }
 
-    public void remove_equipment(string name) {
-        if (!equipment.ContainsKey(name)) {
+    public void remove_equipment(string name)
+    {
+        if (!equipment.ContainsKey(name))
+        {
             return;
         }
         equipment[name].RemoveAt(0);
-        if (equipment[name].Count <= 0) {
+        if (equipment[name].Count <= 0)
+        {
             equipment.Remove(name);
         }
     }
 
-    public int get_equipment_amount(string name) {
-        if (!equipment.ContainsKey(name)) 
+    public int get_equipment_amount(string name)
+    {
+        if (!equipment.ContainsKey(name))
             return 0;
         return equipment[name].Count;
     }
 
-    public bool has_equipped(string name) {
-        foreach (EquipmentSlot es in equipment_slots) {
+    public bool has_equipped(string name)
+    {
+        foreach (EquipmentSlot es in equipment_slots)
+        {
             if (!es.full)
                 continue;
             if (es.equipment.name == name)
@@ -118,31 +143,38 @@ public class EquipmentInventory {
         return false;
     }
 
-    public bool has(string name) {
+    public bool has(string name)
+    {
         return equipment.ContainsKey(name);
     }
 
-    public void remove_all_equipment() {
+    public void remove_all_equipment()
+    {
         equipment.Clear();
     }
 }
 
-public class EquipmentSlot {
+public class EquipmentSlot
+{
     public Equipment equipment;
-   // public bool locked { get; private set; } = false;
+    // public bool locked { get; private set; } = false;
     public int num = 0;
-    public EquipmentSlot(int num) {
+    public EquipmentSlot(int num)
+    {
         this.num = num;
     }
 
-    public void fill(Equipment e) {
+    public void fill(Equipment e)
+    {
         equipment = e;
         e.equipped = true;
         e.activate();
     }
 
-    public void clear() {
-        if (full) {
+    public void clear()
+    {
+        if (full)
+        {
             equipment.deactivate();
         }
         equipment.equipped = false;

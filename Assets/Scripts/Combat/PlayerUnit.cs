@@ -1,7 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class PlayerUnit : Unit {
+public class PlayerUnit : Unit
+{
     public const int WARRIOR = 0;
     public const int SPEARMAN = WARRIOR + 1;
     public const int ARCHER = SPEARMAN + 1;
@@ -20,16 +21,17 @@ public class PlayerUnit : Unit {
     public const int SHIELD_MAIDEN = DRUMMER + 1;
     public const int PIKEMAN = SHIELD_MAIDEN + 1;
 
-    public static readonly List<int> unit_types = new List<int> { WARRIOR, SPEARMAN, ARCHER, 
+    public static readonly List<int> unit_types = new List<int> { WARRIOR, SPEARMAN, ARCHER,
         MINER, INSPIRATOR, SEEKER, GUARDIAN, ARBALEST, SKIRMISHER, PALADIN,
         MENDER, CARTER, DRAGOON, SCOUT, DRUMMER, SHIELD_MAIDEN, PIKEMAN };
 
     public const int EMPTY = 100; // Graphical lookup usage.
     public bool injured = false;
 
-    public static PlayerUnit create_punit(int ID, int owner_ID) {
+    public static PlayerUnit create_punit(int ID, int owner_ID)
+    {
         PlayerUnit pu = null;
-        if (ID == WARRIOR) pu = new Warrior(); 
+        if (ID == WARRIOR) pu = new Warrior();
         else if (ID == SPEARMAN) pu = new Spearman();
         else if (ID == ARCHER) pu = new Archer();
         else if (ID == MINER) pu = new Miner();
@@ -50,77 +52,90 @@ public class PlayerUnit : Unit {
         return pu;
     }
 
-    public PlayerUnit(string name, int ID, int att, int def, int hp, int style, 
-            int atr1=0, int atr2=0, int atr3=0) : 
-            base(name, ID, att, def, hp, style, atr1, atr2, atr3) {
+    public PlayerUnit(string name, int ID, int att, int def, int hp, int style,
+            int atr1 = 0, int atr2 = 0, int atr3 = 0) :
+            base(name, ID, att, def, hp, style, atr1, atr2, atr3)
+    {
         type = PLAYER;
     }
 
-    public override void die() { 
-        BatLoader.I.load_unit_text(Controller.I.get_disc(owner_ID).bat, ID);    
+    public override void die()
+    {
+        BatLoader.I.load_unit_text(Controller.I.get_disc(owner_ID).bat, ID);
         Controller.I.get_disc(owner_ID).bat.remove_dead_unit(this);
         slot.empty();
     }
 
-    protected override string get_attack_animation_ID() {
-        if (combat_style == RANGE) {
+    protected override string get_attack_animation_ID()
+    {
+        if (combat_style == RANGE)
+        {
             return AnimationPlayer.ARROW_FIRE;
-        } else if (ID == SPEARMAN || ID == PIKEMAN || ID == CARTER
-            || ID == GUARDIAN || ID == SKIRMISHER) {
+        }
+        else if (ID == SPEARMAN || ID == PIKEMAN || ID == CARTER
+          || ID == GUARDIAN || ID == SKIRMISHER)
+        {
             return AnimationPlayer.SPEAR_THRUST;
-        } else {
+        }
+        else
+        {
             return AnimationPlayer.SWORD_SLASH;
         }
     }
 
-    public override int get_attack_dmg() {
+    public override int get_attack_dmg()
+    {
         return attack_dmg + get_bonus_att_dmg() + get_bonus_from_equipment(Unit.ATTACK);
     }
 
-    public override int get_defense() {
+    public override int get_defense()
+    {
         return defense + get_bonus_def() + get_bonus_from_equipment(Unit.DEFENSE);
     }
 
-    public override int get_dynamic_max_health() {
+    public override int get_dynamic_max_health()
+    {
         return max_health + get_bonus_health() + get_stat_buff(HEALTH) +
             get_bonus_from_equipment(Unit.HEALTH);
     }
 
     // ---ATTRIBUTES---
-/*
-    protected void apply_surrounding_effect(int boost_type, int amount, List<Pos> coords) {
-        Group g;
-        Pos low = coords[0];
-        Pos high = coords[1];
-        for (int col = low.x; col <= high.x; col++) {
-            for (int row = low.y; row <= high.y; row++) {
-                g = f.get_group(col, row);
-                if (!g) 
-                    continue;
-
-                foreach (Slot s in g.slots) {
-                    if (!s.has_punit) // Skip empty or enemies.
+    /*
+        protected void apply_surrounding_effect(int boost_type, int amount, List<Pos> coords) {
+            Group g;
+            Pos low = coords[0];
+            Pos high = coords[1];
+            for (int col = low.x; col <= high.x; col++) {
+                for (int row = low.y; row <= high.y; row++) {
+                    g = f.get_group(col, row);
+                    if (!g) 
                         continue;
-                        
-                    if (s.get_punit().boosted) {
-                        s.get_punit().remove_boost();
-                    } else {
-                        s.get_punit().boost(boost_type, amount);
+
+                    foreach (Slot s in g.slots) {
+                        if (!s.has_punit) // Skip empty or enemies.
+                            continue;
+
+                        if (s.get_punit().boosted) {
+                            s.get_punit().remove_boost();
+                        } else {
+                            s.get_punit().boost(boost_type, amount);
+                        }
                     }
                 }
             }
-        }
-    }*/
+        }*/
 
     // ---BOOSTS---
-    protected void boost(int boost_type, int amount) {
+    protected void boost(int boost_type, int amount)
+    {
         if (boosted)
             return;
         affect_boosted_stat(boost_type, amount);
         boosted = true;
     }
 
-    public override void remove_boost() {
+    public override void remove_boost()
+    {
         if (!boosted)
             return;
         affect_boosted_stat(active_boost_type, -active_boost_amount);
@@ -129,76 +144,99 @@ public class PlayerUnit : Unit {
 
 }
 
-public class Warrior : PlayerUnit {
-    public Warrior() : base("Warrior", WARRIOR, 1, 1, 100, MELEE, GROUPING_1) {
+public class Warrior : PlayerUnit
+{
+    public Warrior() : base("Warrior", WARRIOR, 1, 1, 100, MELEE, GROUPING_1)
+    {
         attribute_requires_action = true;
         block_rating = .9f;
     }
 }
 
-public class Spearman : PlayerUnit {
-    public Spearman() : base("Spearman", SPEARMAN, 1, 2, 70, MELEE, COUNTER_CHARGE) {
+public class Spearman : PlayerUnit
+{
+    public Spearman() : base("Spearman", SPEARMAN, 1, 2, 70, MELEE, PIERCING, COUNTER_CHARGE)
+    {
         passive_attribute = true;
     }
 }
 
-public class Archer : PlayerUnit {
-    public Archer() : base("Archer", ARCHER, 2, 0, 60, RANGE) {
+public class Archer : PlayerUnit
+{
+    public Archer() : base("Archer", ARCHER, 2, 0, 60, RANGE)
+    {
         passive_attribute = true;
     }
 }
 
-public class Miner : PlayerUnit {
-    public Miner() : base("Miner", MINER, 1, 0, 50, WEAK_MELEE, HARVEST) {
+public class Miner : PlayerUnit
+{
+    public Miner() : base("Miner", MINER, 1, 0, 50, WEAK_MELEE, HARVEST)
+    {
         passive_attribute = true;
     }
 }
 
-public class Inspirator : PlayerUnit {
-    public Inspirator() : base("Inspirator", INSPIRATOR, 0, 0, 45, WEAK_MELEE, INSPIRE) {}
+public class Inspirator : PlayerUnit
+{
+    public Inspirator() : base("Inspirator", INSPIRATOR, 0, 0, 45, WEAK_MELEE, INSPIRE) { }
 
-    public override bool set_attribute_active(bool state) {
+    public override bool set_attribute_active(bool state)
+    {
         if (attribute_active == state)
             return false; // prevent double application/depplication
         bool active = base.set_attribute_active(state);
-        if (active) {
+        if (active)
+        {
             //apply_surrounding_effect(HEALTH, 1, get_forward3x1_coords());
             // affecting num actions directly bypasses one-way street to allow
             // the user to undo and redo the buff. This means has_acted_in_stage
             // does not get enabled for inspirator, which only matters if units
             // are cycling after having acted.
-        } else {
+        }
+        else
+        {
             //apply_surrounding_effect(HEALTH, -1, get_forward3x1_coords());
         }
         return active;
     }
 }
 
-public class Seeker : PlayerUnit {
-    public Seeker() : base("Seeker", SEEKER, 1, 1, 40, WEAK_MELEE, TRUE_SIGHT) {
+public class Seeker : PlayerUnit
+{
+    public Seeker() : base("Seeker", SEEKER, 1, 1, 40, WEAK_MELEE, TRUE_SIGHT)
+    {
         passive_attribute = true;
     }
 }
 
-public class Guardian : PlayerUnit {
-    public Guardian() : base("Guardian", GUARDIAN, 2, 3, 120, MELEE, PARRY) {
+public class Guardian : PlayerUnit
+{
+    public Guardian() : base("Guardian", GUARDIAN, 2, 3, 120, MELEE, PARRY)
+    {
         block_rating = .9f;
     }
 }
 
-public class Arbalest : PlayerUnit {
-    public Arbalest() : base("Arbalest", ARBALEST, 3, 0, 75, RANGE, PIERCING) {
+public class Arbalest : PlayerUnit
+{
+    public Arbalest() : base("Arbalest", ARBALEST, 3, 0, 75, RANGE, PIERCING)
+    {
         passive_attribute = true;
     }
 }
 
-public class Mender : PlayerUnit {
-    public Mender() : base("Mender", MENDER, 0, 3, 40, WEAK_MELEE, HEAL_1) {
+public class Mender : PlayerUnit
+{
+    public Mender() : base("Mender", MENDER, 0, 3, 40, WEAK_MELEE, HEAL_1)
+    {
     }
 
-    public override bool set_attribute_active(bool state) {
+    public override bool set_attribute_active(bool state)
+    {
         bool active = base.set_attribute_active(state);
-        if (active) {
+        if (active)
+        {
             BatLoader.I.selecting_for_heal = active;
             BatLoader.I.healing_unit = this;
         }
@@ -206,60 +244,78 @@ public class Mender : PlayerUnit {
     }
 }
 
-public class Skirmisher : PlayerUnit {
-    public Skirmisher() : base("Skirmisher", SKIRMISHER, 2, 2, 100, RANGE, STUN, GROUPING_2) {
+public class Skirmisher : PlayerUnit
+{
+    public Skirmisher() : base("Skirmisher", SKIRMISHER, 2, 2, 100, RANGE, STUN, GROUPING_2)
+    {
         attribute_requires_action = true;
     }
 }
 
-public class Scout : PlayerUnit {
-    public Scout() : base("Scout", SCOUT, 3, 0, 70, RANGE, PIERCING) {
+public class Scout : PlayerUnit
+{
+    public Scout() : base("Scout", SCOUT, 3, 0, 70, RANGE, PIERCING)
+    {
         passive_attribute = true;
     }
 }
 
-public class Carter : PlayerUnit {
-    public Carter() : base("Carter", CARTER, 2, 2, 110, MELEE) {
+public class Carter : PlayerUnit
+{
+    public Carter() : base("Carter", CARTER, 2, 2, 110, MELEE)
+    {
         passive_attribute = true;
         // inv increase by 6
     }
 }
 
-public class Dragoon : PlayerUnit {
-    public Dragoon() : base("Dragoon", DRAGOON, 4, 1, 150, MELEE, GROUPING_2, PIERCING) {}
+public class Dragoon : PlayerUnit
+{
+    public Dragoon() : base("Dragoon", DRAGOON, 4, 1, 150, MELEE, GROUPING_2, PIERCING) { }
 }
 
-public class Paladin : PlayerUnit {
-    public Paladin() : base("Paladin", PALADIN, 2, 2, 160, MELEE, GROUPING_2) {
+public class Paladin : PlayerUnit
+{
+    public Paladin() : base("Paladin", PALADIN, 2, 2, 160, MELEE, GROUPING_2)
+    {
         attribute_requires_action = true;
     }
 }
 
-public class Drummer : PlayerUnit {
-    public Drummer() : base("Drummer", DRUMMER, 1, 1, 50, WEAK_MELEE, BOLSTER) {}
+public class Drummer : PlayerUnit
+{
+    public Drummer() : base("Drummer", DRUMMER, 1, 1, 50, WEAK_MELEE, BOLSTER) { }
 
-    public override bool set_attribute_active(bool state) {
+    public override bool set_attribute_active(bool state)
+    {
         if (attribute_active == state)
             return false; // prevent double application/depplication
         bool active = base.set_attribute_active(state);
-        if (active) {
+        if (active)
+        {
             //apply_surrounding_effect(DEFENSE, 1, get_forward3x1_coords());
-        } else {
+        }
+        else
+        {
             //apply_surrounding_effect(DEFENSE, -1, get_forward3x1_coords());
         }
         return active;
     }
 }
 
-public class ShieldMaiden : PlayerUnit {
-    public ShieldMaiden() : base("Shield Maiden", SHIELD_MAIDEN, 3, 4, 180, MELEE, GROUPING_1, COMBINED_EFFORT) {
+public class ShieldMaiden : PlayerUnit
+{
+    public ShieldMaiden() : base("Shield Maiden", SHIELD_MAIDEN, 3, 4, 180, MELEE, GROUPING_1, COMBINED_EFFORT)
+    {
         attribute_requires_action = true;
         block_rating = 1f;
     }
 }
 
-public class Pikeman : PlayerUnit {
-    public Pikeman() : base("Pikeman", PIKEMAN, 3, 1, 120, MELEE, REACH, PIERCING, COUNTER_CHARGE) {
+public class Pikeman : PlayerUnit
+{
+    public Pikeman() : base("Pikeman", PIKEMAN, 3, 1, 120, MELEE, REACH, PIERCING, COUNTER_CHARGE)
+    {
         passive_attribute = true;
     }
 }

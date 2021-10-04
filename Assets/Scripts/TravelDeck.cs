@@ -2,7 +2,8 @@
 using UnityEngine.UI;
 using UnityEngine;
 
-public class TravelDeck : MonoBehaviour {
+public class TravelDeck : MonoBehaviour
+{
     public static TravelDeck I { get; private set; }
 
     // <TYPE><TIER>_<NUM>
@@ -11,14 +12,14 @@ public class TravelDeck : MonoBehaviour {
     public const int BLESSING1_1 = 11;
     public const int CAVE1_1 = 12, CAVE1_2 = 13;
     public const int EVENT1_1 = 14, EVENT1_2 = 15, EVENT1_3 = 16, EVENT1_4 = 17, EVENT1_5 = 18, EVENT1_6 = 19;
-    public const int EVENT2_1 = 101, EVENT2_2 = 102, EVENT2_3 = 103, 
+    public const int EVENT2_1 = 101, EVENT2_2 = 102, EVENT2_3 = 103,
         EVENT2_4 = 104, EVENT2_5 = 105, EVENT2_6 = 106;
     public const int EVENT3_1 = 201;
     public const int RUINS1_1 = 20, RUINS1_2 = 21, RUINS1_3 = 22, RUINS1_4 = 23;
     public const int LOCATION1_1 = 24, LOCATION1_2 = 25, LOCATION1_3 = 26;
     public const int LOCATION2_1 = 107;
 
-    int [] tier1_cards = new int[] {
+    int[] tier1_cards = new int[] {
         ATT1_1, ATT1_2, ATT1_3, ATT1_3, ATT1_5, ATT1_6,
         CHANCE1_1, CHANCE1_2, CHANCE1_3,
         //BLESSING1_1,
@@ -26,8 +27,8 @@ public class TravelDeck : MonoBehaviour {
         EVENT1_1, EVENT1_2, EVENT1_3, EVENT1_4, EVENT1_5,
         RUINS1_1, RUINS1_2, RUINS1_3, RUINS1_4,
         LOCATION1_2, LOCATION1_3};
-    
-    int [] tier2_cards = new int[] {
+
+    int[] tier2_cards = new int[] {
         ATT1_1, ATT1_2, ATT1_3, ATT1_3, ATT1_5, ATT1_6,
         CHANCE1_1, CHANCE1_2, CHANCE1_3,
         //BLESSING1_1,
@@ -36,7 +37,7 @@ public class TravelDeck : MonoBehaviour {
         RUINS1_1, RUINS1_2, RUINS1_3, RUINS1_4,
         LOCATION2_1
     };
-    int [] tier3_cards = new int[] {
+    int[] tier3_cards = new int[] {
         ATT1_1, ATT1_2, ATT1_3, ATT1_3, ATT1_5, ATT1_6,
         CHANCE1_1, CHANCE1_2, CHANCE1_3,
         //BLESSING1_1,
@@ -45,7 +46,7 @@ public class TravelDeck : MonoBehaviour {
         RUINS1_1, RUINS1_2, RUINS1_3, RUINS1_4,
         LOCATION2_1
     };
-    int [][] cards;
+    int[][] cards;
 
     // Inclusion dictionary limiting which card types are allowed
     // in which biomes. <MapCell.ID, List<TravelCard.type>>
@@ -66,35 +67,40 @@ public class TravelDeck : MonoBehaviour {
         {MapCell.RUNE_GATE_ID, new List<int>() },
     };
 
-    void Awake() {
-        if (I == null) {
+    void Awake()
+    {
+        if (I == null)
+        {
             I = this;
-        } else {
+        }
+        else
+        {
             Destroy(gameObject);
         }
     }
 
-    void Start() {
-        cards = new int[][] {tier1_cards, tier2_cards, tier3_cards};
+    void Start()
+    {
+        cards = new int[][] { tier1_cards, tier2_cards, tier3_cards };
 
         allowed_cards[MapCell.PLAINS_ID].AddRange(new int[] {
-            TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE, 
-            TravelCard.EVENT, TravelCard.LOCATION} );
+            TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE,
+            TravelCard.EVENT, TravelCard.LOCATION});
         allowed_cards[MapCell.FOREST_ID].AddRange(new int[] {
-            TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE, 
-            TravelCard.EVENT, TravelCard.LOCATION} );
+            TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE,
+            TravelCard.EVENT, TravelCard.LOCATION});
         allowed_cards[MapCell.CLIFF_ID].AddRange(new int[] {
-            TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE, 
-            TravelCard.EVENT, TravelCard.LOCATION} );
+            TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE,
+            TravelCard.EVENT, TravelCard.LOCATION});
         allowed_cards[MapCell.MOUNTAIN_ID].AddRange(new int[] {
-            TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE, 
-            TravelCard.EVENT, TravelCard.LOCATION} );
+            TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE,
+            TravelCard.EVENT, TravelCard.LOCATION});
 
         allowed_cards[MapCell.TITRUM_ID].AddRange(new int[] {
-            TravelCard.COMBAT, TravelCard.CHANCE, 
-            TravelCard.EVENT, TravelCard.LOCATION} );
+            TravelCard.COMBAT, TravelCard.CHANCE,
+            TravelCard.EVENT, TravelCard.LOCATION});
         //allowed_cards[MapCell.MIRE_ID].AddRange(new int[] {
-             //TravelCard.BLESSING, TravelCard.EVENT } );
+        //TravelCard.BLESSING, TravelCard.EVENT } );
         allowed_cards[MapCell.CAVE_ID].Add(TravelCard.CAVE);
         allowed_cards[MapCell.RUINS_ID].Add(TravelCard.RUINS);
         // no cards for star, lush. Settlement = quest card?
@@ -103,24 +109,36 @@ public class TravelDeck : MonoBehaviour {
     public Button combat_cards_onlyB; // DEV ONLY
     public bool combat_cards_only { get; set; } = false;
 
-        // Cards are drawn without replacement. Cards that are allowed
+    // Cards are drawn without replacement. Cards that are allowed
     // in the map cell biome are pulled from the deck then chosen from randomly.
-    public TravelCard draw_card(int tier, int biome_ID) {
+    public TravelCard draw_card(int tier, int biome_ID)
+    {
         // Negate or bypass random draw.
-        if (biome_ID == MapCell.LUSH_LAND_ID || biome_ID == MapCell.STAR_ID) {
+        if (biome_ID == MapCell.LUSH_LAND_ID || biome_ID == MapCell.STAR_ID)
+        {
             return null;
-        } else if (biome_ID == MapCell.RUNE_GATE_ID) {
+        }
+        else if (biome_ID == MapCell.RUNE_GATE_ID)
+        {
             return make_card(LOCATION1_1);
-        } else if (biome_ID == MapCell.GUARDIAN_PASS_ID) {
-            if (tier == 1) {
+        }
+        else if (biome_ID == MapCell.GUARDIAN_PASS_ID)
+        {
+            if (tier == 1)
+            {
                 return make_card(EVENT1_6);
-            } else if (tier == 2) {
+            }
+            else if (tier == 2)
+            {
                 return make_card(EVENT2_6);
-            } else if (tier == 3) {
+            }
+            else if (tier == 3)
+            {
                 return make_card(EVENT3_1);
             }
-        } 
-        else if (combat_cards_only) {
+        }
+        else if (combat_cards_only)
+        {
             return make_card(ATT1_1); // debug only
         }
 
@@ -131,23 +149,28 @@ public class TravelDeck : MonoBehaviour {
 
 
     // Returns cards that can be drawn at the current tile biome.
-    private List<int> aggregate_drawable_cards(int tier, int biome_ID) {
+    private List<int> aggregate_drawable_cards(int tier, int biome_ID)
+    {
         List<int> valid_card_ids = new List<int>();
-        foreach (int card_id in cards[tier - 1]) {
-            if (check_if_card_in_biome(biome_ID, card_id)) {
+        foreach (int card_id in cards[tier - 1])
+        {
+            if (check_if_card_in_biome(biome_ID, card_id))
+            {
                 valid_card_ids.Add(card_id);
             }
         }
         return valid_card_ids;
     }
 
-    private bool check_if_card_in_biome(int biome_ID, int card_ID) {
+    private bool check_if_card_in_biome(int biome_ID, int card_ID)
+    {
         if (!allowed_cards.ContainsKey(biome_ID))
             return false;
         return allowed_cards[biome_ID].Contains(make_card(card_ID).type);
     }
 
-    public TravelCard make_card(int ID) {
+    public TravelCard make_card(int ID)
+    {
         if (ID == ATT1_1) return new Att1_1();
         if (ID == ATT1_2) return new Att1_2();
         if (ID == ATT1_3) return new Att1_3();

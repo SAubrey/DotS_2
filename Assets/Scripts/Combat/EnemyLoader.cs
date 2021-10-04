@@ -7,7 +7,8 @@ using System;
 
 // This draws enemies and places them into combat slots. Enemy drawing
 // is percentage based with replacement.
-public class EnemyLoader : MonoBehaviour {
+public class EnemyLoader : MonoBehaviour
+{
     public static EnemyLoader I { get; private set; }
     public static int COMMON_THRESH = 0;
     public static int UNCOMMON_THRESH = 60;
@@ -20,9 +21,9 @@ public class EnemyLoader : MonoBehaviour {
 
     private Controller c;
     public System.Random rand;
-    public Dictionary<int, List<List<List<int>>>> biomes = 
+    public Dictionary<int, List<List<List<int>>>> biomes =
         new Dictionary<int, List<List<List<int>>>>();
-    
+
 
     // Assign possible enemy spawns (by ID) per biome, per enemy tier, per spawn rate.
     //biomes[PLAINS][1][Enemy.UNCOMMON]
@@ -34,21 +35,26 @@ public class EnemyLoader : MonoBehaviour {
     public List<List<List<int>>> cave_tiers = new List<List<List<int>>>();
     public List<List<List<int>>> meld_tiers = new List<List<List<int>>>();
 
-    
-    public SpawnZone spawn_zone;    
+
+    public SpawnZone spawn_zone;
     public List<EnemyDeployment> enemy_deployments = new List<EnemyDeployment>();
     public GameObject small_enemy_deployment_prefab;
     public GameObject field_panel;
 
-    void Awake() {
-        if (I == null) {
+    void Awake()
+    {
+        if (I == null)
+        {
             I = this;
-        } else {
+        }
+        else
+        {
             Destroy(gameObject);
         }
     }
 
-    void Start() {
+    void Start()
+    {
         c = GameObject.Find("Controller").GetComponent<Controller>();
         rand = new System.Random();
 
@@ -71,34 +77,45 @@ public class EnemyLoader : MonoBehaviour {
         populate_biomes();
     }
 
-    private void make_biome(List<List<List<int>>> biome_tiers) {
-        for (int i = 0; i <= T3; i++) { // for each tier
+    private void make_biome(List<List<List<int>>> biome_tiers)
+    {
+        for (int i = 0; i <= T3; i++)
+        { // for each tier
             List<List<int>> rarities = new List<List<int>>();
-            for (int j = 0; j <= 2; j++) { // for each rarity
+            for (int j = 0; j <= 2; j++)
+            { // for each rarity
                 rarities.Add(new List<int>());
             }
             biome_tiers.Insert(i, rarities);
         }
     }
 
-    private void reset() {
+    private void reset()
+    {
         remove_enemy_deployments();
     }
 
-    public void remove_enemy_deployments() {
-        foreach (EnemyDeployment ed in enemy_deployments) {
+    public void remove_enemy_deployments()
+    {
+        foreach (EnemyDeployment ed in enemy_deployments)
+        {
             ed.delete();
         }
         enemy_deployments.Clear();
     }
 
-    public void generate_new_enemies(MapCell cell, int quantity) {
-        for (int i = 0; i < quantity; i++) {
-            int rarity = roll_rarity(); 
+    public void generate_new_enemies(MapCell cell, int quantity)
+    {
+        for (int i = 0; i < quantity; i++)
+        {
+            int rarity = roll_rarity();
             int enemyID = -1;
-            if (cell.ID == MapCell.RUINS_ID) {
+            if (cell.ID == MapCell.RUINS_ID)
+            {
                 enemyID = pick_enemy(cell.travelcard.enemy_biome_ID, cell.tier, rarity);
-            } else {
+            }
+            else
+            {
                 enemyID = pick_enemy(cell.ID, cell.tier, rarity);
             }
             cell.add_enemy(Enemy.create_enemy(enemyID));
@@ -106,25 +123,29 @@ public class EnemyLoader : MonoBehaviour {
         //reset();
     }
 
-    public void load_enemies(List<Enemy> enemies, int group_size) {
+    public void load_enemies(List<Enemy> enemies, int group_size)
+    {
         // Enemies are grouped by combat style and assigned to deployments with 75/25 distribution.
         List<Enemy> melee_enemies = extract_enemies_of_type(enemies, Unit.MELEE);
         List<Enemy> range_enemies = extract_enemies_of_type(enemies, Unit.RANGE);
-        int num_melee_groups = 
+        int num_melee_groups =
             (int)UnityEngine.Random.Range(melee_enemies.Count / group_size, melee_enemies.Count / 2f) + 1;
-        int num_range_groups = 
+        int num_range_groups =
             (int)UnityEngine.Random.Range(range_enemies.Count / group_size, range_enemies.Count / 2f) + 1;
 
         distribute_enemies_to_groups(melee_enemies, num_melee_groups);
         distribute_enemies_to_groups(range_enemies, num_range_groups);
     }
 
-    public void distribute_enemies_to_groups(List<Enemy> enemies, int num_groups) {
-        if (enemies.Count <= 0 || num_groups <= 0) {
+    public void distribute_enemies_to_groups(List<Enemy> enemies, int num_groups)
+    {
+        if (enemies.Count <= 0 || num_groups <= 0)
+        {
             Debug.Log("ERROR: CANNOT TAKE 0 AS INPUT");
             return;
         }
-        if (num_groups == 1) {
+        if (num_groups == 1)
+        {
             Debug.Log("Spawning a single group w/ enemies: " + enemies.Count);
             spawn_deployments(enemies, enemies.Count, num_groups);
             return;
@@ -134,8 +155,9 @@ public class EnemyLoader : MonoBehaviour {
         int num_some_groups = Mathf.Max((int)(num_groups / 2f), 1);
         Debug.Log("num groups: " + num_groups + "num_some_groups: " + num_some_groups);
         enemies = spawn_deployments(enemies, num_enemies, num_some_groups);
-        
-        if (enemies.Count > 0) {
+
+        if (enemies.Count > 0)
+        {
             // Other half takes 1/4 of enemies. 
             num_some_groups = num_groups - num_some_groups;
             enemies = spawn_deployments(enemies, enemies.Count, num_some_groups);
@@ -144,16 +166,19 @@ public class EnemyLoader : MonoBehaviour {
     }
 
     // Returns the remaining enemies not placed.
-    public List<Enemy> spawn_deployments(List<Enemy> enemies, int num_enemies, int num_groups) {
+    public List<Enemy> spawn_deployments(List<Enemy> enemies, int num_enemies, int num_groups)
+    {
         int enemies_per_group = (int)(num_enemies / num_groups);
         GameObject ed;
         EnemyDeployment ed_script;
 
         int enemies_placed = 0;
-        for (int i = 0; i < num_groups; i++) {
+        for (int i = 0; i < num_groups; i++)
+        {
             ed = Instantiate(small_enemy_deployment_prefab, field_panel.transform);
             ed_script = ed.GetComponentInChildren<SmallEnemyDeployment>();
-            for (int j = 0; j < enemies_per_group; j++) {
+            for (int j = 0; j < enemies_per_group; j++)
+            {
                 ed_script.place_unit(enemies[(i * enemies_per_group) + j]);
                 enemies_placed++;
             }
@@ -167,29 +192,36 @@ public class EnemyLoader : MonoBehaviour {
         return enemies;
     }
 
-    public List<Enemy> extract_enemies_of_type(List<Enemy> enemies, int type) {
+    public List<Enemy> extract_enemies_of_type(List<Enemy> enemies, int type)
+    {
         List<Enemy> units = new List<Enemy>();
-        foreach (Enemy e in enemies) {
-            if (e.combat_style == type) {
+        foreach (Enemy e in enemies)
+        {
+            if (e.combat_style == type)
+            {
                 units.Add(e);
             }
         }
         return units;
     }
 
-    public int count_num_enemies_of_type(List<Enemy> enemies, int type) {
+    public int count_num_enemies_of_type(List<Enemy> enemies, int type)
+    {
         int count = 0;
-        foreach (Enemy e in enemies) {
-            if (e.combat_style == type) {
+        foreach (Enemy e in enemies)
+        {
+            if (e.combat_style == type)
+            {
                 count++;
             }
         }
         return count;
     }
 
-    private int roll_rarity() {
+    private int roll_rarity()
+    {
         int rarity = rand.Next(0, MAX_ROLL);
-        if (rarity < UNCOMMON_THRESH) 
+        if (rarity < UNCOMMON_THRESH)
             return Enemy.COMMON;
         else if (rarity < RARE_THRESH)
             return Enemy.UNCOMMON;
@@ -197,11 +229,13 @@ public class EnemyLoader : MonoBehaviour {
             return Enemy.RARE;
     }
 
-    private int pick_enemy(int biome, int tier, int rarity) {
+    private int pick_enemy(int biome, int tier, int rarity)
+    {
         List<int> candidates = biomes[biome][tier][rarity];
 
         // Try lower rarities if one is missing. (There should always be a common)
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++)
+        {
             candidates = biomes[biome][tier][rarity];
             if (candidates.Count > 0)
                 break;
@@ -209,36 +243,38 @@ public class EnemyLoader : MonoBehaviour {
         }
         int r = rand.Next(0, candidates.Count);
         //Debug.Log("candidates: " + candidates.Count + ". " +
-             //biome + ", " + tier + ", " + rarity + ", " + r);
+        //biome + ", " + tier + ", " + rarity + ", " + r);
         return biomes[biome][tier][rarity][r];
     }
 
-    private void slot_enemy(Enemy enemy) {
+    private void slot_enemy(Enemy enemy)
+    {
         //Zone zone = get_appropriate_zone(enemy);
         //if (fill_slot(enemy, zone.get_spawn_pos()))
-          //  zone.increment_pos();
+        //  zone.increment_pos();
     }
 
     private bool spawn_left = false;
     //private Zone get_appropriate_zone(Enemy enemy) {
     //}
 
-  /*  private bool fill_slot(Enemy enemy, Pos pos) {
-        //Debug.Log(pos.x + " : " + pos.y);
-        //Formation.I.check_groups();
-        Group g = Formation.I.get_group(pos.x, pos.y);
-        if (g == null) {
-            //Debug.Log("null group")
-        }
-        Slot s = Formation.I.get_group(pos.x, pos.y).get_highest_empty_slot();
-        if (s != null) {
-            s.fill(enemy);
-            return true;
-        }
-        return false;
-    }*/
+    /*  private bool fill_slot(Enemy enemy, Pos pos) {
+          //Debug.Log(pos.x + " : " + pos.y);
+          //Formation.I.check_groups();
+          Group g = Formation.I.get_group(pos.x, pos.y);
+          if (g == null) {
+              //Debug.Log("null group")
+          }
+          Slot s = Formation.I.get_group(pos.x, pos.y).get_highest_empty_slot();
+          if (s != null) {
+              s.fill(enemy);
+              return true;
+          }
+          return false;
+      }*/
 
-    private void populate_biomes() {
+    private void populate_biomes()
+    {
         biomes[MapCell.PLAINS_ID][T1][Enemy.COMMON].Add(Enemy.GALTSA);
         biomes[MapCell.PLAINS_ID][T1][Enemy.COMMON].Add(Enemy.GREM);
         biomes[MapCell.PLAINS_ID][T1][Enemy.UNCOMMON].Add(Enemy.ENDU);

@@ -44,9 +44,15 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Units
+    uniqueID: 1749916811
+    locked: 0
   - name: Middle
     uniqueID: 3720066371
     locked: 0
   - name: Top
     uniqueID: 3462198067
+    locked: 0
+  - name: New Layer 4
+    uniqueID: 693589479
     locked: 0

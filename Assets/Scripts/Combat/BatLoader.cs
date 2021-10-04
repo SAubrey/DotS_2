@@ -8,7 +8,8 @@ using TMPro;
 Battalion loader.
 Pertains to the player unit placement selection bar and placed player/enemy unit images for slots.
 */
-public class BatLoader : MonoBehaviour {
+public class BatLoader : MonoBehaviour
+{
     public static BatLoader I { get; private set; }
     //public Sprite white_fade_img, dark_fade_img;
     public Sprite empty; // UIMask image for a slot button image.
@@ -21,7 +22,7 @@ public class BatLoader : MonoBehaviour {
 
     // Button images in battle scene for highlighting selections.
     public IDictionary<int, Button> unit_buttons = new Dictionary<int, Button>();
-    public Button archer_B, warrior_B, spearman_B, inspirator_B, miner_B, 
+    public Button archer_B, warrior_B, spearman_B, inspirator_B, miner_B,
         seeker_B, guardian_B, arbalest_B, skirmisher_B, paladin_B, mender_B, carter_B, dragoon_B,
         scout_B, drummer_B, shield_maiden_B, pikeman_B;
 
@@ -64,28 +65,37 @@ public class BatLoader : MonoBehaviour {
     public PlayerUnit healing_unit;
 
 
-    public Sprite get_unit_img(Unit unit, int direction) {
+    public Sprite get_unit_img(Unit unit, int direction)
+    {
         if (unit != null)
             return get_unit_direction_img(unit.get_type(), unit.get_ID(), direction);
         return null;
     }
 
-    private Sprite get_unit_direction_img(int unit_type, int unit_ID, int direction) {
-        if (unit_type == Unit.PLAYER) {
+    private Sprite get_unit_direction_img(int unit_type, int unit_ID, int direction)
+    {
+        if (unit_type == Unit.PLAYER)
+        {
             if (direction == Group.UP || direction == Group.RIGHT)
                 return unit_images_back[unit_ID];
             return unit_images_front[unit_ID];
-        } else {
+        }
+        else
+        {
             if (direction == Group.UP || direction == Group.RIGHT)
                 return enemy_images_back[unit_ID];
             return enemy_images_front[unit_ID];
         }
     }
 
-    void Awake() {
-        if (I == null) {
+    void Awake()
+    {
+        if (I == null)
+        {
             I = this;
-        } else {
+        }
+        else
+        {
             Destroy(gameObject);
         }
 
@@ -232,29 +242,33 @@ public class BatLoader : MonoBehaviour {
         // Meld
         enemy_images_back.Add(Enemy.MELD_WARRIOR, meld_warrior_b);
         enemy_images_front.Add(Enemy.MELD_WARRIOR, meld_warrior_f);
-        
+
         enemy_images_back.Add(Enemy.MELD_SPEARMAN, meld_spearman_b);
         enemy_images_front.Add(Enemy.MELD_SPEARMAN, meld_spearman_f);
     }
 
     // This loads the player's battalion composition into the static
     // slots in the battle scene. 
-    public void load_bat(Battalion b) {
-        foreach (int type_ID in b.units.Keys) {
+    public void load_bat(Battalion b)
+    {
+        foreach (int type_ID in b.units.Keys)
+        {
             load_unit_text(b, type_ID);
             unit_buttons[type_ID].interactable = b.units[type_ID].Count > 0;
         }
         MapUI.I.highlight_discipline(discT, null, b.disc.ID);
     }
 
-    public void load_unit_text(Battalion b, int ID) {
+    public void load_unit_text(Battalion b, int ID)
+    {
         texts[ID].text = build_unit_text(b, ID);
     }
 
     /*
     Load unit counts in unit placement sidebar.
     */
-    private string build_unit_text(Battalion b, int ID) {
+    private string build_unit_text(Battalion b, int ID)
+    {
         if (!texts.ContainsKey(ID))
             return "";
         string num = b.count_placeable(ID).ToString();
