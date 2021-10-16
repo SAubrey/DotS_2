@@ -44,16 +44,22 @@ public abstract class EnemyDeployment : Deployment
         var comfortable = new Comfortable(this);
         var move_to_attack = new MoveToAttack(this);
         var attack = new Attack(this);
+        var backing_up = new BackingUp(this);
 
 
         // Add transitions from state, to state, if condition.
         At(roam, chase, in_chase_range());
         At(chase, roam, in_roam_range());
+
         At(chase, comfortable, in_comfy_range());
         At(comfortable, chase, in_chase_range());
+
+        
         At(comfortable, move_to_attack, moving_to_attack());
         At(move_to_attack, attack, time_to_attack());
-        At(attack, comfortable, done_attacking());
+
+        At(attack, backing_up, done_attacking());
+        At(backing_up, comfortable, in_comfy_range());
 
 
         Func<bool> in_roam_range() => () => get_behavior_zone() == BehaviorZone.roam;
@@ -78,10 +84,21 @@ public abstract class EnemyDeployment : Deployment
         state_machine.Tick();
     }
 
+    
+    protected override void FixedUpdate()
+    {
+        base.FixedUpdate();
+    }
+
     protected void init()
     {
         PlayerDeployment.I.on_position_change += update_player_pos;
         isEnemy = true;
+    }
+
+    private void update_player_pos(Vector2 pos)
+    {
+        player_pos = pos;
     }
 
     public BehaviorZone get_behavior_zone()
@@ -98,14 +115,9 @@ public abstract class EnemyDeployment : Deployment
         return BehaviorZone.roam;
     }
 
-    private void update_player_pos(Vector2 pos)
-    {
-        player_pos = pos;
-    }
-
     public virtual void back_up()
     {
-        move(-get_direction_to_player(), VEL_RUN);
+        Move(-get_direction_to_player(), VEL_RUN, PhysicsBody.MoveForce);
     }
 
     public void wander()
@@ -121,8 +133,8 @@ public abstract class EnemyDeployment : Deployment
             (pos.x - transform.position.x)) * Mathf.Rad2Deg - 90f));
 
         // Lerp smooths and thus limits rotation speed.
-        float str = Mathf.Min(5 * Time.deltaTime, 1);
-        gameObject.transform.rotation = Quaternion.Lerp(gameObject.transform.rotation, target_rotation, str);
+        float str = Mathf.Min(5f * Time.deltaTime, 1f);
+        transform.rotation = Quaternion.Lerp(transform.rotation, target_rotation, str);
         face_slots_to_camera();
     }
 
@@ -133,6 +145,6 @@ public abstract class EnemyDeployment : Deployment
 
     public Vector3 get_direction_to_player()
     {
-        return StaticOperations.target_unit_vec(gameObject.transform.position, player_pos);
+        return Statics.Direction(gameObject.transform.position, player_pos);
     }
 }

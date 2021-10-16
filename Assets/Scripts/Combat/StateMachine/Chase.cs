@@ -14,12 +14,7 @@ public class Chase : IState
     public void Tick()
     {
         // Move and rotate towards target
-        /*d.gameObject.transform.position = 
-            Vector2.MoveTowards(d.gameObject.transform.position, 
-                d.player_pos, d.VEL_RUN); */
-        d.move(StaticOperations.target_unit_vec(d.gameObject.transform.position, d.player_pos),
-            d.VEL_RUN, d.player_pos.x, d.player_pos.y);
-
+        d.Move(d.player_pos, d.VEL_RUN, PhysicsBody.MoveForce, 3f);
         d.rotate_towards_target(d.player_pos);
     }
 

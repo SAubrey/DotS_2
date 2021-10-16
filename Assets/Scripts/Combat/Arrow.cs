@@ -8,14 +8,14 @@ public class Arrow : MonoBehaviour
     public LineRenderer lr;
     public LayerMask target_mask;
     private float gravity = 800f;
-    private float velocity = 800f;
+    private float velocity = 500f;
     private float vertical_velocity;
     private float duration;
     private Vector2 direction;
     private Vector2 shadow_pos;
     private bool in_flight = false;
-    public Image shadow;
-    public Image arrow;
+    public SpriteRenderer shadow;
+    public SpriteRenderer arrow;
 
     Timer t = new Timer(0.02f);
     public int p = 0;
@@ -33,10 +33,10 @@ public class Arrow : MonoBehaviour
         //Debug.Log("vertical v" + vertical_velocity);
         shadow_pos = launch_pos;
         in_flight = true;
-        arrow.transform.forward = direction;
-        GetComponent<Image>().transform.LookAt(CamSwitcher.I.battle_cam.transform);
+        arrow.transform.up = direction;
+        GetComponent<SpriteRenderer>().transform.LookAt(CamSwitcher.I.battle_cam.transform);
 
-        t.increase(0.09f);
+        t.Increase(0.09f);
     }
 
     void Update()
@@ -44,7 +44,8 @@ public class Arrow : MonoBehaviour
         if (!in_flight)
             return;
         calc_shadow();
-        if (t.increase(Time.deltaTime))
+
+        if (t.Increase(Time.deltaTime))
         {
             update_arc();
         }

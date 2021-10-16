@@ -4,14 +4,12 @@ using UnityEngine;
 using System;
 using UnityEngine.UI;
 
-public abstract class Deployment : MonoBehaviour
+public abstract class Deployment : PhysicsBody
 {
     protected static Vector2 VEC_UP = new Vector2(0, 1f);
     protected static Vector2 VEC_DOWN = new Vector2(0, -1f);
     protected static Vector2 VEC_RIGHT = new Vector2(1f, 0);
     protected static Vector2 VEC_LEFT = new Vector2(-1f, 0);
-
-    public Rigidbody2D rb;
 
     public bool isPlayer { get; protected set; } = false;
     public bool isEnemy { get; protected set; } = false;
@@ -19,6 +17,7 @@ public abstract class Deployment : MonoBehaviour
     public float VEL_RUN = 250f;
     public float VEL_WALK = 120f;
     public float VEL_SPRINT = 550f;
+    public float MAX_VELOCITY = 51f;
 
     private Vector3 rotation_left = new Vector3(0, 0, -1.1f);
     private Vector3 rotation_right = new Vector3(0, 0, 1.1f);
@@ -40,25 +39,22 @@ public abstract class Deployment : MonoBehaviour
             }
         }
     }
-    private Timer stam_regen_timer = new Timer(.015f);
-    protected float stam_regen_amount = .15f;
+    private Timer stam_regen_timer = new Timer(.0005f);
+    protected float stam_regen_amount = .1f;
     protected float stam_dash_cost = 30f;
     protected float stam_attack_cost = 20f;
     protected float stam_range_cost = 25f;
     protected float stam_block_cost = 20f;
     public bool stunned = false;
+    public bool attacking = false;
+    public bool blocking = false;
+    
+    public bool canMove
+    {
+        get { return !attacking && !stunned && !blocking; }
+    }
 
-
-    protected float MAX_HP = 100f;
     public Slider healthbar;
-    private Color healthbarFillColor = new Color(1, 1, 1, .8f);
-    public Color healthbarBGColor;
-    public event Action<Vector2> on_position_change;
-    public event Action<float> on_velocity_change;
-    public event Action<float> on_begin_rotation;
-    public event Action<float> on_end_rotation;
-
-    Vector2 position;
     public float unit_img_dir = Group.UP;
 
     protected List<Group[]> zones = new List<Group[]>();
@@ -73,9 +69,18 @@ public abstract class Deployment : MonoBehaviour
     protected virtual void Update()
     {
         update_timers(Time.deltaTime);
-        if (stam_regen_timer.increase(Time.deltaTime) && stamina <= MAX_STAMINA - stam_regen_amount)
-        {
-            regen_stamina(stam_regen_amount);
+
+        if (rb.velocity.magnitude > MAX_VELOCITY)
+            MAX_VELOCITY = rb.velocity.magnitude;
+    }
+
+    protected virtual void FixedUpdate() {
+        if (canMove) {
+            if (stam_regen_timer.Increase(Time.fixedDeltaTime) && 
+                stamina <= MAX_STAMINA - stam_regen_amount)
+            {
+                regen_stamina(stam_regen_amount);
+            }
         }
     }
 
@@ -92,44 +97,6 @@ public abstract class Deployment : MonoBehaviour
                 }
             }
         }
-    }
-
-    protected void set_position(Vector2 pos)
-    {
-        position = pos;
-        if (on_position_change != null)
-            on_position_change(position);
-    }
-
-    public virtual void move(Vector2 movement, float vel, float dest_x = 0, float dest_y = 0)
-    {
-        // If destination coordinates are given, check if close enough to avoid jittering.
-        if (vel == 0 || 
-            (dest_x != 0 && dest_y != 0 && arrived_at_pos(new Vector2(dest_x, dest_y))))
-            return;
-
-        movement.Normalize();
-        //movement *= vel * Time.fixedDeltaTime;
-        if (movement.magnitude == 0)
-        {
-            on_velocity_change(0);
-            return;
-        }
-        on_velocity_change(vel);
-        //Vector2 current_pos = gameObject.transform.position;
-        //Vector2 new_pos = current_pos += movement;
-        //rb.MovePosition(rb.position + movement);
-        //gameObject.transform.position = new_pos;
-        
-        // Applied force is inverse to velocity.
-        float force = 50f * (1 - (rb.velocity.magnitude / vel));
-        rb.AddForce(movement * force);
-        set_position(rb.position);
-    }
-
-    public bool arrived_at_pos(Vector2 dest)
-    {
-        return Vector2.Distance(gameObject.transform.position, dest) < 2f;
     }
 
     public void melee_attack(Group[] zone)
@@ -184,9 +151,9 @@ public abstract class Deployment : MonoBehaviour
 
     public void regen_stamina(float amount)
     {
-        if (stamina >= MAX_STAMINA)
+        if (stamina >= MAX_STAMINA || blocking)
             return;
-        //stamina += StaticOperations.GetAdjustedIncrease(stamina, amount, MAX_STAMINA);
+        //stamina += StaticOps.GetAdjustedIncrease(stamina, amount, MAX_STAMINA);
         stamina += amount;
     }
 
@@ -195,22 +162,22 @@ public abstract class Deployment : MonoBehaviour
         staminabar.maxValue = MAX_STAMINA;
         staminabar.value = stamina;
 
-        float green = ((float)stamina / (float)MAX_STAMINA);
-        staminabar.fillRect.GetComponent<Image>().color = new Color(.1f, .65f, .1f, green);
+        //float green = ((float)stamina / (float)MAX_STAMINA);
+        //staminabar.fillRect.GetComponent<Image>().color = new Color(.1f, .65f, .1f, green);
     }
 
     public void rotate(int dir)
     {
         if (dir < 0)
         {
-            gameObject.transform.Rotate(rotation_right);
+            transform.Rotate(rotation_right);
         }
         else
         {
-            gameObject.transform.Rotate(rotation_left);
+            transform.Rotate(rotation_left);
         }
         face_slots_to_camera();
-        determine_unit_img_direction(gameObject.transform.rotation.eulerAngles);
+        determine_unit_img_direction(transform.rotation.eulerAngles);
     }
 
     private void determine_unit_img_direction(Vector3 dir)
@@ -285,20 +252,10 @@ public abstract class Deployment : MonoBehaviour
             {
                 foreach (Slot s in g.slots)
                 {
-                    s.toggle_dust_ps(active);
+                    s.toggle_dust_ps(new Vector2(active, 0));
                 }
             }
         }
-    }
-
-    protected void trigger_begin_rotation_event()
-    {
-        on_begin_rotation(VEL_RUN);
-    }
-
-    protected void trigger_end_rotation_event()
-    {
-        on_end_rotation(VEL_RUN);
     }
 
     public virtual void delete()

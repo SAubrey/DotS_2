@@ -4,20 +4,22 @@ using UnityEngine;
 
 public class SpriteBobber : MonoBehaviour
 {
-    //public Image image;
-    public float bob_power = 0.01f;
+    public const float FREQ_IDLE = 1f;
+    public const float FREQ_WALK = 5f;
+    public const float FREQ_RUN = 20f;
+    public float bob_power = 0.1f;
     public float random_offset = 1f;
-    private float velocity = 0;
+    private float velocity;
     private Deployment deployment;
     public Slot slot;
+    private Vector2 default_pos;
 
     void Start()
     {
+        default_pos = transform.localPosition;
         random_offset = UnityEngine.Random.Range(0, 100);
         deployment = slot.deployment;
-        deployment.on_velocity_change += set_velocity;
-        deployment.on_begin_rotation += set_velocity;
-        deployment.on_end_rotation += set_velocity;
+        slot.on_velocity_change += set_velocity;
     }
 
     void Update()
@@ -25,22 +27,40 @@ public class SpriteBobber : MonoBehaviour
         bob_step();
     }
 
-    private void set_velocity(float v)
+    private void set_velocity(Vector2 v)
     {
-        velocity = v * 0.1f;
+        velocity = v.magnitude;
     }
 
-    // Bobbing period should scale with velocity
+    private float get_bob_frequency(float v) {
+        float vm = v / deployment.MAX_VELOCITY;
+        if (vm > .6f) 
+        {
+            return FREQ_RUN;
+        }
+        if (vm > .2f) 
+        {
+            return FREQ_WALK;
+        }
+        return FREQ_IDLE;
+    }
+
     private void bob_step()
     {
         float bp = bob_power;
-        if (velocity > 0)
+        if (velocity > 2f)
         {
-            bp += 0.6f;
+            bp += 0.5f;
         }
 
-        transform.position = new Vector3(transform.position.x,
-            transform.position.y + (Mathf.Sin(Mathf.Max(velocity, 3f) * (Time.time + random_offset)) * bp),
-            0);
+        // High velocity creates shorter arc lengths, or faster bob frequency.
+        // Time determines position along wave, animating the sprite.
+        // Bob power determines amplitude (height).
+        // Note: rapid change in velocity will cause jittering 
+        float sin_y = Mathf.Sin(get_bob_frequency(velocity) * ((Time.time) + random_offset)) * bp;
+        //float sin_y = Mathf.Sin(velocity * ((Time.time) + random_offset)) * bp;
+        //sin_y = Mathf.Lerp(transform.localPosition.y, sin_y, smoothe);
+        transform.localPosition = new Vector3(default_pos.x,
+            default_pos.y + sin_y, 0);
     }
 }

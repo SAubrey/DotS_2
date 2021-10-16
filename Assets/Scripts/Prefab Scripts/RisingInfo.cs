@@ -8,7 +8,29 @@ public class RisingInfo : MonoBehaviour
     //public Text T;
     public TextMeshProUGUI T;
     public float translation_distance = 0.01f;
+    
+    public static RisingInfo create_rising_info(string text, Color color, Transform origin, Transform parent, GameObject rising_info_prefab)
+    {
+        GameObject ri = GameObject.Instantiate(rising_info_prefab, parent.transform);
+        RisingInfo ri_script = ri.GetComponent<RisingInfo>();
+        ri_script.init(origin, text, color);
+        return ri_script;
+    }
 
+    public static void create_rising_info_map(string text, Color color, Transform origin, GameObject prefab)
+    {
+        RisingInfo ri_script = create_rising_info(text, color, origin, CamSwitcher.I.mapUI_canvas.transform, prefab);
+        ri_script.translation_distance = 0.01f;
+        ri_script.show();
+    }
+
+    public static void create_rising_info_battle(string text, Color color, Transform origin, GameObject prefab)
+    {
+        RisingInfo ri_script = create_rising_info(text, color, origin, CamSwitcher.I.battle_canvas.transform, prefab);
+        ri_script.translation_distance = 1f;
+        ri_script.show();
+    }
+    
     public void init(string resource, int value, Color color)
     {
         string readout = "";

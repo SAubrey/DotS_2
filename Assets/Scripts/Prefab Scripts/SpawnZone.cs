@@ -15,6 +15,7 @@ public class SpawnZone : MonoBehaviour
         high.x = rt.rect.xMax;
         low.y = rt.rect.yMin;
         high.y = rt.rect.yMax;
+        Debug.Log("low: " + low.x + ", " + low.y + " high: " + high.x +", " + high.y);
     }
 
     public Vector2 get_spawn_pos()
@@ -27,7 +28,7 @@ public class SpawnZone : MonoBehaviour
     public void place_deployment(GameObject d, GameObject parent_obj)
     {
         //d.transform.SetParent(parent_obj.transform);
-        d.transform.position = get_spawn_pos();
+        d.transform.localPosition = get_spawn_pos();
     }
 
     public void reset()

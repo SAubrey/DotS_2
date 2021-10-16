@@ -4,13 +4,12 @@ using UnityEngine;
 
 public class FOVZoomer : MonoBehaviour
 {
-
     float FOV;
     public Camera battle_cam;
-    private const int SCROLL_FACTOR = 2;
-    private const int BUTTON_ZOOM_INCREMENT = 1;
-    private const int MAX_FOV = 73;
-    private const int MIN_FOV = 5;
+    private const float SCROLL_FACTOR = .5f;
+    private const float BUTTON_ZOOM_INCREMENT = 1f;
+    private const int MAX_FOV = 5;
+    private const int MIN_FOV = 2;
     private CamSwitcher cs;
     void Start()
     {

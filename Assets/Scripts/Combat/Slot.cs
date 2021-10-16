@@ -3,39 +3,30 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using System;
 
 
-public class Slot : MonoBehaviour
+public class Slot : PhysicsBody
 {
-    public SpriteRenderer sprite_unit;
-    protected Unit unit;
-    protected Camera cam;
-
-    // --VISUAL-- 
-    public TextMeshProUGUI name_T;
-
-    public static readonly Color selected_color = new Color(1, 1, 1, .8f);
-    public static readonly Color unselected_color = new Color(1, 1, 1, .1f);
     private static readonly Color healthbar_fill_color = new Color(.8f, .1f, .1f, .45f);
-    private static readonly Color healthbar_injured_fill_color = new Color(1f, .5f, 0f, .45f);
-    private static readonly Color staminabar_fill_color = new Color(.1f, .8f, .1f, .45f);
-    private static readonly Color defensebar_fill_color = new Color(.1f, .1f, .8f, .45f);
     private static readonly Color statbar_bg_color = new Color(.4f, .4f, .4f, .3f);
     private static readonly Color equipment_text_color = new Color(1f, .67f, .32f, 1f);
+    
+    public SpriteRenderer sprite_unit;
+    protected Camera cam;
+    public GameObject frame;
     public Slider healthbar;
-    public Canvas info_canv;
     public Image healthbar_bg, healthbar_fill;
     public GameObject healthbar_obj;
-    public UnityEngine.Experimental.Rendering.Universal.Light2D light2d;
+    //public UnityEngine.Experimental.Rendering.Universal.Light2D light2d;
     public Sprite range_icon, melee_icon, shield_icon, armor_icon;
 
+    public TextMeshProUGUI name_T;
     public TextMeshProUGUI attT, defT, hpT;
-    //public Image attfgI, attbgI;
-    //public Image deffgI, defbgI;
-    //public Color attfgI_c, deffgI_c;
 
     [HideInInspector]
     public int col, row;
+    protected Unit unit;
     public Group group;
     //public Button button;
     public AnimationPlayer animation_player;
@@ -47,75 +38,39 @@ public class Slot : MonoBehaviour
     public Deployment deployment;
     public GameObject melee_att_zone;
     public GameObject arrow_prefab;
-    private bool rotating = false;
+    public event Action<Vector2> on_velocity_change;
 
     void Awake()
     {
         cam = GameObject.Find("BattleCamera").GetComponent<Camera>();
-        light2d.enabled = false;
-
         face_cam();
+        gameObject.SetActive(false);
     }
 
-    void Start()
+    protected virtual void Start()
     {
         healthbar_fill.color = healthbar_fill_color;
         healthbar_bg.color = statbar_bg_color;
-        deployment.on_velocity_change += toggle_dust_ps;
-        deployment.on_begin_rotation += begin_rotation;
-        deployment.on_end_rotation += end_rotation;
+        on_velocity_change += toggle_dust_ps;
         dust_ps.enableEmission = false;
+        rb = gameObject.GetComponent<Rigidbody2D>();
     }
 
-    public float move_timer = 0;
-    void Update()
-    {
-        move();
-        if (rotating)
-        {
-            gameObject.transform.rotation = deployment.gameObject.transform.rotation;
-        }
-    }
-
-    public float smooth_speed = 0.125f;
-
-    public void move()
-    {
-        // Slots hold units and smooth lerp towards the static slot points. Slots points are fixed in a grid in group. Thus, slots are not under the hierarchy of groups anymore.
-        // Rotation, movement, and formation change will incur smooth movement. This also allows slots to move forward towards a destination.
-        //float t = move_timer / duration;
-        //t = t * t * (3f - 2f * t);
-        if (slot_point_transform == null)
-            return;
-        //transform.position = Vector3(startPosition, endPosition, t);
-        Vector3 v = Vector3.zero;
-        Vector3 desired_pos = slot_point_transform.position;
-        transform.position = Vector2.Lerp(transform.position, desired_pos, smooth_speed);
-        //transform.position = Vector3.SmoothDamp(transform.position, desired_pos, ref v, .3f, 300f);
-        //transform.position = StaticOperations.GetSmoothedNextPosition(transform.position, desired_pos, smooth_speed);
-    }
-
-    private void begin_rotation(float v)
-    {
-        rotating = true;
-    }
-
-    private void end_rotation(float v)
-    {
-        rotating = false;
+    protected virtual void FixedUpdate() {
+        on_velocity_change(rb.velocity);
+        Move(slot_point_transform.position, 50f, PhysicsBody.MoveForce, 3f);
     }
 
     public virtual bool fill(Unit u)
     {
         if (u == null)
             return false;
+        gameObject.SetActive(true);
         set_unit(u);
         init_UI(u);
         //unit_img.color = Color.white;
         sprite_unit.color = Color.white;
         sprite_unit.sprite = BatLoader.I.get_unit_img(u, 0);
-        if (u.is_playerunit)
-            toggle_light(true);
         return true;
     }
 
@@ -128,13 +83,13 @@ public class Slot : MonoBehaviour
             unit.set_slot(null);
             unit = null;
         }
+        gameObject.SetActive(false);
 
         update_unit_img(0);
         set_active_UI(false);
         set_nameT("");
         sprite_unit.color = Color.clear;
         dust_ps.enableEmission = false;
-        toggle_light(false);
         if (validate)
             group.validate_unit_order();
         return removed_unit;
@@ -180,13 +135,13 @@ public class Slot : MonoBehaviour
         update_text_UI();
     }
 
-    public void toggle_dust_ps(float velocity)
+    public void toggle_dust_ps(Vector2 v)
     {
         if (is_empty)
         {
             return;
         }
-        dust_ps.enableEmission = velocity > 0;
+        dust_ps.enableEmission = v.magnitude > 0;
     }
 
     // Updated when a boost is removed or applied,
@@ -275,11 +230,11 @@ public class Slot : MonoBehaviour
         face_cam();
     }
 
-    public void face_cam()
+    public virtual void face_cam()
     {
-        sprite_unit.transform.LookAt(cam.transform);
-        info_canv.transform.LookAt(cam.transform);
-        info_canv.transform.forward *= -1;
+        //sprite_unit.transform.LookAt(cam.transform);
+        frame.transform.LookAt(cam.transform);
+        frame.transform.forward *= -1;
     }
 
     public void set_animation_depth(int direction)
@@ -292,11 +247,6 @@ public class Slot : MonoBehaviour
         {
             animation_obj.transform.SetAsLastSibling();
         }
-    }
-
-    private void toggle_light(bool state)
-    {
-        light2d.enabled = state;
     }
     // ---End GRAPHICAL--- 
 

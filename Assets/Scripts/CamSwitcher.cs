@@ -18,6 +18,9 @@ public class CamSwitcher : MonoBehaviour
     private bool paused = false;
     public int current_cam = MENU;
     public int previous_cam = MAP;
+    private Transform player_dep_transform;
+    private float initial_z = -2000f;
+
     void Awake()
     {
         if (I == null)
@@ -36,9 +39,8 @@ public class CamSwitcher : MonoBehaviour
         pause_panel.SetActive(false);
         battle_pause_panel.SetActive(false);
         set_active(MENU, true);
-        move_battle_camera(Controller.I.get_deployment().gameObject.transform.position);
-        Controller.I.get_deployment().on_position_change += move_battle_camera;
-
+        player_dep_transform = Controller.I.get_deployment().gameObject.transform; 
+        move_battle_camera(player_dep_transform.position);
     }
 
     void Update()
@@ -49,13 +51,13 @@ public class CamSwitcher : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.C))
             cycle();
-
+        move_battle_camera(player_dep_transform.position);
     }
 
     private void move_battle_camera(Vector2 pos)
     {
-        Vector3 p = battle_cam.transform.position;
-        battle_cam.transform.position = new Vector3(pos.x, pos.y, p.z);
+        //Vector3 p = battle_cam.transform.position;
+        battle_cam.transform.position = new Vector3(pos.x, pos.y, initial_z);
     }
 
     void cycle()

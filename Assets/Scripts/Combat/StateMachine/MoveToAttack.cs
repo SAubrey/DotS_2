@@ -15,11 +15,7 @@ public class MoveToAttack : IState
     public void Tick()
     {
         // Move into attack range
-        //d.gameObject.transform.position = 
-        // Vector2.MoveTowards(d.gameObject.transform.position, d.player_pos, d.VEL_RUN);
-
-        d.move(StaticOperations.target_unit_vec(d.gameObject.transform.position, d.player_pos),
-            d.VEL_SPRINT, d.player_pos.x, d.player_pos.y);
+        d.Move(d.player_pos, d.VEL_SPRINT, PhysicsBody.MoveForce, 3f);
 
         if (d.player_distance <= d.attack_distance) {
             begin_attack = true;

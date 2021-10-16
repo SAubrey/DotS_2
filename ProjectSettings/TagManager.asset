@@ -23,9 +23,9 @@ TagManager:
   - 
   - Enemy
   - Player
-  - 
-  - 
-  - 
+  - PlayerDeployment
+  - PlayerGroup
+  - Slot
   - 
   - 
   - 

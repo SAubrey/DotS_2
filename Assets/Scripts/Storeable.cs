@@ -83,7 +83,7 @@ public class Storeable : MonoBehaviour, ISaveLoad
             }
             else
             {
-                Statics.create_rising_info_map(
+                RisingInfo.create_rising_info_map(
                     RisingInfo.build_resource_text(a.resource, a.amount),
                     Statics.disc_colors[ID],
                     origin_of_rise_obj.transform,
@@ -209,7 +209,7 @@ public class Storeable : MonoBehaviour, ISaveLoad
         }
         if (show && val != 0)
         {
-            Statics.create_rising_info_map(
+            RisingInfo.create_rising_info_map(
                 RisingInfo.build_resource_text(var, val),
                 Statics.disc_colors[ID],
                 origin_of_rise_obj.transform,

@@ -9,6 +9,8 @@ public class Controller : MonoBehaviour
 
     public const string MAP = "Map";
     public const string CONTROLLER = "Controller";
+    public int numPlayers { get; private set; } = 1;
+    public Discipline discipline { get; private set; }
 
     public Button loadB, saveB, resumeB;
     public GameObject save_warningP, new_game_warningP, load_warningP;
@@ -35,8 +37,8 @@ public class Controller : MonoBehaviour
         endura.ID = Discipline.ENDURA;
         city.ID = City.CITY;
         discs.Add(Discipline.ASTRA, astra);
-        discs.Add(Discipline.MARTIAL, martial);
-        discs.Add(Discipline.ENDURA, endura);
+        //discs.Add(Discipline.MARTIAL, martial);
+        //discs.Add(Discipline.ENDURA, endura);
     }
 
     void Start()
@@ -88,9 +90,7 @@ public class Controller : MonoBehaviour
 
         List<GameData> serializables = new List<GameData>() {
             { Map.I.save() },
-            { astra.save() },
-            { martial.save() },
-            { endura.save() },
+            { discipline.save() },
             { city.save() },
         };
 
@@ -117,10 +117,15 @@ public class Controller : MonoBehaviour
         CamSwitcher.I.flip_menu_map();
     }
 
+    public void ChooseNewGamediscipline(int ID) {
+        discipline = astra;
+    }
+
     public void new_game()
     {
         initialize(false);
         CamSwitcher.I.flip_menu_map();
+        ChooseNewGamediscipline(Discipline.ASTRA);
     }
 
     public void check_button_states()

@@ -39,7 +39,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -515.4, y: 406.8}
-  m_SizeDelta: {x: 335, y: 335}
+  m_SizeDelta: {x: 25, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6928956094902717708
 CanvasRenderer:
@@ -95,6 +95,7 @@ MonoBehaviour:
   VEL_RUN: 250
   VEL_WALK: 120
   VEL_SPRINT: 550
+  MAX_VELOCITY: 51
   staminabar: {fileID: 0}
   MAX_STAMINA: 100
   stunned: 0
@@ -122,7 +123,7 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 0
+  m_LinearDrag: 5
   m_AngularDrag: 0.05
   m_GravityScale: 0
   m_Material: {fileID: 0}
@@ -145,7 +146,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 100
+  m_Radius: 12
 --- !u!1001 &3331417890668430955
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -222,16 +223,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchorMin.y
       value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 4701275357608127343, guid: 2f467bc7f3fcb3241a248b1f222beee6,
-        type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 4701275357608127343, guid: 2f467bc7f3fcb3241a248b1f222beee6,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 4701275357608127343, guid: 2f467bc7f3fcb3241a248b1f222beee6,
         type: 3}

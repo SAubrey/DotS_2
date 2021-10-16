@@ -58,14 +58,14 @@ public abstract class Unit
     protected float block_rating = 0.5f;
     public int health, max_health;
     public int combat_style;
-    public int movement_range = 1;
-    public int attack_range = 1;
+    public float attack_range = 10f;
     public bool blocking = false;
     protected float block_time = 1f;
     protected Timer block_timer;
     protected float range_time = 1f;
     protected Timer range_timer;
     protected bool can_fire = true;
+    public float smooth_speed = .125f;
 
     protected int type; // Player or Enemy
     protected int ID; // Code for the particular unit type. (not unique to unit)
@@ -128,6 +128,7 @@ public abstract class Unit
 
         block_timer = new Timer(block_time);
         range_timer = new Timer(range_time);
+        smooth_speed = Random.Range(.1f, .15f);
     }
 
     public bool has_attribute(int atr_ID)
@@ -142,11 +143,11 @@ public abstract class Unit
     {
         if (get_slot() == null)
             return;
-        if (block_timer.increase(dt))
+        if (block_timer.Increase(dt))
         {
             blocking = false;
         }
-        if (range_timer.increase(dt))
+        if (range_timer.Increase(dt))
         {
             can_fire = true;
         }
@@ -162,8 +163,7 @@ public abstract class Unit
         animate_attack();
         Collider2D[] hits =
             Physics2D.OverlapCircleAll(slot.melee_att_zone.transform.position, attack_range, layer_mask);
-        //UnityEditor.Handles.DrawWireDisc(slot.melee_att_zone.transform.position, Vector2.up, attack_range);
-        //Debug.Log("Num hits: " + hits.Length);
+        //
         foreach (Collider2D h in hits)
         {
             Slot s = h.GetComponent<Slot>();
@@ -174,6 +174,11 @@ public abstract class Unit
                 continue;
             u.take_damage(get_attack_dmg() * 10);
         }
+    }
+
+    void OnDrawGizmos() {
+        //UnityEditor.Handles.DrawWireDisc(slot.melee_att_zone.transform.position, Vector2.up, attack_range);
+        Gizmos.DrawWireSphere(slot.melee_att_zone.transform.position, attack_range);
     }
 
     public void range_attack(LayerMask mask, Vector3 target_pos)
@@ -199,7 +204,7 @@ public abstract class Unit
         return state;
     }
 
-    protected void move(Slot end)
+    protected void change_slotpoint(Slot end)
     {
         slot.empty();
         end.fill(this);

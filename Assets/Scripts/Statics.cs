@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /*
-Fields that are not particular to a class and do not need to be instantiated more than once.
+Fields and methods not particular to a class and do not need to be instantiated more than once.
 */
-public class Statics : MonoBehaviour
+public class Statics
 {
-    //public static GameObject rising_info_prefab, hitsplat_prefab;
     // UI CONSTANTS
     public static readonly Color DISABLED_C = new Color(.78125f, .78125f, .78125f, 1);
     public static readonly Color ASTRA_COLOR = new Color(.6f, .6f, 1, 1);
@@ -20,24 +19,45 @@ public class Statics : MonoBehaviour
 
     public static readonly Vector3 CITY_POS = new Vector3(10.5f, 10.5f, 0);
 
-    public static Color get_unit_state_color(int state)
+    public static float AngleBetweenTwoPoints(Vector3 a, Vector3 b) {
+         return Mathf.Atan2(a.y - b.y, a.x - b.x) * Mathf.Rad2Deg;
+     }
+
+    public static float GetAdjustedIncrease(float current, float amount, float max)
     {
-        if (state == Unit.ALIVE)
-            return BLUE;
-        else if (state == Unit.DEAD)
-            return RED;
-        else if (state == Unit.INJURED)
-            return ORANGE;
-        return Color.white;
+        // Increase as much as possible without exceeding.
+        return current + amount <= max ? amount :
+            amount - (max - (current + amount)); // subtract by overflow
     }
 
-    public static int calc_distance(Slot start, Slot end)
+    public static Collider2D DetermineClosestCollider(Collider2D[] colliders, Vector2 sourcePoint)
     {
-        int dx = Mathf.Abs(start.col - end.col);
-        int dy = Mathf.Abs(start.row - end.row);
-        return dx + dy;
+        if (colliders.Length == 0)
+            return null;
+        Collider2D closest = colliders[0];
+        float closestDistance = Vector2.Distance(sourcePoint, closest.transform.position);
+        foreach (Collider2D col in colliders)
+        {
+            float distance = Vector2.Distance(sourcePoint, col.transform.position);
+            if (Vector2.Distance(sourcePoint, col.transform.position) < closestDistance)
+            {
+                closest = col;
+                closestDistance = distance;
+            }
+        }
+        return closest;
     }
 
+    public static Vector2 Direction(Vector2 v, Vector2 target)
+    {
+        return (target - v).normalized;
+    }
+
+    public static Vector3 GetSmoothedNextPosition(Vector3 pos, Vector3 end_pos, float smooth_speed)
+    {
+        return Vector2.Lerp(pos, end_pos, smooth_speed);
+    }
+    
     public static int calc_map_distance(Pos pos1, Pos pos2)
     {
         int dx = Mathf.Abs(pos1.x - pos2.x);
@@ -52,28 +72,5 @@ public class Statics : MonoBehaviour
             return starting_amount;
         }
         return change;
-    }
-
-
-    public static RisingInfo create_rising_info(string text, Color color, Transform origin, Transform parent, GameObject rising_info_prefab)
-    {
-        GameObject ri = GameObject.Instantiate(rising_info_prefab, parent.transform);
-        RisingInfo ri_script = ri.GetComponent<RisingInfo>();
-        ri_script.init(origin, text, color);
-        return ri_script;
-    }
-
-    public static void create_rising_info_map(string text, Color color, Transform origin, GameObject prefab)
-    {
-        RisingInfo ri_script = create_rising_info(text, color, origin, CamSwitcher.I.mapUI_canvas.transform, prefab);
-        ri_script.translation_distance = 0.01f;
-        ri_script.show();
-    }
-
-    public static void create_rising_info_battle(string text, Color color, Transform origin, GameObject prefab)
-    {
-        RisingInfo ri_script = create_rising_info(text, color, origin, CamSwitcher.I.battle_canvas.transform, prefab);
-        ri_script.translation_distance = 1f;
-        ri_script.show();
     }
 }

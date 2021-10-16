@@ -8,24 +8,11 @@ using UnityEngine.UI;
 public class Group : MonoBehaviour
 {
     public const int UP = 0, DOWN = 180, LEFT = 90, RIGHT = 270;
-    public const int MAX = 9;
-
-    // Group types. Used to limit unit placement.
-    public const int NEUTRAL = 0; // Cannot place here.
-    public const int PLAYER = 1; // player can only place here initially.
-    public const int ENEMY = 2; // Only enemy can place here.
-    public const int PERIPHERY = 3; // Player can place here phase 2+.
-
-    public Color neutral_color;
-    public Color player_color;
-    public Color enemy_color;
-    public Color periphery_color;
-    public int type;
+    public const int MAX = 6;
 
     public int col, row;
     public List<Slot> slots = new List<Slot>();
     private bool initialized = false;
-    Image img;
 
     public GameObject slot_group;
     public Transform[] slot_point_transforms = new Transform[0];
@@ -33,7 +20,6 @@ public class Group : MonoBehaviour
 
     void Awake()
     {
-        img = GetComponent<Image>();
         pair_slot_point_group();
     }
     void Start()
@@ -43,7 +29,6 @@ public class Group : MonoBehaviour
 
     public void init()
     {
-        set_color(type);
         //reorder_slots_visually(direction);
         initialized = true;
     }
@@ -55,6 +40,7 @@ public class Group : MonoBehaviour
             s.fill(unit);
     }
 
+    // Couple groups with slots under respective empty group shells.
     public void pair_slot_point_group()
     {
         foreach (Transform child in slot_group.transform)
@@ -136,21 +122,6 @@ public class Group : MonoBehaviour
                 num_grouped++;
         }
         return num_grouped;
-    }
-
-    // Toggles the group color if no parameter is set. 
-    private void set_color(int type)
-    {
-        if (type == NEUTRAL)
-            img.color = neutral_color;
-        else if (type == PLAYER)
-        {
-            img.color = player_color;
-        }
-        else if (type == ENEMY)
-            img.color = enemy_color;
-        else if (type == PERIPHERY)
-            img.color = periphery_color;
     }
 
     public void reset_dir()

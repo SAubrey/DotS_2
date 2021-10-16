@@ -16,7 +16,7 @@ public class Comfortable : IState
 
     public void Tick()
     {
-        if (pending_attack_timer.increase(Time.deltaTime))
+        if (pending_attack_timer.Increase(Time.deltaTime))
         {
             move_to_attack = true;
         }

@@ -9,15 +9,15 @@ public class PlayerDeployment : Deployment
     public static PlayerDeployment I { get; private set; }
 
     public UnityEngine.Experimental.Rendering.Universal.Light2D light2d;
-    private float sprintMaxVel;
-    public bool attacking = false;
 
     // Movement
-
     public Group[] zone_front_sword = new Group[3];
     public Group[] zone_front_polearm = new Group[3];
     public Group[] zone_center = new Group[1];
     public Group[] zone_rear = new Group[3];
+
+    public GameObject zone_front_sword_parent;
+    public GameObject zone_front_polearm_parent;
 
     public bool swordsmen_forward = true;
     public Group[] forward_zone
@@ -28,12 +28,6 @@ public class PlayerDeployment : Deployment
             else return zone_front_polearm;
         }
     }
-
-    public bool canMove
-    {
-        get { return !attacking; }
-    }
-
 
     void Awake()
     {
@@ -69,14 +63,16 @@ public class PlayerDeployment : Deployment
     protected override void Update()
     {
         base.Update();
-
         if (Input.GetMouseButtonDown(0))
         { // Left click
-                melee_attack(forward_zone);
+            melee_attack(forward_zone);
         }
         else if (Input.GetMouseButtonDown(1))
         { // Right click
-                block();
+            block(true);
+        }
+        else if (Input.GetMouseButtonUp(1)) {
+            block(false);
         }
         else if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -95,17 +91,7 @@ public class PlayerDeployment : Deployment
         if (Input.GetKeyDown(KeyCode.F))
         {
             swordsmen_forward = !swordsmen_forward;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Q) || Input.GetKeyDown(KeyCode.E))
-        {
-            toggle_slot_dust_ps(1);
-            trigger_begin_rotation_event();
-        }
-        if (Input.GetKeyUp(KeyCode.Q) || Input.GetKeyUp(KeyCode.E))
-        {
-            toggle_slot_dust_ps(-1);
-            trigger_end_rotation_event();
+            SwapForwardZone();
         }
         else if (Input.GetKeyDown(KeyCode.R))
         {
@@ -117,28 +103,34 @@ public class PlayerDeployment : Deployment
         }
     }
 
-    public void FixedUpdate() {
+    protected override void FixedUpdate()
+    {
+        base.FixedUpdate();
         Vector2 movement = get_movement_input();
-        if (movement != Vector2.zero) 
+        if (movement != Vector2.zero && canMove)
         {
-            move(movement, VEL_RUN);
+            Move(movement, VEL_RUN, PhysicsBody.MoveForce);
         }
-        else {
-            simulate_friction();
-        }
-    
-        if (Input.GetKey(KeyCode.Q))
-        {
-            rotate(-1);
-        }
-        else if (Input.GetKey(KeyCode.E))
-        {
-            rotate(1);
-        }
+        RotateToMouse();
     }
 
-    public void simulate_friction() {
-        rb.AddForce(-rb.velocity);
+    private void SwapForwardZone()
+    {
+        Vector3 p = zone_front_sword_parent.transform.position;
+        zone_front_sword_parent.transform.position = zone_front_polearm_parent.transform.position;
+        zone_front_polearm_parent.transform.position = p;
+    }
+
+    /*    void OnDrawGizmosSelected() {
+            Vector2 mouse_pos = (Vector2)
+                CamSwitcher.I.battle_cam.ScreenToWorldPoint(Input.mousePosition);
+
+            Gizmos.DrawLine(transform.position, mouse_pos);
+        }*/
+
+    private Vector2 GetDirToMouse(Vector2 mouse_pos)
+    {
+        return Statics.Direction(transform.position, mouse_pos);
     }
 
     private Vector2 get_movement_input()
@@ -186,10 +178,9 @@ public class PlayerDeployment : Deployment
         MapUI.I.update_deployment(b);
     }
 
-
-
-    protected void block()
+    protected void block(bool active)
     {
+        blocking = active;
         if (stamina < stam_block_cost)
             return;
 
@@ -200,7 +191,7 @@ public class PlayerDeployment : Deployment
                 if (g.slots[i].has_unit)
                 {
                     Unit u = g.slots[i].get_unit();
-                    u.blocking = true;
+                    u.blocking = active;
                 }
             }
         }
@@ -211,7 +202,6 @@ public class PlayerDeployment : Deployment
         return melee ? forward_zone : zone_rear;
     }
 
-
     private GameObject find_nearest_enemy_in_sight()
     {
         int mask = 1 << 9;
@@ -219,7 +209,7 @@ public class PlayerDeployment : Deployment
         Collider2D[] enemiesInRange = Physics2D.OverlapCircleAll(
             new Vector2(transform.position.x, transform.position.y), light2d.pointLightOuterRadius, mask);
 
-        Collider2D closestEnemy = StaticOperations.DetermineClosestCollider(enemiesInRange,
+        Collider2D closestEnemy = Statics.DetermineClosestCollider(enemiesInRange,
             new Vector2(transform.position.x, transform.position.y));
         if (closestEnemy == null)
             return null;

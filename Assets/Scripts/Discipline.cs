@@ -164,7 +164,7 @@ public class Discipline : Storeable, ISaveLoad
         if (get_travelcard().equipment_reward_amount > 0)
         {
             string name = equipment_inventory.add_random_equipment(cell.tier);
-            Statics.create_rising_info_map(
+            RisingInfo.create_rising_info_map(
                 RisingInfo.build_resource_text(name, 1),
                 Statics.disc_colors[ID],
                 origin_of_rise_obj.transform,
@@ -183,7 +183,7 @@ public class Discipline : Storeable, ISaveLoad
     private IEnumerator _add_xp_in_battle(int xp, Enemy enemy)
     {
         yield return new WaitForSeconds(1f);
-        Statics.create_rising_info_battle(
+        RisingInfo.create_rising_info_battle(
             RisingInfo.build_resource_text("XP", xp),
             Statics.disc_colors[ID],
             enemy.get_slot().transform,
