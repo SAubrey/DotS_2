@@ -238,7 +238,7 @@ public class CityUI : MonoBehaviour
         upgrade_buttons.Add(BOW_ILUHATAR, bow_iluhatarB);
         upgrade_buttons.Add(BARRACKS2, barracks2B);
 
-        foreach (Discipline d in Controller.I.discs.Values)
+        foreach (Discipline d in TurnPhaser.I.discs.Values)
         {
             d.on_resource_change += update_stat_text;
             d.on_capacity_change += register_capacity_change;
@@ -268,7 +268,7 @@ public class CityUI : MonoBehaviour
         set_color(CRAFT_SHOP, false, true);
         set_color(FORGE, false, true);
 
-        switch_upgradeP(TurnPhaser.I.active_disc_ID);
+        switch_upgradeP(TurnPhaser.I.activeDiscID);
         upgradesP.SetActive(false);
     }
 
@@ -282,7 +282,7 @@ public class CityUI : MonoBehaviour
             city_inv.TryGetValue(field, out t);
             MapUI.update_capacity_text(city_capacityT, sum, capacity);
         }
-        else if (calling_class == TurnPhaser.I.active_disc_ID)
+        else if (calling_class == TurnPhaser.I.activeDiscID)
         {
             disc_inv.TryGetValue(field, out t);
             MapUI.update_capacity_text(bat_capacityT, sum, capacity);
@@ -297,7 +297,7 @@ public class CityUI : MonoBehaviour
     {
         foreach (int type in unit_counts.Keys)
             unit_counts[type].text =
-                TurnPhaser.I.active_disc.bat.units[type].Count.ToString();
+                TurnPhaser.I.activeDisc.bat.units[type].Count.ToString();
     }
 
     public void try_hire_unit(string args_str)
@@ -309,14 +309,14 @@ public class CityUI : MonoBehaviour
 
         if (verify_avail_unit_resources(sc_cost, mineral_cost))
         {
-            TurnPhaser.I.active_disc.bat.add_units(type, 1);
-            TurnPhaser.I.active_disc.show_adjustments(
+            TurnPhaser.I.activeDisc.bat.add_units(type, 1);
+            TurnPhaser.I.activeDisc.show_adjustments(
                 new Dictionary<string, int>() {
                     {Storeable.STAR_CRYSTALS, -sc_cost},
                     {Storeable.MINERALS, -mineral_cost}
             });
             // Update TextMeshProUGUI in city ui and map ui
-            unit_counts[type].text = TurnPhaser.I.active_disc.bat.units[type].Count.ToString();
+            unit_counts[type].text = TurnPhaser.I.activeDisc.bat.units[type].Count.ToString();
             MapUI.I.unit_countsT[type].text = unit_counts[type].text;
         }
     }
@@ -329,26 +329,26 @@ public class CityUI : MonoBehaviour
             return;
         }
         if (Controller.I.city.get_valid_change_amount(type, 1) != 0 &&
-                TurnPhaser.I.active_disc.get_valid_change_amount(type, -1) != 0)
+                TurnPhaser.I.activeDisc.get_valid_change_amount(type, -1) != 0)
         {
             Controller.I.city.change_var(type, 1);
-            TurnPhaser.I.active_disc.change_var(type, -1);
+            TurnPhaser.I.activeDisc.change_var(type, -1);
         }
     }
 
     public void move_resource_to_disc(string type)
     {
         if (Controller.I.city.get_valid_change_amount(type, -1) != 0 &&
-                TurnPhaser.I.active_disc.get_valid_change_amount(type, 1) != 0)
+                TurnPhaser.I.activeDisc.get_valid_change_amount(type, 1) != 0)
         {
             Controller.I.city.change_var(type, -1);
-            TurnPhaser.I.active_disc.change_var(type, 1);
+            TurnPhaser.I.activeDisc.change_var(type, 1);
         }
     }
 
     private bool verify_avail_unit_resources(int sc_cost, int mineral_cost)
     {
-        Discipline disc = TurnPhaser.I.active_disc;
+        Discipline disc = TurnPhaser.I.activeDisc;
 
         if (disc.get_res(Storeable.STAR_CRYSTALS) >= sc_cost &&
             disc.get_res(Storeable.MINERALS) >= mineral_cost)
@@ -368,7 +368,7 @@ public class CityUI : MonoBehaviour
 
     public void register_capacity_change(int ID, int sum, int capacity)
     {
-        if (TurnPhaser.I.active_disc_ID != ID)
+        if (TurnPhaser.I.activeDiscID != ID)
             return;
         MapUI.update_capacity_text(city_capacityT, sum, capacity);
     }
@@ -409,7 +409,7 @@ public class CityUI : MonoBehaviour
 
     private bool can_afford_upgrade(int upgrade_ID)
     {
-        Discipline b = TurnPhaser.I.active_disc;
+        Discipline b = TurnPhaser.I.activeDisc;
         Upgrade u = upgrades[upgrade_ID];
         if (b.get_res(Storeable.STAR_CRYSTALS) < u.star_crystals ||
             b.get_res(Storeable.MINERALS) < u.minerals ||
@@ -443,7 +443,7 @@ public class CityUI : MonoBehaviour
             return;
         }
         Upgrade u = upgrades[ID];
-        TurnPhaser.I.active_disc.show_adjustments(
+        TurnPhaser.I.activeDisc.show_adjustments(
             new Dictionary<string, int>() {
                 {Storeable.STAR_CRYSTALS, -u.star_crystals},
                 {Storeable.MINERALS, -u.minerals},
@@ -515,9 +515,9 @@ public class CityUI : MonoBehaviour
         }
         else if (ID == SHARED_WISDOM)
         {
-            Controller.I.astra.change_var(Storeable.UNITY, 10);
-            Controller.I.endura.change_var(Storeable.UNITY, 10);
-            Controller.I.martial.change_var(Storeable.UNITY, 10);
+            TurnPhaser.I.astra.change_var(Storeable.UNITY, 10);
+            TurnPhaser.I.endura.change_var(Storeable.UNITY, 10);
+            TurnPhaser.I.martial.change_var(Storeable.UNITY, 10);
         }
         else if (ID == STOREHOUSE)
         {
@@ -537,15 +537,15 @@ public class CityUI : MonoBehaviour
         }
         else if (ID == FAITHFUL)
         {
-            Controller.I.astra.change_var(Storeable.UNITY, 10);
-            Controller.I.endura.change_var(Storeable.UNITY, 10);
-            Controller.I.martial.change_var(Storeable.UNITY, 10);
+            TurnPhaser.I.astra.change_var(Storeable.UNITY, 10);
+            TurnPhaser.I.endura.change_var(Storeable.UNITY, 10);
+            TurnPhaser.I.martial.change_var(Storeable.UNITY, 10);
         }
         else if (ID == REFINED_STARDUST)
         {
-            Controller.I.astra.light_refresh_amount = 5;
-            Controller.I.endura.light_refresh_amount = 5;
-            Controller.I.martial.light_refresh_amount = 5;
+            TurnPhaser.I.astra.light_refresh_amount = 5;
+            TurnPhaser.I.endura.light_refresh_amount = 5;
+            TurnPhaser.I.martial.light_refresh_amount = 5;
         }
         else if (ID == STABLE)
         {

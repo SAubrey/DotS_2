@@ -39,8 +39,8 @@ public class EquipmentUI : MonoBehaviour
 
 
         }
-        TurnPhaser.I.on_disc_change += load_discipline;
-        foreach (Discipline d in Controller.I.discs.Values)
+        TurnPhaser.I.onDiscChange += load_discipline;
+        foreach (Discipline d in TurnPhaser.I.discs.Values)
         {
             d.on_resource_change += register_resource_change;
         }
@@ -53,11 +53,11 @@ public class EquipmentUI : MonoBehaviour
 
     public void register_resource_change(int ID, string field, int amount, int c, int cap)
     {
-        if (ID != TurnPhaser.I.active_disc_ID)
+        if (ID != TurnPhaser.I.activeDiscID)
             return;
         if (field == Discipline.EXPERIENCE)
         {
-            unlock_slots(Controller.I.get_disc(ID).equipment_inventory);
+            unlock_slots(TurnPhaser.I.getDisc(ID).equipment_inventory);
         }
     }
 
@@ -67,7 +67,7 @@ public class EquipmentUI : MonoBehaviour
         selecting = true;
         string e = d.captionText.text;
 
-        EquipmentInventory ei = TurnPhaser.I.active_disc.equipment_inventory;
+        EquipmentInventory ei = TurnPhaser.I.activeDisc.equipment_inventory;
         // Undo the selection, the same equipment cannot be worn more than once,
         // and only one of a type can be worn at once.
         if (ei.has_equipped(e) || ei.get_equipment_amount(e) > 1)
@@ -167,7 +167,7 @@ public class EquipmentUI : MonoBehaviour
     {
         if (e == "Empty")
             return;
-        EquipmentInventory ei = TurnPhaser.I.active_disc.equipment_inventory;
+        EquipmentInventory ei = TurnPhaser.I.activeDisc.equipment_inventory;
         if (!ei.has(e))
             return;
         descriptionP.SetActive(true);

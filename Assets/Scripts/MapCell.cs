@@ -175,7 +175,7 @@ public class MapCell
         }
         if (dropped_XP > 0)
         {
-            pickup_XP(TurnPhaser.I.active_disc);
+            pickup_XP(TurnPhaser.I.activeDisc);
         }
     }
 
@@ -238,7 +238,7 @@ creates_travelcard && !travelcard_complete && entered && !has_battle;
 
     public void assign_group_leader()
     {
-        battle = new Battle(Map.I, this, TurnPhaser.I.active_disc, true);
+        battle = new Battle(Map.I, this, TurnPhaser.I.activeDisc, true);
         begin_color_oscillation();
     }
 
@@ -278,7 +278,7 @@ creates_travelcard && !travelcard_complete && entered && !has_battle;
     // and a group has not already been formed on this cell.
     public bool can_setup_group_battle()
     {
-        return has_enemies && Map.check_adjacent(TurnPhaser.I.active_disc.pos, pos.to_vec3);
+        return has_enemies && Map.check_adjacent(TurnPhaser.I.activeDisc.pos, pos.to_vec3);
     }
 
     public void add_enemy(Enemy e)

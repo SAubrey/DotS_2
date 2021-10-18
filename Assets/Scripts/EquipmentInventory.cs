@@ -19,8 +19,6 @@ public class EquipmentInventory
         {
             equipment_slots.Add(new EquipmentSlot(i));
         }
-        add_to_inventory(Equipment.SHARPENED_BLADES, 2);
-        add_to_inventory(Equipment.BOLSTERED_SHIELDS, 1);
     }
 
     public EquipmentSlot get_slot(int i)

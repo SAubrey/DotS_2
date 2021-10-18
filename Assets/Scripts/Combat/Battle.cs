@@ -120,7 +120,7 @@ public class Battle
         if (player_won && enemy_won)
         {
             leader.receive_travelcard_consequence();
-            if (!TurnPhaser.I.active_disc.dead)
+            if (!TurnPhaser.I.activeDisc.dead)
             {
                 retreat();
             }
@@ -132,7 +132,7 @@ public class Battle
         }
         else if (enemy_won)
         {
-            if (!TurnPhaser.I.active_disc.dead)
+            if (!TurnPhaser.I.activeDisc.dead)
             {
                 retreat();
             }
@@ -199,7 +199,7 @@ public class Battle
         List<Battalion> dead = new List<Battalion>();
         foreach (Discipline d in participants)
         {
-            if (d.bat.count_healthy() <= 0)
+            if (d.bat.count_units() <= 0)
             {
                 dead.Add(d.bat);
             }
@@ -221,7 +221,7 @@ public class Battle
     {
         int sum = 0;
         foreach (Discipline d in participants)
-            sum += d.bat.count_placeable();
+            sum += d.bat.count_units();
         return sum;
     }
 
@@ -234,7 +234,7 @@ public class Battle
 
     public bool leader_is_active_on_map
     {
-        get { return TurnPhaser.I.active_disc == leader; }
+        get { return TurnPhaser.I.activeDisc == leader; }
     }
 
     public bool last_battalions_turn

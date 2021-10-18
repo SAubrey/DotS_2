@@ -18,7 +18,7 @@ interface ISaveLoad
 public class TurnPhaserData : GameData
 {
     public int turn;
-    public int active_disc_ID;
+    public int activeDiscID;
 }
 
 [System.Serializable]
@@ -113,18 +113,10 @@ public struct SStoreableResources
 public struct SBattalion
 {
     // Indices refer to the unit type, values refer to the amount.
-    public List<int> healthy_types, injured_types;
+    public List<int> unit_types;
     public SBattalion(Battalion bat)
     {
-        healthy_types = new List<int>(PlayerUnit.unit_types.Count);
-        injured_types = new List<int>(PlayerUnit.unit_types.Count);
-        foreach (int type in PlayerUnit.unit_types)
-        {
-            int injured = bat.count_injured(type);
-            int healthy = bat.units[type].Count - injured;
-            healthy_types.Add(healthy);
-            injured_types.Add(injured);
-        }
+        unit_types = PlayerUnit.unit_types;
     }
 }
 

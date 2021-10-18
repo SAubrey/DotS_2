@@ -13,6 +13,7 @@ public class City : Storeable
         resources[LIGHT] = 8;
         resources[UNITY] = 3;
         ID = CITY;
+        name = "City";
     }
 
     public override void light_decay_cascade()

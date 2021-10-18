@@ -26,7 +26,6 @@ public class PlayerUnit : Unit
         MENDER, CARTER, DRAGOON, SCOUT, DRUMMER, SHIELD_MAIDEN, PIKEMAN };
 
     public const int EMPTY = 100; // Graphical lookup usage.
-    public bool injured = false;
 
     public static PlayerUnit create_punit(int ID, int owner_ID)
     {
@@ -61,8 +60,8 @@ public class PlayerUnit : Unit
 
     public override void die()
     {
-        BatLoader.I.load_unit_text(Controller.I.get_disc(owner_ID).bat, ID);
-        Controller.I.get_disc(owner_ID).bat.remove_dead_unit(this);
+        BatLoader.I.load_unit_text(TurnPhaser.I.getDisc(owner_ID).bat, ID);
+        TurnPhaser.I.getDisc(owner_ID).bat.remove_dead_unit(this);
         slot.empty();
     }
 

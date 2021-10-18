@@ -9,18 +9,14 @@ public class Controller : MonoBehaviour
 
     public const string MAP = "Map";
     public const string CONTROLLER = "Controller";
-    public int numPlayers { get; private set; } = 1;
-    public Discipline discipline { get; private set; }
 
     public Button loadB, saveB, resumeB;
     public GameObject save_warningP, new_game_warningP, load_warningP;
-    public Discipline astra, martial, endura;
     public City city;
     public bool game_has_begun { get; private set; } = false;
 
-    public IDictionary<int, Discipline> discs = new Dictionary<int, Discipline>();
-    public event Action<bool> init;
-    public PlayerDeployment player_deployment;
+    public event Action<bool> init; // True = from save, false = new game
+    public PlayerDeployment playerDeployment;
 
     void Awake()
     {
@@ -32,13 +28,6 @@ public class Controller : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        astra.ID = Discipline.ASTRA;
-        martial.ID = Discipline.MARTIAL;
-        endura.ID = Discipline.ENDURA;
-        city.ID = City.CITY;
-        discs.Add(Discipline.ASTRA, astra);
-        //discs.Add(Discipline.MARTIAL, martial);
-        //discs.Add(Discipline.ENDURA, endura);
     }
 
     void Start()
@@ -49,19 +38,20 @@ public class Controller : MonoBehaviour
         load_warningP.SetActive(false);
     }
 
-    public void initialize(bool from_save)
+    public void Initialize(bool from_save)
     {
-        init(from_save);
+        if (init != null)
+            init(from_save);
+
         if (from_save)
         {
 
         }
         else
         {
-            astra.pos = new Vector3(12.5f, 12.9f, 0);
-            martial.pos = new Vector3(12.1f, 12.1f, 0);
-            endura.pos = new Vector3(12.9f, 12.1f, 0);
-            TurnPhaser.I.active_disc_ID = 0;
+            TurnPhaser.I.astra.pos = new Vector3(12.5f, 12.9f, 0);
+            TurnPhaser.I.martial.pos = new Vector3(12.1f, 12.1f, 0);
+            TurnPhaser.I.endura.pos = new Vector3(12.9f, 12.1f, 0);
         }
         // Clear fields not overwritten by possible load.
         BattlePhaser.I.reset(from_save);
@@ -69,9 +59,9 @@ public class Controller : MonoBehaviour
         // Order matters
         Map.I.init(from_save);
         TurnPhaser.I.reset();
-        EquipmentUI.I.init(TurnPhaser.I.active_disc);
+        EquipmentUI.I.init(TurnPhaser.I.activeDisc);
 
-        MapUI.I.register_disc_change(TurnPhaser.I.active_disc);
+        MapUI.I.register_disc_change(TurnPhaser.I.activeDisc);
 
         game_has_begun = true;
     }
@@ -79,7 +69,7 @@ public class Controller : MonoBehaviour
     public void game_over()
     {
         CamSwitcher.I.set_active(CamSwitcher.MENU, true);
-        initialize(false);
+        Initialize(false);
     }
 
     // Called by save button
@@ -90,7 +80,7 @@ public class Controller : MonoBehaviour
 
         List<GameData> serializables = new List<GameData>() {
             { Map.I.save() },
-            { discipline.save() },
+            { TurnPhaser.I.activeDisc.save() },
             { city.save() },
         };
 
@@ -108,24 +98,39 @@ public class Controller : MonoBehaviour
 
         TurnPhaser.I.load(data);
         Map.I.load(FileIO.load_game(MAP));
-        astra.load(FileIO.load_game("astra"));
-        martial.load(FileIO.load_game("martial"));
-        endura.load(FileIO.load_game("endura"));
+        TurnPhaser.I.astra.load(FileIO.load_game("astra"));
+        TurnPhaser.I.martial.load(FileIO.load_game("martial"));
+        TurnPhaser.I.endura.load(FileIO.load_game("endura"));
         city.load(FileIO.load_game("city"));
 
-        initialize(true);
+        Initialize(true);
+        CamSwitcher.I.flip_menu_map();
+    }
+
+
+    public void new_game()
+    {
+        ChooseNewGamediscipline(Discipline.ASTRA);
+        Initialize(false);
         CamSwitcher.I.flip_menu_map();
     }
 
     public void ChooseNewGamediscipline(int ID) {
-        discipline = astra;
-    }
-
-    public void new_game()
-    {
-        initialize(false);
-        CamSwitcher.I.flip_menu_map();
-        ChooseNewGamediscipline(Discipline.ASTRA);
+        ID = 0; // Force astra
+        Discipline d = null;
+        if (ID == Discipline.ASTRA) {
+            d = TurnPhaser.I.astra;
+        }
+        else if (ID == Discipline.MARTIAL) 
+        {
+            d = TurnPhaser.I.martial;
+        }
+        else if (ID == Discipline.ENDURA) 
+        {
+            d = TurnPhaser.I.endura;
+        }
+        TurnPhaser.I.Init(d);
+        d.init(false);
     }
 
     public void check_button_states()
@@ -171,23 +176,18 @@ public class Controller : MonoBehaviour
 
     public PlayerDeployment get_deployment()
     {
-        return player_deployment;
-    }
-
-    public Discipline get_disc(int ID)
-    {
-        return discs[ID];
+        return playerDeployment;
     }
 
     // BUTTON HANDLES
     public void inc_stat(string field)
     {
-        TurnPhaser.I.active_disc.change_var(field, 1);
+        TurnPhaser.I.activeDisc.change_var(field, 1);
     }
 
     public void dec_stat(string field)
     {
-        TurnPhaser.I.active_disc.change_var(field, -1);
+        TurnPhaser.I.activeDisc.change_var(field, -1);
     }
 
     public void inc_city_stat(string field)

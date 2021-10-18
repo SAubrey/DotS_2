@@ -28,7 +28,7 @@ public class MapCellUI : MonoBehaviour
         enable_button(teleportB, Map.I.can_teleport(pos));
         enable_button(unlockB, can_unlock());
         enable_button(battleB, cell.can_setup_group_battle());
-        enable_button(mineB, cell.can_mine(TurnPhaser.I.active_disc.bat));
+        enable_button(mineB, cell.can_mine(TurnPhaser.I.activeDisc.bat));
         enable_button(show_travelcardB, can_show_travelcard());
         if (cell.can_setup_group_battle())
         {
@@ -88,7 +88,7 @@ public class MapCellUI : MonoBehaviour
 
     public string build_group_battleB_T()
     {
-        bool adjacent = Map.check_adjacent(TurnPhaser.I.active_disc.pos, cell.pos.to_vec3);
+        bool adjacent = Map.check_adjacent(TurnPhaser.I.activeDisc.pos, cell.pos.to_vec3);
         if (!adjacent)
         {
             return "Group Battle";
@@ -112,7 +112,7 @@ public class MapCellUI : MonoBehaviour
             else if (cell.battle.group_pending)
             {
                 // Be able to leave in same turn
-                if (cell.battle.includes_disc(TurnPhaser.I.active_disc))
+                if (cell.battle.includes_disc(TurnPhaser.I.activeDisc))
                     return "Leave Group Battle";
                 else
                     return "Join Group Battle";
@@ -152,14 +152,14 @@ public class MapCellUI : MonoBehaviour
                 // Reinforce - discipline's troops become available for placement
                 // in the outskirts of the battlefield once the turn reaches the 
                 // leader again.
-                cell.battle.add_participant(TurnPhaser.I.active_disc);
+                cell.battle.add_participant(TurnPhaser.I.activeDisc);
             }
             else if (cell.battle.group_pending)
             {
-                if (cell.battle.includes_disc(TurnPhaser.I.active_disc))
-                    cell.battle.remove_participant(TurnPhaser.I.active_disc);
+                if (cell.battle.includes_disc(TurnPhaser.I.activeDisc))
+                    cell.battle.remove_participant(TurnPhaser.I.activeDisc);
                 else
-                    cell.battle.add_participant(TurnPhaser.I.active_disc);
+                    cell.battle.add_participant(TurnPhaser.I.activeDisc);
             }
         }
         battleT.text = build_group_battleB_T();
@@ -167,7 +167,7 @@ public class MapCellUI : MonoBehaviour
 
     public void move()
     {
-        TurnPhaser.I.active_disc.move(cell);
+        TurnPhaser.I.activeDisc.move(cell);
         close();
     }
 
@@ -186,13 +186,13 @@ public class MapCellUI : MonoBehaviour
 
     public void teleport()
     {
-        TurnPhaser.I.active_disc.move(cell);
+        TurnPhaser.I.activeDisc.move(cell);
         close();
     }
 
     public void mine()
     {
-        TurnPhaser.I.active_disc.mine(cell);
+        TurnPhaser.I.activeDisc.mine(cell);
     }
 
     public bool can_show_travelcard()
@@ -210,11 +210,11 @@ public class MapCellUI : MonoBehaviour
     // requirements can be met if it is an unlockable cell.
     private bool can_unlock()
     {
-        bool on_cell = TurnPhaser.I.active_disc.cell == cell;
+        bool on_cell = TurnPhaser.I.activeDisc.cell == cell;
         if (!cell.locked || !on_cell)
             return false;
         if (cell.has_rune_gate && !cell.restored_rune_gate &&
-            TurnPhaser.I.active_disc.get_res(Storeable.STAR_CRYSTALS) >= 10)
+            TurnPhaser.I.activeDisc.get_res(Storeable.STAR_CRYSTALS) >= 10)
         {
             return true;
         }
@@ -222,10 +222,10 @@ public class MapCellUI : MonoBehaviour
         TravelCardUnlockable u = cell.get_unlockable();
         if (u.requires_seeker)
         {
-            return TurnPhaser.I.active_disc.bat.has_seeker;
+            return TurnPhaser.I.activeDisc.bat.has_seeker;
         }
         // Must be a resource requirement.
-        if (TurnPhaser.I.active_disc.get_res(u.resource_type) >=
+        if (TurnPhaser.I.activeDisc.get_res(u.resource_type) >=
             Mathf.Abs(u.resource_cost))
         {
             return true;
@@ -237,18 +237,18 @@ public class MapCellUI : MonoBehaviour
     {
         if (cell.has_rune_gate)
         {
-            TurnPhaser.I.active_disc.show_adjustment(Storeable.STAR_CRYSTALS, -10);
+            TurnPhaser.I.activeDisc.show_adjustment(Storeable.STAR_CRYSTALS, -10);
             cell.restored_rune_gate = true;
         }
         else if (cell.has_travelcard)
         {
             if (cell.get_unlockable().requires_seeker)
             {
-                TurnPhaser.I.active_disc.receive_travelcard_consequence();
+                TurnPhaser.I.activeDisc.receive_travelcard_consequence();
             }
             else
             {
-                TurnPhaser.I.active_disc.show_adjustment(cell.get_unlock_type(), cell.get_unlock_cost());
+                TurnPhaser.I.activeDisc.show_adjustment(cell.get_unlock_type(), cell.get_unlock_cost());
             }
             cell.complete_travelcard();
         }

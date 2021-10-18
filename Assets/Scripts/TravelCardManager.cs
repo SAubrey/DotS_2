@@ -24,10 +24,10 @@ public class TravelCardManager : MonoBehaviour
     public void restart_battle_from_drawn_card(MapCell cell)
     {
         // Load forced travel card from a previous save.
-        if (TurnPhaser.I.active_disc.restart_battle_from_drawn_card)
+        if (TurnPhaser.I.activeDisc.restart_battle_from_drawn_card)
         {
-            MapUI.I.display_travelcard(TurnPhaser.I.active_disc.get_travelcard());
-            TurnPhaser.I.active_disc.restart_battle_from_drawn_card = false;
+            MapUI.I.display_travelcard(TurnPhaser.I.activeDisc.get_travelcard());
+            TurnPhaser.I.activeDisc.restart_battle_from_drawn_card = false;
             Debug.Log("resuming loaded battle");
             return;
         }
@@ -69,7 +69,7 @@ public class TravelCardManager : MonoBehaviour
         }
         else if (cell.travelcard.rules.affect_resources && !cell.locked)
         {
-            TurnPhaser.I.active_disc.receive_travelcard_consequence();
+            TurnPhaser.I.activeDisc.receive_travelcard_consequence();
         }
     }
 

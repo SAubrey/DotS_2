@@ -107,99 +107,27 @@ public class Battalion
         for (int i = 0; i < punits.Count; i++)
         {
             PlayerUnit pu = punits[i];
-            if (pu != null && !pu.is_placed && !pu.injured)
+            if (pu != null && !pu.is_placed)
                 return pu;
         }
         return null;
     }
 
-    public int count_placeable(int type = -1)
+    public int count_units(int type = -1)
     {
         int i = 0;
         if (type >= 0)
         {
-            foreach (PlayerUnit u in units[type])
-            {
-                if (!u.is_placed && !u.injured)
-                    i++;
-            }
+            i += units[type].Count;
         }
         else
         { // Count all units.
             for (int t = 0; t < units.Count; t++)
             {
-                foreach (PlayerUnit u in units[t])
-                {
-                    if (!u.is_placed && !u.injured)
-                        i++;
-                }
+                i += units[t].Count;
             }
         }
         return i;
-    }
-
-    public int count_injured(int type = -1)
-    {
-        int i = 0;
-        if (type >= 0)
-        {
-            foreach (PlayerUnit u in units[type])
-            {
-                if (u.injured)
-                    i++;
-            }
-        }
-        else
-        { // Count all units.
-            for (int t = 0; t < units.Count; t++)
-            {
-                foreach (PlayerUnit u in units[t])
-                {
-                    if (u.injured)
-                        i++;
-                }
-            }
-        }
-        return i;
-    }
-
-
-    public int count_healthy(int type = -1)
-    {
-        int i = 0;
-        if (type >= 0)
-        {
-            foreach (PlayerUnit u in units[type])
-            {
-                if (!u.injured)
-                    i++;
-            }
-        }
-        else
-        { // Count all units.
-            for (int t = 0; t < units.Count; t++)
-            {
-                foreach (PlayerUnit u in units[t])
-                {
-                    if (!u.injured)
-                        i++;
-                }
-            }
-        }
-        return i;
-    }
-
-    public bool heal_injured_unit(int ID)
-    {
-        foreach (PlayerUnit pu in units[ID])
-        {
-            if (pu.injured)
-            {
-                pu.injured = false;
-                return true;
-            }
-        }
-        return false;
     }
 
     public void remove_dead_unit(PlayerUnit du)
@@ -209,7 +137,7 @@ public class Battalion
 
     public void post_battle()
     {
-        if (count_healthy() <= 0)
+        if (count_units() <= 0)
         {
             disc.die();
             return;

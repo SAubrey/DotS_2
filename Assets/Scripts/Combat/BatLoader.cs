@@ -271,7 +271,7 @@ public class BatLoader : MonoBehaviour
     {
         if (!texts.ContainsKey(ID))
             return "";
-        string num = b.count_placeable(ID).ToString();
+        string num = b.count_units(ID).ToString();
         int total_num = b.units[ID].Count;
         return num + " / " + total_num.ToString();
     }

@@ -58,7 +58,7 @@ public class Slot : PhysicsBody
 
     protected virtual void FixedUpdate() {
         on_velocity_change(rb.velocity);
-        Move(slot_point_transform.position, 50f, PhysicsBody.MoveForce, 3f);
+        Move(slot_point_transform.position, 100f, PhysicsBody.MoveForce, 3f);
     }
 
     public virtual bool fill(Unit u)
@@ -189,12 +189,8 @@ public class Slot : PhysicsBody
         if (unit.is_enemy)
             return;
 
-        EquipmentInventory ei = Controller.I.get_disc(get_punit().owner_ID).equipment_inventory;
+        EquipmentInventory ei = TurnPhaser.I.getDisc(get_punit().owner_ID).equipment_inventory;
         hpT.color = ei.get_stat_boost_amount(unit.get_ID(), Unit.HEALTH) > 0 ?
-            equipment_text_color : Color.white;
-        defT.color = ei.get_stat_boost_amount(unit.get_ID(), Unit.DEFENSE) > 0 ?
-            equipment_text_color : Color.white;
-        attT.color = ei.get_stat_boost_amount(unit.get_ID(), Unit.ATTACK) > 0 ?
             equipment_text_color : Color.white;
     }
 

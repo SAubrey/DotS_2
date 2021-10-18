@@ -203,11 +203,11 @@ public class PullCart : Equipment
     }
     public override void activate()
     {
-        TurnPhaser.I.active_disc.capacity += 6;
+        TurnPhaser.I.activeDisc.capacity += 6;
     }
     public override void deactivate()
     {
-        TurnPhaser.I.active_disc.capacity -= 6;
+        TurnPhaser.I.activeDisc.capacity -= 6;
     }
 }
 
@@ -266,11 +266,11 @@ public class Wagon : Equipment
     }
     public override void activate()
     {
-        TurnPhaser.I.active_disc.capacity += 12;
+        TurnPhaser.I.activeDisc.capacity += 12;
     }
     public override void deactivate()
     {
-        TurnPhaser.I.active_disc.capacity -= 12;
+        TurnPhaser.I.activeDisc.capacity -= 12;
     }
 }
 

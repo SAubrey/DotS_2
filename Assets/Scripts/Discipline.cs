@@ -14,7 +14,7 @@ public class Discipline : Storeable, ISaveLoad
     private int mine_qty_multiplier = 3;
     public int mine_qty
     {
-        get => mine_qty_multiplier *= bat.count_placeable(PlayerUnit.MINER);
+        get => mine_qty_multiplier *= bat.count_units(PlayerUnit.MINER);
     }
     public bool has_mined_in_turn, has_moved_in_turn, has_scouted_in_turn = false;
     public bool has_acted_in_turn { get => has_moved_in_turn || has_scouted_in_turn; }
@@ -62,7 +62,7 @@ public class Discipline : Storeable, ISaveLoad
         equipment_inventory = new EquipmentInventory(this);
 
         resources[LIGHT] = 4;
-        resources[UNITY] = 4;
+        resources[UNITY] = 5;
         resources[STAR_CRYSTALS] = 1;
         resources[EXPERIENCE] = 500;
         cell = Map.I.city_cell;
@@ -71,6 +71,9 @@ public class Discipline : Storeable, ISaveLoad
 
     public override void register_turn()
     {
+        if (!initialized)
+            return;
+
         if (!dead)
         {
             base.register_turn();
@@ -247,24 +250,10 @@ public class Discipline : Storeable, ISaveLoad
 
         // Create healthy units.
         Debug.Log("count:" + PlayerUnit.unit_types.Count);
-        Debug.Log("count:" + data.sbat.healthy_types.Count);
+        Debug.Log("count:" + data.sbat.unit_types.Count);
         foreach (int type in PlayerUnit.unit_types)
         {
-            bat.add_units(type, data.sbat.healthy_types[type]);
+            bat.add_units(type, data.sbat.unit_types[type]);
         }
-        // Create injured units.
-        foreach (int type in PlayerUnit.unit_types)
-        {
-            for (int i = 0; i < data.sbat.injured_types[type]; i++)
-            {
-                PlayerUnit pu = PlayerUnit.create_punit(type, ID);
-                if (pu == null)
-                    continue;
-                pu.injured = true;
-                bat.units[type].Add(pu);
-            }
-        }
-
-
     }
 }

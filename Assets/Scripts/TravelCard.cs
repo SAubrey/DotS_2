@@ -42,7 +42,7 @@ public class TravelCard
     {
         ID = id;
         this.type = type;
-        foreach (string field in Controller.I.astra.resources.Keys)
+        foreach (string field in TurnPhaser.I.activeDisc.resources.Keys)
         {
             consequence.Add(field, 0);
         }
@@ -208,7 +208,7 @@ public class Chance1_2 : Chance
         {
             consequence[Storeable.UNITY] = -2;
         }
-        //TurnPhaser.I.active_disc.show_adjustments(consequence);
+        //TurnPhaser.I.activeDisc.show_adjustments(consequence);
     }
 }
 
@@ -314,7 +314,7 @@ public class Ruins1_1 : RuinsCard
 
     public override void on_continue(TravelCardManager tcm)
     {
-        TurnPhaser.I.active_disc.bat.add_units(PlayerUnit.SEEKER, 1, true);
+        TurnPhaser.I.activeDisc.bat.add_units(PlayerUnit.SEEKER, 1, true);
     }
 }
 
@@ -486,7 +486,7 @@ public class Event1_3 : Event
     public override void on_continue(TravelCardManager tcm)
     {
         //tcm.c.map.move_player(tcm.c.get_disc().prev_pos);
-        TurnPhaser.I.active_disc.move(TurnPhaser.I.active_disc.previous_cell);
+        TurnPhaser.I.activeDisc.move(TurnPhaser.I.activeDisc.previous_cell);
     }
 }
 public class Event1_4 : Event
@@ -565,10 +565,10 @@ public class Event2_3 : Event
     public override void on_continue(TravelCardManager tcm)
     {
         // Kill 2 random units
-        if (!TurnPhaser.I.active_disc.bat.has_scout)
+        if (!TurnPhaser.I.activeDisc.bat.has_scout)
         {
-            TurnPhaser.I.active_disc.bat.lose_random_unit("Caught in a trap");
-            TurnPhaser.I.active_disc.bat.lose_random_unit("Caught in a trap");
+            TurnPhaser.I.activeDisc.bat.lose_random_unit("Caught in a trap");
+            TurnPhaser.I.activeDisc.bat.lose_random_unit("Caught in a trap");
         }
     }
 }

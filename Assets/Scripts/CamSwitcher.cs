@@ -148,7 +148,7 @@ public class CamSwitcher : MonoBehaviour
             if (active)
             {
                 // Set the camera on the active player.
-                Vector3 p = new Vector3(TurnPhaser.I.active_disc.pos.x, TurnPhaser.I.active_disc.pos.y, -14);
+                Vector3 p = new Vector3(TurnPhaser.I.activeDisc.pos.x, TurnPhaser.I.activeDisc.pos.y, -14);
                 map_cam.transform.SetPositionAndRotation(p, Quaternion.identity);
                 set_active(BATTLE, false);
                 set_active(MENU, false);

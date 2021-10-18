@@ -38,7 +38,7 @@ public class MapUI : MonoBehaviour
 
     public IDictionary<string, TextMeshProUGUI> disc_inv = new Dictionary<string, TextMeshProUGUI>();
     public TextMeshProUGUI discT, map_cellT, battle_cellT;
-    public Button next_stageB;
+    public Button nextTurnB;
     public GameObject ask_to_enterP, game_overP, travel_cardP;
     public TextMeshProUGUI travelcard_descriptionT, travelcard_typeT,
         travelcard_subtextT, travelcard_consequenceT;
@@ -61,10 +61,7 @@ public class MapUI : MonoBehaviour
         ruins_color;
     public Dictionary<int, Color> cell_light_colors;
 
-    public PlayerDeploymentUI astra_player_deployment_UI;
-    public PlayerDeploymentUI martial_player_deployment_UI;
-    public PlayerDeploymentUI endura_player_deployment_UI;
-    private PlayerDeploymentUI[] deployment_UIs;
+    public PlayerDeploymentUI playerDeploymentUI;
 
     void Awake()
     {
@@ -77,11 +74,7 @@ public class MapUI : MonoBehaviour
             Destroy(gameObject);
         }
 
-        deployment_UIs = new PlayerDeploymentUI[3] {
-            astra_player_deployment_UI,
-            martial_player_deployment_UI,
-            endura_player_deployment_UI
-        };
+
 
         cell_light_colors = new Dictionary<int, Color>() {
             {MapCell.STAR_ID, star_light_color},
@@ -137,14 +130,12 @@ public class MapUI : MonoBehaviour
 
     void Start()
     {
-        set_next_stageB_text(TurnPhaser.I.active_disc_ID);
         set_active_travelcard_continueB(true);
         set_active_travelcard_rollB(false);
-        TurnPhaser.I.on_disc_change += register_disc_change;
-        TurnPhaser.I.on_turn_change += register_turn;
+        TurnPhaser.I.onDiscChange += register_disc_change;
+        TurnPhaser.I.onTurnChange += register_turn;
 
-
-        foreach (Discipline d in Controller.I.discs.Values)
+        foreach (Discipline d in TurnPhaser.I.discs.Values)
         {
             d.on_resource_change += update_stat_text;
             d.on_capacity_change += register_capacity_change;
@@ -181,7 +172,7 @@ public class MapUI : MonoBehaviour
             game_overP.activeSelf || travel_cardP.activeSelf;
         if (advance)
         {
-            if (next_stageB.IsActive() && !UIopen)
+            if (nextTurnB.IsActive() && !UIopen)
             {
                 TurnPhaser.I.end_disciplines_turn();
             }
@@ -220,19 +211,18 @@ public class MapUI : MonoBehaviour
 
     public void register_capacity_change(int ID, int sum, int capacity)
     {
-        if (TurnPhaser.I.active_disc_ID != ID)
+        if (TurnPhaser.I.activeDiscID != ID)
             return;
         update_capacity_text(bat_capacityT, sum, capacity);
     }
 
     public void update_deployment(Battalion bat)
     {
-        PlayerDeploymentUI pd = deployment_UIs[bat.disc.ID];
         foreach (List<PlayerUnit> pu in bat.units.Values)
         {
             foreach (Unit u in pu)
             {
-                pd.place_unit(u);
+                playerDeploymentUI.place_unit(u);
             }
         }
     }
@@ -368,7 +358,7 @@ public class MapUI : MonoBehaviour
 
     public void load_battalion_count()
     {
-        Battalion b = TurnPhaser.I.active_disc.bat;
+        Battalion b = TurnPhaser.I.activeDisc.bat;
         if (b == null)
             return;
         foreach (int type_ID in b.units.Keys)
@@ -382,11 +372,9 @@ public class MapUI : MonoBehaviour
         if (!unit_countsT.ContainsKey(ID))
             return "";
 
-        string num = b.count_placeable(ID).ToString();
+        string num = b.count_units(ID).ToString();
         int total_num = b.units[ID].Count;
-        int num_injured = b.count_injured(ID);
-        return unit_countsT[ID].text = (total_num - num_injured) +
-            "         " + num_injured;
+        return unit_countsT[ID].text = total_num.ToString();
     }
 
     public static void update_capacity_text(TextMeshProUGUI text, int sum_resources, int capacity)
@@ -404,7 +392,7 @@ public class MapUI : MonoBehaviour
             city_inv.TryGetValue(field, out t);
             update_capacity_text(city_capacityT, sum, capacity);
         }
-        else if (disc_ID == TurnPhaser.I.active_disc_ID)
+        else if (disc_ID == TurnPhaser.I.activeDiscID)
         {
             disc_inv.TryGetValue(field, out t);
             update_capacity_text(bat_capacityT, sum, capacity);
@@ -441,7 +429,7 @@ public class MapUI : MonoBehaviour
     public void toggle_city_panel()
     {
         // If the battalion is at the city, toggle the main city panel.
-        if (Map.I.is_at_city(TurnPhaser.I.active_disc))
+        if (Map.I.is_at_city(TurnPhaser.I.activeDisc))
         {
             CityUI.I.toggle_city_panel();
         }
@@ -463,25 +451,13 @@ public class MapUI : MonoBehaviour
         battle_cellT.text = tile_name;
     }
 
-    private void set_next_stageB_text(int disc_ID)
-    {
-        string s = "End ";
-        if (disc_ID == Discipline.ASTRA)
-            s += "Astra's Turn";
-        if (disc_ID == Discipline.MARTIAL)
-            s += "Martial's Turn";
-        if (disc_ID == Discipline.ENDURA)
-            s += "Endura's Turn";
-        next_stageB.GetComponentInChildren<TextMeshProUGUI>().text = s;
-    }
-
     public void display_travelcard(TravelCard tc)
     {
         if (tc == null || travel_cardP.activeSelf)
             return;
-        bool active_disc_at_selected_cell =
-            TurnPhaser.I.active_disc.cell == open_cell_UI_script.cell;
-        bool interactable = !tc.complete && active_disc_at_selected_cell;
+        bool activeDisc_at_selected_cell =
+            TurnPhaser.I.activeDisc.cell == open_cell_UI_script.cell;
+        bool interactable = !tc.complete && activeDisc_at_selected_cell;
         set_active_travelcard_continueB(interactable);
         set_active_travelcard_rollB(interactable && tc.die_num_sides > 0 && !tc.rolled);
         set_active_travelcard_exitB(!interactable);
@@ -554,6 +530,6 @@ public class MapUI : MonoBehaviour
 
     public void set_active_next_stageB(bool state)
     {
-        next_stageB.interactable = state;
+        nextTurnB.interactable = state;
     }
 }

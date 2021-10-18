@@ -30,8 +30,23 @@ public class Storeable : MonoBehaviour, ISaveLoad
     };
     public GameObject rising_info_prefab;
     public GameObject origin_of_rise_obj;
-    public GameObject map_UI_canvas;
-    public int ID;
+    private int _ID;
+    public int ID {
+        get { return _ID; }
+        set { 
+            _ID = value;
+            if (ID == Discipline.ASTRA)
+                name = "Astra";
+            else if (ID == Discipline.ENDURA)
+                name = "Endura";
+            else if (ID == Discipline.MARTIAL)
+                name = "Martial";
+            else
+                name = "City";
+        }
+    }
+    public new string name;
+    public bool initialized { get; protected set; } = false;
     public const int INITIAL_CAPACITY = 72;
     private int _capacity = INITIAL_CAPACITY;
     public int capacity
@@ -50,31 +65,23 @@ public class Storeable : MonoBehaviour, ISaveLoad
     public event Action<int, string, int, int, int> on_resource_change; // Disc ID, res type, new amount
     public event Action<int, int, int> on_capacity_change;
     protected List<Adjustment> adjustments = new List<Adjustment>();
+    Timer showAdjTimer = new Timer(.5f);
 
     protected virtual void Start()
     {
-        map_UI_canvas = GameObject.Find("MapUICanvas");
-        TurnPhaser.I.on_turn_change += register_turn;
-
-        Controller.I.init += init;
+        TurnPhaser.I.onTurnChange += register_turn;
     }
-
-    float time_elapsed = 0f;
-    float time_interval = 0.5f;
 
     void Update()
     {
         /* Display adjusted resources in a timely sequence. */
-        if (adjustments.Count == 0)
+        if (adjustments.Count == 0 || !initialized)
         {
             return;
         }
 
-        time_elapsed += Time.deltaTime;
-        if (time_elapsed >= time_interval)
+        if (showAdjTimer.Increase(Time.deltaTime))
         {
-            time_elapsed = 0;
-
             Adjustment a = adjustments[0];
             adjustments.Remove(a);
             if (resources.ContainsKey(a.resource))
@@ -93,7 +100,7 @@ public class Storeable : MonoBehaviour, ISaveLoad
             // Allow next adjustment to happen instantly.
             if (adjustments.Count == 0)
             {
-                time_elapsed = time_interval;
+                showAdjTimer.Reset();
             }
         }
     }

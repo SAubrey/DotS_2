@@ -277,7 +277,7 @@ public abstract class Unit
     {
         if (is_enemy)
             return 0;
-        Discipline d = Controller.I.get_disc(owner_ID).bat.disc;
+        Discipline d = TurnPhaser.I.getDisc(owner_ID).bat.disc;
         return d.equipment_inventory.get_stat_boost_amount(ID, stat_ID);
     }
 

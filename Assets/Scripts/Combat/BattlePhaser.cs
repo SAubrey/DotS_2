@@ -35,7 +35,7 @@ public class BattlePhaser : MonoBehaviour
             if (battle == null)
                 return null;
             //return Controller.I.get_disc(battle.active_bat_ID).bat; 
-            return TurnPhaser.I.active_disc.bat;
+            return TurnPhaser.I.activeDisc.bat;
         }
     }
 
@@ -78,7 +78,7 @@ public class BattlePhaser : MonoBehaviour
         // have been created at least one turn in advance of battle initiation.
         if (battle == null)
         {
-            battle = new Battle(Map.I, cell, TurnPhaser.I.active_disc, false);
+            battle = new Battle(Map.I, cell, TurnPhaser.I.activeDisc, false);
             cell.battle = battle;
             battle.begin();
         }
@@ -119,7 +119,7 @@ public class BattlePhaser : MonoBehaviour
         if (battle == null)
         {
             // only activate one image
-            disc_icon1.sprite = disc_sprites[TurnPhaser.I.active_disc_ID];
+            disc_icon1.sprite = disc_sprites[TurnPhaser.I.activeDiscID];
             Debug.Log("this should never happen");
         }
         else
@@ -208,6 +208,6 @@ public class BattlePhaser : MonoBehaviour
     // battalion_dead implies enemy_won, enemy_won does not imply battalion_dead.
     private bool battalion_dead
     {
-        get => active_bat.count_healthy() <= 0;
+        get => active_bat.count_units() <= 0;
     }
 }

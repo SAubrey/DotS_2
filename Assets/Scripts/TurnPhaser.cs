@@ -11,31 +11,32 @@ public class TurnPhaser : MonoBehaviour, ISaveLoad
 {
     public static TurnPhaser I { get; private set; }
 
-    public const int MOVEMENT = 1;
-    public const int TRAVEL_CARD = 2;
-    public const int ACTION = 3; // mine, build
-
-    public event Action<Discipline> on_disc_change;
-    public event Action on_turn_change;
-
+    public event Action<Discipline> onDiscChange;
+    public event Action onTurnChange;
     public int turn { get; private set; }
+    public Discipline astra, martial, endura;
 
-    private int _active_disc_ID;
-    public int active_disc_ID
+    public IDictionary<int, Discipline> discs = new Dictionary<int, Discipline>();
+
+    // <arbitrary turn order index, Discipline>
+    public Discipline[] discsInPlay;
+    public int numPlayers { get; private set; } = 1;
+
+    private int _activeDiscID;
+    public int activeDiscID
     {
-        get { return _active_disc_ID; }
+        get { return _activeDiscID; }
         set
         {
-            _active_disc_ID = value % 3;
-            active_disc = Controller.I.get_disc(active_disc_ID);
-            active_disc.active = true;
-            Controller.I.get_disc((_active_disc_ID + 1) % 3).active = false;
-            Controller.I.get_disc((_active_disc_ID + 2) % 3).active = false;
+            _activeDiscID = value % numPlayers;
+            activeDisc = discsInPlay[value % numPlayers];
+            activeDisc.active = true;
+            getDisc((_activeDiscID + 1) % 3).active = false;
+            getDisc((_activeDiscID + 2) % 3).active = false;
         }
     } // disciplines are like sub factions.
-    public Discipline active_disc { get; private set; }
+    public Discipline activeDisc { get; private set; }
 
-    private MapCell cell;
     void Awake()
     {
         if (I == null)
@@ -47,20 +48,25 @@ public class TurnPhaser : MonoBehaviour, ISaveLoad
             Destroy(gameObject);
         }
     }
-    void Start()
-    {
-        _active_disc_ID = Discipline.ASTRA;
-        active_disc = Controller.I.discs[_active_disc_ID];
+
+    public void Init(Discipline chosen_disc) {
+        astra.ID = Discipline.ASTRA;
+        martial.ID = Discipline.MARTIAL;
+        endura.ID = Discipline.ENDURA;
+        discs.Add(Discipline.ASTRA, astra);
+        discs.Add(Discipline.MARTIAL, martial);
+        discs.Add(Discipline.ENDURA, endura);
+
+        discsInPlay = new Discipline[] {chosen_disc};
+        numPlayers = discsInPlay.Length;
+        activeDisc = chosen_disc;
+        activeDisc.piece.SetActive(true);
     }
 
     public void advance_turn()
     {
         turn++;
-        on_turn_change();
-        /* foreach (Discipline disc in Controller.I.discs.Values) {
-             disc.register_turn();
-         }
-         Controller.I.city.register_turn();*/
+        onTurnChange();
     }
 
     public void end_disciplines_turn()
@@ -71,17 +77,16 @@ public class TurnPhaser : MonoBehaviour, ISaveLoad
 
     private void advance_player()
     {
-        active_disc_ID++;
-        if (on_disc_change != null)
-            on_disc_change(active_disc);
-        if (active_disc_ID == 0)
+        activeDiscID++;
+        if (onDiscChange != null)
+            onDiscChange(activeDisc);
+        if (activeDiscID == discsInPlay[0].ID)
             advance_turn();
 
-        if (active_disc.dead)
+        if (activeDisc.dead)
         {
-            active_disc.respawn();
+            activeDisc.respawn();
         }
-
 
         reset();
         CamSwitcher.I.set_active(CamSwitcher.MAP, true);
@@ -89,9 +94,8 @@ public class TurnPhaser : MonoBehaviour, ISaveLoad
 
     public void reset()
     { // New game, new player
-        cell = active_disc.cell;
         MapUI.I.set_active_ask_to_enterP(false);
-        MapUI.I.update_cell_text(cell.name);
+        MapUI.I.update_cell_text(activeDisc.cell.name);
     }
 
     public GameData save()
@@ -99,14 +103,22 @@ public class TurnPhaser : MonoBehaviour, ISaveLoad
         TurnPhaserData data = new TurnPhaserData();
         data.name = "TurnPhaser";
         data.turn = turn;
-        data.active_disc_ID = active_disc_ID;
+        data.activeDiscID = activeDiscID;
         return data;
     }
 
     public void load(GameData generic)
     {
         TurnPhaserData data = generic as TurnPhaserData;
-        active_disc_ID = data.active_disc_ID;
+        activeDiscID = data.activeDiscID;
         turn = data.turn;
+    }
+    
+    public Discipline getDisc(int ID)
+    {
+        if (!discs.Keys.Contains(ID)) {
+            return activeDisc;
+        }
+        return discs[ID];
     }
 }
