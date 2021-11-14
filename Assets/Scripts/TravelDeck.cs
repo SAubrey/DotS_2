@@ -53,18 +53,18 @@ public class TravelDeck : MonoBehaviour
     // Uses these mappings to aggregate relevant cards to draw from. 
     // For each list entry, join onto a new list the cards of that type.
     private Dictionary<int, List<int>> allowed_cards = new Dictionary<int, List<int>>() {
-        {MapCell.PLAINS_ID, new List<int>() },
-        {MapCell.FOREST_ID, new List<int>() },
-        {MapCell.RUINS_ID, new List<int>() },
-        {MapCell.CLIFF_ID, new List<int>() },
-        {MapCell.CAVE_ID, new List<int>() },
-        {MapCell.STAR_ID, new List<int>() },
-        {MapCell.TITRUM_ID, new List<int>() },
-        {MapCell.LUSH_LAND_ID, new List<int>() },
+        {MapCell.IDPlains, new List<int>() },
+        {MapCell.IDForest, new List<int>() },
+        {MapCell.IDRuins, new List<int>() },
+        {MapCell.IDCliff, new List<int>() },
+        {MapCell.IDCave, new List<int>() },
+        {MapCell.IDStar, new List<int>() },
+        {MapCell.IDTitrum, new List<int>() },
+        {MapCell.IDLushLand, new List<int>() },
         //{MapCell.MIRE_ID, new List<int>() },
-        {MapCell.MOUNTAIN_ID, new List<int>() },
-        {MapCell.SETTLEMENT_ID, new List<int>() },
-        {MapCell.RUNE_GATE_ID, new List<int>() },
+        {MapCell.IDMountain, new List<int>() },
+        {MapCell.IDSettlement, new List<int>() },
+        {MapCell.IDRuneGate, new List<int>() },
     };
 
     void Awake()
@@ -83,26 +83,26 @@ public class TravelDeck : MonoBehaviour
     {
         cards = new int[][] { tier1_cards, tier2_cards, tier3_cards };
 
-        allowed_cards[MapCell.PLAINS_ID].AddRange(new int[] {
+        allowed_cards[MapCell.IDPlains].AddRange(new int[] {
             TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE,
             TravelCard.EVENT, TravelCard.LOCATION});
-        allowed_cards[MapCell.FOREST_ID].AddRange(new int[] {
+        allowed_cards[MapCell.IDForest].AddRange(new int[] {
             TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE,
             TravelCard.EVENT, TravelCard.LOCATION});
-        allowed_cards[MapCell.CLIFF_ID].AddRange(new int[] {
+        allowed_cards[MapCell.IDCliff].AddRange(new int[] {
             TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE,
             TravelCard.EVENT, TravelCard.LOCATION});
-        allowed_cards[MapCell.MOUNTAIN_ID].AddRange(new int[] {
+        allowed_cards[MapCell.IDMountain].AddRange(new int[] {
             TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE,
             TravelCard.EVENT, TravelCard.LOCATION});
 
-        allowed_cards[MapCell.TITRUM_ID].AddRange(new int[] {
+        allowed_cards[MapCell.IDTitrum].AddRange(new int[] {
             TravelCard.COMBAT, TravelCard.CHANCE,
             TravelCard.EVENT, TravelCard.LOCATION});
         //allowed_cards[MapCell.MIRE_ID].AddRange(new int[] {
         //TravelCard.BLESSING, TravelCard.EVENT } );
-        allowed_cards[MapCell.CAVE_ID].Add(TravelCard.CAVE);
-        allowed_cards[MapCell.RUINS_ID].Add(TravelCard.RUINS);
+        allowed_cards[MapCell.IDCave].Add(TravelCard.CAVE);
+        allowed_cards[MapCell.IDRuins].Add(TravelCard.RUINS);
         // no cards for star, lush. Settlement = quest card?
     }
 
@@ -114,15 +114,15 @@ public class TravelDeck : MonoBehaviour
     public TravelCard draw_card(int tier, int biome_ID)
     {
         // Negate or bypass random draw.
-        if (biome_ID == MapCell.LUSH_LAND_ID || biome_ID == MapCell.STAR_ID)
+        if (biome_ID == MapCell.IDLushLand || biome_ID == MapCell.IDStar)
         {
             return null;
         }
-        else if (biome_ID == MapCell.RUNE_GATE_ID)
+        else if (biome_ID == MapCell.IDRuneGate)
         {
             return make_card(LOCATION1_1);
         }
-        else if (biome_ID == MapCell.GUARDIAN_PASS_ID)
+        else if (biome_ID == MapCell.IDGuardianPass)
         {
             if (tier == 1)
             {

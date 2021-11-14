@@ -25,7 +25,7 @@ public class Comfortable : IState
     public void OnEnter()
     {
         pending_attack_timer = new Timer(Random.Range(0.5f, 1.5f));
-        Debug.Log("comfortable w/ PD: " + d.player_distance);
+        Debug.Log("comfortable w/ PD: " + d.PlayerDistance);
     }
 
     public void OnExit()

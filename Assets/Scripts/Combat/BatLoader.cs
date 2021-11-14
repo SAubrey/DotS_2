@@ -12,16 +12,16 @@ public class BatLoader : MonoBehaviour
 {
     public static BatLoader I { get; private set; }
     //public Sprite white_fade_img, dark_fade_img;
-    public Sprite empty; // UIMask image for a slot button image.
+    public Sprite Empty; // UIMask image for a slot button image.
     // Unit quantity text fields in the unit selection scrollbar.
-    public Dictionary<int, TextMeshProUGUI> texts = new Dictionary<int, TextMeshProUGUI>();
-    public TextMeshProUGUI warrior_t, spearman_t, archer_t, miner_t, inspirator_t, seeker_t,
+    public Dictionary<int, TextMeshProUGUI> Texts = new Dictionary<int, TextMeshProUGUI>();
+    public TextMeshProUGUI TWarrior, spearman_t, archer_t, miner_t, inspirator_t, seeker_t,
         guardian_t, arbalest_t, skirmisher_t, paladin_t, mender_t, carter_t, dragoon_t,
         scout_t, drummer_t, shield_maiden_t, pikeman_t;
 
 
     // Button images in battle scene for highlighting selections.
-    public IDictionary<int, Button> unit_buttons = new Dictionary<int, Button>();
+    public IDictionary<int, Button> UnitButtons = new Dictionary<int, Button>();
     public Button archer_B, warrior_B, spearman_B, inspirator_B, miner_B,
         seeker_B, guardian_B, arbalest_B, skirmisher_B, paladin_B, mender_B, carter_B, dragoon_B,
         scout_B, drummer_B, shield_maiden_B, pikeman_B;
@@ -29,18 +29,18 @@ public class BatLoader : MonoBehaviour
 
     // Drawn unit images.
     // Player units
-    public Dictionary<int, Sprite> unit_images_back = new Dictionary<int, Sprite>();
+    public Dictionary<int, Sprite> UnitImagesBack = new Dictionary<int, Sprite>();
     public Sprite warrior_b, spearman_b, archer_b, miner_b, inspirator_b, seeker_b,
         guardian_b, arbalest_b, skirmisher_b, paladin_b, mender_b, carter_b, dragoon_b,
         scout_b, drummer_b, shield_maiden_b, pikeman_b;
-    public Dictionary<int, Sprite> unit_images_front = new Dictionary<int, Sprite>();
+    public Dictionary<int, Sprite> UnitImagesFront = new Dictionary<int, Sprite>();
     public Sprite warrior_f, spearman_f, archer_f, miner_f, inspirator_f, seeker_f,
         guardian_f, arbalest_f, skirmisher_f, paladin_f, mender_f, carter_f, dragoon_f,
         scout_f, drummer_f, shield_maiden_f, pikeman_f;
 
     // Enemy units
-    public Dictionary<int, Sprite> enemy_images_back = new Dictionary<int, Sprite>();
-    public Dictionary<int, Sprite> enemy_images_front = new Dictionary<int, Sprite>();
+    public Dictionary<int, Sprite> EnemyImagesBack = new Dictionary<int, Sprite>();
+    public Dictionary<int, Sprite> EnemyImagesFront = new Dictionary<int, Sprite>();
     // Plains
     public Sprite galtsa_b, grem_b, endu_b, korote_b, molner_b, etuena_b, clypte_b, goliath_b;
     public Sprite galtsa_f, grem_f, endu_f, korote_f, molner_f, etuena_f, clypte_f, goliath_f;
@@ -60,31 +60,31 @@ public class BatLoader : MonoBehaviour
     public Sprite meld_warrior_b, meld_spearman_b;
     public Sprite meld_warrior_f, meld_spearman_f;
 
-    public bool selecting_for_heal = false;
+    public bool SelectingForHeal = false;
     public TextMeshProUGUI discT;
-    public PlayerUnit healing_unit;
+    public PlayerUnit HealingUnit;
 
 
-    public Sprite get_unit_img(Unit unit, int direction)
+    public Sprite GetUnitImg(Unit unit, int direction)
     {
         if (unit != null)
-            return get_unit_direction_img(unit.get_type(), unit.get_ID(), direction);
+            return GetUnitDirectionImg(unit.IsPlayer, unit.GetID(), direction);
         return null;
     }
 
-    private Sprite get_unit_direction_img(int unit_type, int unit_ID, int direction)
+    private Sprite GetUnitDirectionImg(bool isPlayer, int unitID, int direction)
     {
-        if (unit_type == Unit.PLAYER)
+        if (isPlayer)
         {
-            if (direction == Group.UP || direction == Group.RIGHT)
-                return unit_images_back[unit_ID];
-            return unit_images_front[unit_ID];
+            if (direction == Group.Up || direction == Group.Right)
+                return UnitImagesBack[unitID];
+            return UnitImagesFront[unitID];
         }
         else
         {
-            if (direction == Group.UP || direction == Group.RIGHT)
-                return enemy_images_back[unit_ID];
-            return enemy_images_front[unit_ID];
+            if (direction == Group.Up || direction == Group.Right)
+                return EnemyImagesBack[unitID];
+            return EnemyImagesFront[unitID];
         }
     }
 
@@ -99,180 +99,180 @@ public class BatLoader : MonoBehaviour
             Destroy(gameObject);
         }
 
-        texts.Add(PlayerUnit.WARRIOR, warrior_t);
-        texts.Add(PlayerUnit.SPEARMAN, spearman_t);
-        texts.Add(PlayerUnit.ARCHER, archer_t);
-        texts.Add(PlayerUnit.MINER, miner_t);
-        texts.Add(PlayerUnit.INSPIRATOR, inspirator_t);
-        texts.Add(PlayerUnit.SEEKER, seeker_t);
-        texts.Add(PlayerUnit.GUARDIAN, guardian_t);
-        texts.Add(PlayerUnit.ARBALEST, arbalest_t);
-        texts.Add(PlayerUnit.SKIRMISHER, skirmisher_t);
-        texts.Add(PlayerUnit.PALADIN, paladin_t);
-        texts.Add(PlayerUnit.MENDER, mender_t);
-        texts.Add(PlayerUnit.CARTER, carter_t);
-        texts.Add(PlayerUnit.DRAGOON, dragoon_t);
-        texts.Add(PlayerUnit.SCOUT, scout_t);
-        texts.Add(PlayerUnit.DRUMMER, drummer_t);
-        texts.Add(PlayerUnit.SHIELD_MAIDEN, shield_maiden_t);
-        texts.Add(PlayerUnit.PIKEMAN, pikeman_t);
+        Texts.Add(PlayerUnit.WARRIOR, TWarrior);
+        Texts.Add(PlayerUnit.SPEARMAN, spearman_t);
+        Texts.Add(PlayerUnit.ARCHER, archer_t);
+        Texts.Add(PlayerUnit.MINER, miner_t);
+        Texts.Add(PlayerUnit.INSPIRATOR, inspirator_t);
+        Texts.Add(PlayerUnit.SEEKER, seeker_t);
+        Texts.Add(PlayerUnit.GUARDIAN, guardian_t);
+        Texts.Add(PlayerUnit.ARBALEST, arbalest_t);
+        Texts.Add(PlayerUnit.SKIRMISHER, skirmisher_t);
+        Texts.Add(PlayerUnit.PALADIN, paladin_t);
+        Texts.Add(PlayerUnit.MENDER, mender_t);
+        Texts.Add(PlayerUnit.CARTER, carter_t);
+        Texts.Add(PlayerUnit.DRAGOON, dragoon_t);
+        Texts.Add(PlayerUnit.SCOUT, scout_t);
+        Texts.Add(PlayerUnit.DRUMMER, drummer_t);
+        Texts.Add(PlayerUnit.SHIELD_MAIDEN, shield_maiden_t);
+        Texts.Add(PlayerUnit.PIKEMAN, pikeman_t);
 
         // Populate unit placement button images dictionary.
-        unit_buttons.Add(PlayerUnit.WARRIOR, warrior_B);
-        unit_buttons.Add(PlayerUnit.SPEARMAN, spearman_B);
-        unit_buttons.Add(PlayerUnit.ARCHER, archer_B);
-        unit_buttons.Add(PlayerUnit.MINER, miner_B);
-        unit_buttons.Add(PlayerUnit.INSPIRATOR, inspirator_B);
-        unit_buttons.Add(PlayerUnit.SEEKER, seeker_B);
-        unit_buttons.Add(PlayerUnit.GUARDIAN, guardian_B);
-        unit_buttons.Add(PlayerUnit.ARBALEST, arbalest_B);
-        unit_buttons.Add(PlayerUnit.SKIRMISHER, skirmisher_B);
-        unit_buttons.Add(PlayerUnit.PALADIN, paladin_B);
-        unit_buttons.Add(PlayerUnit.MENDER, mender_B);
-        unit_buttons.Add(PlayerUnit.CARTER, carter_B);
-        unit_buttons.Add(PlayerUnit.DRAGOON, dragoon_B);
-        unit_buttons.Add(PlayerUnit.SCOUT, scout_B);
-        unit_buttons.Add(PlayerUnit.DRUMMER, drummer_B);
-        unit_buttons.Add(PlayerUnit.SHIELD_MAIDEN, shield_maiden_B);
-        unit_buttons.Add(PlayerUnit.PIKEMAN, pikeman_B);
+        UnitButtons.Add(PlayerUnit.WARRIOR, warrior_B);
+        UnitButtons.Add(PlayerUnit.SPEARMAN, spearman_B);
+        UnitButtons.Add(PlayerUnit.ARCHER, archer_B);
+        UnitButtons.Add(PlayerUnit.MINER, miner_B);
+        UnitButtons.Add(PlayerUnit.INSPIRATOR, inspirator_B);
+        UnitButtons.Add(PlayerUnit.SEEKER, seeker_B);
+        UnitButtons.Add(PlayerUnit.GUARDIAN, guardian_B);
+        UnitButtons.Add(PlayerUnit.ARBALEST, arbalest_B);
+        UnitButtons.Add(PlayerUnit.SKIRMISHER, skirmisher_B);
+        UnitButtons.Add(PlayerUnit.PALADIN, paladin_B);
+        UnitButtons.Add(PlayerUnit.MENDER, mender_B);
+        UnitButtons.Add(PlayerUnit.CARTER, carter_B);
+        UnitButtons.Add(PlayerUnit.DRAGOON, dragoon_B);
+        UnitButtons.Add(PlayerUnit.SCOUT, scout_B);
+        UnitButtons.Add(PlayerUnit.DRUMMER, drummer_B);
+        UnitButtons.Add(PlayerUnit.SHIELD_MAIDEN, shield_maiden_B);
+        UnitButtons.Add(PlayerUnit.PIKEMAN, pikeman_B);
 
         // Unit images to be loaded into slots.
-        unit_images_back.Add(PlayerUnit.WARRIOR, warrior_b);
-        unit_images_back.Add(PlayerUnit.SPEARMAN, spearman_b);
-        unit_images_back.Add(PlayerUnit.ARCHER, archer_b);
-        unit_images_back.Add(PlayerUnit.MINER, miner_b);
-        unit_images_back.Add(PlayerUnit.INSPIRATOR, inspirator_b);
-        unit_images_back.Add(PlayerUnit.SEEKER, seeker_b);
-        unit_images_back.Add(PlayerUnit.SHIELD_MAIDEN, shield_maiden_b);
-        unit_images_back.Add(PlayerUnit.ARBALEST, arbalest_b);
-        unit_images_back.Add(PlayerUnit.SKIRMISHER, skirmisher_b);
-        unit_images_back.Add(PlayerUnit.PALADIN, paladin_b);
-        unit_images_back.Add(PlayerUnit.MENDER, mender_b);
-        unit_images_back.Add(PlayerUnit.CARTER, carter_b);
-        unit_images_back.Add(PlayerUnit.DRAGOON, dragoon_b);
-        unit_images_back.Add(PlayerUnit.SCOUT, scout_b);
-        unit_images_back.Add(PlayerUnit.DRUMMER, drummer_b);
-        unit_images_back.Add(PlayerUnit.GUARDIAN, guardian_b);
-        unit_images_back.Add(PlayerUnit.PIKEMAN, pikeman_b);
+        UnitImagesBack.Add(PlayerUnit.WARRIOR, warrior_b);
+        UnitImagesBack.Add(PlayerUnit.SPEARMAN, spearman_b);
+        UnitImagesBack.Add(PlayerUnit.ARCHER, archer_b);
+        UnitImagesBack.Add(PlayerUnit.MINER, miner_b);
+        UnitImagesBack.Add(PlayerUnit.INSPIRATOR, inspirator_b);
+        UnitImagesBack.Add(PlayerUnit.SEEKER, seeker_b);
+        UnitImagesBack.Add(PlayerUnit.SHIELD_MAIDEN, shield_maiden_b);
+        UnitImagesBack.Add(PlayerUnit.ARBALEST, arbalest_b);
+        UnitImagesBack.Add(PlayerUnit.SKIRMISHER, skirmisher_b);
+        UnitImagesBack.Add(PlayerUnit.PALADIN, paladin_b);
+        UnitImagesBack.Add(PlayerUnit.MENDER, mender_b);
+        UnitImagesBack.Add(PlayerUnit.CARTER, carter_b);
+        UnitImagesBack.Add(PlayerUnit.DRAGOON, dragoon_b);
+        UnitImagesBack.Add(PlayerUnit.SCOUT, scout_b);
+        UnitImagesBack.Add(PlayerUnit.DRUMMER, drummer_b);
+        UnitImagesBack.Add(PlayerUnit.GUARDIAN, guardian_b);
+        UnitImagesBack.Add(PlayerUnit.PIKEMAN, pikeman_b);
 
-        unit_images_front.Add(PlayerUnit.WARRIOR, warrior_f);
-        unit_images_front.Add(PlayerUnit.SPEARMAN, spearman_f);
-        unit_images_front.Add(PlayerUnit.ARCHER, archer_f);
-        unit_images_front.Add(PlayerUnit.MINER, miner_f);
-        unit_images_front.Add(PlayerUnit.INSPIRATOR, inspirator_f);
-        unit_images_front.Add(PlayerUnit.SEEKER, seeker_f);
-        unit_images_front.Add(PlayerUnit.SHIELD_MAIDEN, shield_maiden_f);
-        unit_images_front.Add(PlayerUnit.ARBALEST, arbalest_f);
-        unit_images_front.Add(PlayerUnit.SKIRMISHER, skirmisher_f);
-        unit_images_front.Add(PlayerUnit.PALADIN, paladin_f);
-        unit_images_front.Add(PlayerUnit.MENDER, mender_f);
-        unit_images_front.Add(PlayerUnit.CARTER, carter_f);
-        unit_images_front.Add(PlayerUnit.DRAGOON, dragoon_f);
-        unit_images_front.Add(PlayerUnit.SCOUT, scout_f);
-        unit_images_front.Add(PlayerUnit.DRUMMER, drummer_f);
-        unit_images_front.Add(PlayerUnit.GUARDIAN, guardian_f);
-        unit_images_front.Add(PlayerUnit.PIKEMAN, pikeman_f);
+        UnitImagesFront.Add(PlayerUnit.WARRIOR, warrior_f);
+        UnitImagesFront.Add(PlayerUnit.SPEARMAN, spearman_f);
+        UnitImagesFront.Add(PlayerUnit.ARCHER, archer_f);
+        UnitImagesFront.Add(PlayerUnit.MINER, miner_f);
+        UnitImagesFront.Add(PlayerUnit.INSPIRATOR, inspirator_f);
+        UnitImagesFront.Add(PlayerUnit.SEEKER, seeker_f);
+        UnitImagesFront.Add(PlayerUnit.SHIELD_MAIDEN, shield_maiden_f);
+        UnitImagesFront.Add(PlayerUnit.ARBALEST, arbalest_f);
+        UnitImagesFront.Add(PlayerUnit.SKIRMISHER, skirmisher_f);
+        UnitImagesFront.Add(PlayerUnit.PALADIN, paladin_f);
+        UnitImagesFront.Add(PlayerUnit.MENDER, mender_f);
+        UnitImagesFront.Add(PlayerUnit.CARTER, carter_f);
+        UnitImagesFront.Add(PlayerUnit.DRAGOON, dragoon_f);
+        UnitImagesFront.Add(PlayerUnit.SCOUT, scout_f);
+        UnitImagesFront.Add(PlayerUnit.DRUMMER, drummer_f);
+        UnitImagesFront.Add(PlayerUnit.GUARDIAN, guardian_f);
+        UnitImagesFront.Add(PlayerUnit.PIKEMAN, pikeman_f);
 
         // Enemies
         // Plains
-        enemy_images_back.Add(Enemy.GALTSA, galtsa_b);
-        enemy_images_front.Add(Enemy.GALTSA, galtsa_f);
-        enemy_images_back.Add(Enemy.GREM, grem_b);
-        enemy_images_front.Add(Enemy.GREM, grem_f);
-        enemy_images_back.Add(Enemy.ENDU, endu_b);
-        enemy_images_front.Add(Enemy.ENDU, endu_f);
-        enemy_images_back.Add(Enemy.KOROTE, korote_b);
-        enemy_images_front.Add(Enemy.KOROTE, korote_f);
-        enemy_images_back.Add(Enemy.MOLNER, molner_b);
-        enemy_images_front.Add(Enemy.MOLNER, molner_f);
-        enemy_images_back.Add(Enemy.ETUENA, etuena_b);
-        enemy_images_front.Add(Enemy.ETUENA, etuena_f);
-        enemy_images_back.Add(Enemy.CLYPTE, clypte_b);
-        enemy_images_front.Add(Enemy.CLYPTE, clypte_f);
-        enemy_images_back.Add(Enemy.GOLIATH, goliath_b);
-        enemy_images_front.Add(Enemy.GOLIATH, goliath_f);
+        EnemyImagesBack.Add(Enemy.GALTSA, galtsa_b);
+        EnemyImagesFront.Add(Enemy.GALTSA, galtsa_f);
+        EnemyImagesBack.Add(Enemy.GREM, grem_b);
+        EnemyImagesFront.Add(Enemy.GREM, grem_f);
+        EnemyImagesBack.Add(Enemy.ENDU, endu_b);
+        EnemyImagesFront.Add(Enemy.ENDU, endu_f);
+        EnemyImagesBack.Add(Enemy.KOROTE, korote_b);
+        EnemyImagesFront.Add(Enemy.KOROTE, korote_f);
+        EnemyImagesBack.Add(Enemy.MOLNER, molner_b);
+        EnemyImagesFront.Add(Enemy.MOLNER, molner_f);
+        EnemyImagesBack.Add(Enemy.ETUENA, etuena_b);
+        EnemyImagesFront.Add(Enemy.ETUENA, etuena_f);
+        EnemyImagesBack.Add(Enemy.CLYPTE, clypte_b);
+        EnemyImagesFront.Add(Enemy.CLYPTE, clypte_f);
+        EnemyImagesBack.Add(Enemy.GOLIATH, goliath_b);
+        EnemyImagesFront.Add(Enemy.GOLIATH, goliath_f);
         // Forest
-        enemy_images_back.Add(Enemy.KVERM, kverm_b);
-        enemy_images_front.Add(Enemy.KVERM, kverm_f);
-        enemy_images_back.Add(Enemy.LATU, latu_b);
-        enemy_images_front.Add(Enemy.LATU, latu_f);
-        enemy_images_back.Add(Enemy.EKE_TU, eke_tu_b);
-        enemy_images_front.Add(Enemy.EKE_TU, eke_tu_f);
-        enemy_images_back.Add(Enemy.OETEM, oetem_b);
-        enemy_images_front.Add(Enemy.OETEM, oetem_f);
-        enemy_images_back.Add(Enemy.EKE_FU, eke_fu_b);
-        enemy_images_front.Add(Enemy.EKE_FU, eke_fu_f);
-        enemy_images_back.Add(Enemy.EKE_SHI_AMI, eke_shi_ami_b);
-        enemy_images_front.Add(Enemy.EKE_SHI_AMI, eke_shi_ami_f);
-        enemy_images_back.Add(Enemy.EKE_LORD, eke_lord_b);
-        enemy_images_front.Add(Enemy.EKE_LORD, eke_lord_f);
-        enemy_images_back.Add(Enemy.KETEMCOL, ketemcol_b);
-        enemy_images_front.Add(Enemy.KETEMCOL, ketemcol_f);
+        EnemyImagesBack.Add(Enemy.KVERM, kverm_b);
+        EnemyImagesFront.Add(Enemy.KVERM, kverm_f);
+        EnemyImagesBack.Add(Enemy.LATU, latu_b);
+        EnemyImagesFront.Add(Enemy.LATU, latu_f);
+        EnemyImagesBack.Add(Enemy.EKE_TU, eke_tu_b);
+        EnemyImagesFront.Add(Enemy.EKE_TU, eke_tu_f);
+        EnemyImagesBack.Add(Enemy.OETEM, oetem_b);
+        EnemyImagesFront.Add(Enemy.OETEM, oetem_f);
+        EnemyImagesBack.Add(Enemy.EKE_FU, eke_fu_b);
+        EnemyImagesFront.Add(Enemy.EKE_FU, eke_fu_f);
+        EnemyImagesBack.Add(Enemy.EKE_SHI_AMI, eke_shi_ami_b);
+        EnemyImagesFront.Add(Enemy.EKE_SHI_AMI, eke_shi_ami_f);
+        EnemyImagesBack.Add(Enemy.EKE_LORD, eke_lord_b);
+        EnemyImagesFront.Add(Enemy.EKE_LORD, eke_lord_f);
+        EnemyImagesBack.Add(Enemy.KETEMCOL, ketemcol_b);
+        EnemyImagesFront.Add(Enemy.KETEMCOL, ketemcol_f);
         // Titrum
-        enemy_images_back.Add(Enemy.MAHUKIN, mahukin_b);
-        enemy_images_front.Add(Enemy.MAHUKIN, mahukin_f);
-        enemy_images_back.Add(Enemy.DRONGO, drongo_b);
-        enemy_images_front.Add(Enemy.DRONGO, drongo_f);
-        enemy_images_back.Add(Enemy.MAHEKET, maheket_b);
-        enemy_images_front.Add(Enemy.MAHEKET, maheket_f);
-        enemy_images_back.Add(Enemy.CALUTE, calute_b);
-        enemy_images_front.Add(Enemy.CALUTE, calute_f);
-        enemy_images_back.Add(Enemy.ETALKET, etalket_b);
-        enemy_images_front.Add(Enemy.ETALKET, etalket_f);
-        enemy_images_back.Add(Enemy.MUATEM, muatem_b);
-        enemy_images_front.Add(Enemy.MUATEM, muatem_f);
+        EnemyImagesBack.Add(Enemy.MAHUKIN, mahukin_b);
+        EnemyImagesFront.Add(Enemy.MAHUKIN, mahukin_f);
+        EnemyImagesBack.Add(Enemy.DRONGO, drongo_b);
+        EnemyImagesFront.Add(Enemy.DRONGO, drongo_f);
+        EnemyImagesBack.Add(Enemy.MAHEKET, maheket_b);
+        EnemyImagesFront.Add(Enemy.MAHEKET, maheket_f);
+        EnemyImagesBack.Add(Enemy.CALUTE, calute_b);
+        EnemyImagesFront.Add(Enemy.CALUTE, calute_f);
+        EnemyImagesBack.Add(Enemy.ETALKET, etalket_b);
+        EnemyImagesFront.Add(Enemy.ETALKET, etalket_f);
+        EnemyImagesBack.Add(Enemy.MUATEM, muatem_b);
+        EnemyImagesFront.Add(Enemy.MUATEM, muatem_f);
 
         // Mountains/Cliff
-        enemy_images_back.Add(Enemy.DRAK, drak_b);
-        enemy_images_front.Add(Enemy.DRAK, drak_f);
-        enemy_images_back.Add(Enemy.ZERRKU, zerrku_b);
-        enemy_images_front.Add(Enemy.ZERRKU, zerrku_f);
-        enemy_images_back.Add(Enemy.GOKIN, gokin_b);
-        enemy_images_front.Add(Enemy.GOKIN, gokin_f);
+        EnemyImagesBack.Add(Enemy.DRAK, drak_b);
+        EnemyImagesFront.Add(Enemy.DRAK, drak_f);
+        EnemyImagesBack.Add(Enemy.ZERRKU, zerrku_b);
+        EnemyImagesFront.Add(Enemy.ZERRKU, zerrku_f);
+        EnemyImagesBack.Add(Enemy.GOKIN, gokin_b);
+        EnemyImagesFront.Add(Enemy.GOKIN, gokin_f);
         // Cave
-        enemy_images_back.Add(Enemy.TAJAQAR, tajaqar_b);
-        enemy_images_front.Add(Enemy.TAJAQAR, tajaqar_f);
-        enemy_images_back.Add(Enemy.TAJAERO, tajaero_b);
-        enemy_images_front.Add(Enemy.TAJAERO, tajaero_f);
-        enemy_images_back.Add(Enemy.TERRA_QUAL, terra_qual_b);
-        enemy_images_front.Add(Enemy.TERRA_QUAL, terra_qual_f);
-        enemy_images_back.Add(Enemy.DUALE, duale_b);
-        enemy_images_front.Add(Enemy.DUALE, duale_f);
+        EnemyImagesBack.Add(Enemy.TAJAQAR, tajaqar_b);
+        EnemyImagesFront.Add(Enemy.TAJAQAR, tajaqar_f);
+        EnemyImagesBack.Add(Enemy.TAJAERO, tajaero_b);
+        EnemyImagesFront.Add(Enemy.TAJAERO, tajaero_f);
+        EnemyImagesBack.Add(Enemy.TERRA_QUAL, terra_qual_b);
+        EnemyImagesFront.Add(Enemy.TERRA_QUAL, terra_qual_f);
+        EnemyImagesBack.Add(Enemy.DUALE, duale_b);
+        EnemyImagesFront.Add(Enemy.DUALE, duale_f);
 
         // Meld
-        enemy_images_back.Add(Enemy.MELD_WARRIOR, meld_warrior_b);
-        enemy_images_front.Add(Enemy.MELD_WARRIOR, meld_warrior_f);
+        EnemyImagesBack.Add(Enemy.MELD_WARRIOR, meld_warrior_b);
+        EnemyImagesFront.Add(Enemy.MELD_WARRIOR, meld_warrior_f);
 
-        enemy_images_back.Add(Enemy.MELD_SPEARMAN, meld_spearman_b);
-        enemy_images_front.Add(Enemy.MELD_SPEARMAN, meld_spearman_f);
+        EnemyImagesBack.Add(Enemy.MELD_SPEARMAN, meld_spearman_b);
+        EnemyImagesFront.Add(Enemy.MELD_SPEARMAN, meld_spearman_f);
     }
 
     // This loads the player's battalion composition into the static
     // slots in the battle scene. 
-    public void load_bat(Battalion b)
+    public void LoadBat(Battalion b)
     {
-        foreach (int type_ID in b.units.Keys)
+        foreach (int type_ID in b.Units.Keys)
         {
-            load_unit_text(b, type_ID);
-            unit_buttons[type_ID].interactable = b.units[type_ID].Count > 0;
+            LoadUnitText(b, type_ID);
+            UnitButtons[type_ID].interactable = b.Units[type_ID].Count > 0;
         }
-        MapUI.I.highlight_discipline(discT, null, b.disc.ID);
+        MapUI.I.HighlightDiscipline(discT, null, b.Disc.ID);
     }
 
-    public void load_unit_text(Battalion b, int ID)
+    public void LoadUnitText(Battalion b, int ID)
     {
-        texts[ID].text = build_unit_text(b, ID);
+        Texts[ID].text = BuildUnitText(b, ID);
     }
 
     /*
     Load unit counts in unit placement sidebar.
     */
-    private string build_unit_text(Battalion b, int ID)
+    private string BuildUnitText(Battalion b, int ID)
     {
-        if (!texts.ContainsKey(ID))
+        if (!Texts.ContainsKey(ID))
             return "";
-        string num = b.count_units(ID).ToString();
-        int total_num = b.units[ID].Count;
+        string num = b.CountUnits(ID).ToString();
+        int total_num = b.Units[ID].Count;
         return num + " / " + total_num.ToString();
     }
 }

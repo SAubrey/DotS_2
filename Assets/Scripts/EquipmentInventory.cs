@@ -5,8 +5,8 @@ using UnityEngine;
 public class EquipmentInventory
 {
     // <equipment ID, List of equipment of that type>
-    public Dictionary<string, List<Equipment>> equipment = new Dictionary<string, List<Equipment>>();
-    public List<EquipmentSlot> equipment_slots = new List<EquipmentSlot>();
+    public Dictionary<string, List<Equipment>> Equipment = new Dictionary<string, List<Equipment>>();
+    public List<EquipmentSlot> EquipmentSlots = new List<EquipmentSlot>();
     public int[] slot_experience_requirements = new int[4] {
         50, 150, 300, 1000
     };
@@ -17,20 +17,20 @@ public class EquipmentInventory
         this.disc = disc;
         for (int i = 0; i < slot_experience_requirements.Length; i++)
         {
-            equipment_slots.Add(new EquipmentSlot(i));
+            EquipmentSlots.Add(new EquipmentSlot(i));
         }
     }
 
     public EquipmentSlot get_slot(int i)
     {
-        return equipment_slots[i];
+        return EquipmentSlots[i];
     }
 
     public int get_highest_unlocked_slot()
     {
         for (int i = slot_experience_requirements.Length - 1; i >= 0; i--)
         {
-            if (disc.get_res(Discipline.EXPERIENCE) >= slot_experience_requirements[i])
+            if (disc.GetResource(Discipline.Experience) >= slot_experience_requirements[i])
             {
                 return i;
             }
@@ -40,40 +40,40 @@ public class EquipmentInventory
 
     public string add_random_equipment(int tier)
     {
-        int choice_index = Random.Range(0, Equipment.equipment[tier].Length);
-        return (add_to_inventory(Equipment.equipment[tier][choice_index]));
+        int choice_index = Random.Range(0, global::Equipment.equipment[tier].Length);
+        return (add_to_inventory(global::Equipment.equipment[tier][choice_index]));
     }
 
     public string add_to_inventory(string name, int amount = 1)
     {
-        Equipment e = Equipment.make_equipment(name);
-        if (!equipment.ContainsKey(name))
-            equipment.Add(name, new List<Equipment>());
-        equipment[name].Add(e);
-        disc.show_adjustment(name, amount);
+        Equipment e = global::Equipment.make_equipment(name);
+        if (!Equipment.ContainsKey(name))
+            Equipment.Add(name, new List<Equipment>());
+        Equipment[name].Add(e);
+        disc.ShowAdjustment(name, amount);
         EquipmentUI.I.fill_dropdowns(this);
         return e == null ? "" : e.name;
     }
 
     public void equip(string name, int slot_num)
     {
-        if (name == null || !equipment.ContainsKey(name))
+        if (name == null || !Equipment.ContainsKey(name))
             return;
 
-        equipment_slots[slot_num].fill(equipment[name][0]);
+        EquipmentSlots[slot_num].fill(Equipment[name][0]);
     }
 
     public void unequip(int slot_num)
     {
-        if (slot_num < 0 || slot_num > equipment_slots.Count)
+        if (slot_num < 0 || slot_num > EquipmentSlots.Count)
             return;
-        equipment_slots[slot_num].clear();
+        EquipmentSlots[slot_num].clear();
     }
 
     public int get_stat_boost_amount(int unit_ID, int stat_ID)
     {
         int sum = 0;
-        foreach (EquipmentSlot es in equipment_slots)
+        foreach (EquipmentSlot es in EquipmentSlots)
         {
             if (!es.full)
                 continue;
@@ -111,27 +111,27 @@ public class EquipmentInventory
 
     public void remove_equipment(string name)
     {
-        if (!equipment.ContainsKey(name))
+        if (!Equipment.ContainsKey(name))
         {
             return;
         }
-        equipment[name].RemoveAt(0);
-        if (equipment[name].Count <= 0)
+        Equipment[name].RemoveAt(0);
+        if (Equipment[name].Count <= 0)
         {
-            equipment.Remove(name);
+            Equipment.Remove(name);
         }
     }
 
     public int get_equipment_amount(string name)
     {
-        if (!equipment.ContainsKey(name))
+        if (!Equipment.ContainsKey(name))
             return 0;
-        return equipment[name].Count;
+        return Equipment[name].Count;
     }
 
     public bool has_equipped(string name)
     {
-        foreach (EquipmentSlot es in equipment_slots)
+        foreach (EquipmentSlot es in EquipmentSlots)
         {
             if (!es.full)
                 continue;
@@ -143,12 +143,12 @@ public class EquipmentInventory
 
     public bool has(string name)
     {
-        return equipment.ContainsKey(name);
+        return Equipment.ContainsKey(name);
     }
 
     public void remove_all_equipment()
     {
-        equipment.Clear();
+        Equipment.Clear();
     }
 }
 

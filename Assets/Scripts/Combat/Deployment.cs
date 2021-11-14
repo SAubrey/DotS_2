@@ -6,142 +6,166 @@ using UnityEngine.UI;
 
 public abstract class Deployment : PhysicsBody
 {
-    protected static Vector2 VEC_UP = new Vector2(0, 1f);
-    protected static Vector2 VEC_DOWN = new Vector2(0, -1f);
-    protected static Vector2 VEC_RIGHT = new Vector2(1f, 0);
-    protected static Vector2 VEC_LEFT = new Vector2(-1f, 0);
+    public bool IsPlayer { get; protected set; } = false;
+    public bool IsEnemy { get; protected set; } = false;
 
-    public bool isPlayer { get; protected set; } = false;
-    public bool isEnemy { get; protected set; } = false;
-
-    public float VEL_RUN = 250f;
-    public float VEL_WALK = 120f;
-    public float VEL_SPRINT = 550f;
-    public float MAX_VELOCITY = 51f;
-
-    private Vector3 rotation_left = new Vector3(0, 0, -1.1f);
-    private Vector3 rotation_right = new Vector3(0, 0, 1.1f);
-    protected bool invulnerable;
+    public Vector3 Destination;
+    public float VelRun = 100f;
+    public float VelWalk = 50f;
+    public float VelSprint = 350f;
+    public float VelMax = 51f;
+    public float VelMaxBase { get { return 51f; } set { return; } }
+    protected bool Invulnerable;
 
     // Stamina
     public Slider staminabar;
-    public float MAX_STAMINA = 100f;
-    private float _stamina = 100f;
-    public float stamina
+
+    public float StamMax = 100f;
+    private float _Stamina = 100f;
+    public float Stamina
     {
-        get { return _stamina; }
+        get { return _Stamina; }
         set
         {
-            _stamina = Mathf.Max(value, 0f);
+            _Stamina = Mathf.Max(value, 0f);
             if (staminabar != null)
             {
-                update_staminabar();
+                UpdateSlider(staminabar, StamMax, Stamina);
             }
         }
     }
-    private Timer stam_regen_timer = new Timer(.0005f);
-    protected float stam_regen_amount = .1f;
-    protected float stam_dash_cost = 30f;
-    protected float stam_attack_cost = 20f;
-    protected float stam_range_cost = 25f;
-    protected float stam_block_cost = 20f;
-    public bool stunned = false;
-    public bool attacking = false;
-    public bool blocking = false;
-    
-    public bool canMove
-    {
-        get { return !attacking && !stunned && !blocking; }
+
+    public bool Stunned = false;
+    public bool Attacking = false;
+    private bool _Blocking = false;
+    public bool Blocking {
+        get { return _Blocking; }
+        set {
+            _Blocking = value;
+            VelMax = Blocking ? VelMaxBase * .5f : VelMaxBase;
+        }
     }
 
-    public Slider healthbar;
-    public float unit_img_dir = Group.UP;
+    public bool CanMove
+    {
+        get { return !Attacking && !Stunned && !Blocking; }
+    }
 
-    protected List<Group[]> zones = new List<Group[]>();
+    public float UnitImgDir = Group.Up;
+    protected float StamRegenAmount = .1f;
+    protected float StamAttackCost = 20f;
+    protected float StamRangeCost = 25f;
+    protected float StamBlockCost = 20f;
+
+    protected List<Group[]> Zones = new List<Group[]>();
     public LayerMask target_layer_mask;
 
-    public abstract Group[] get_attacking_zone(bool melee);
+    private Timer StamRegenTimer = new Timer(.0005f);
+    public abstract Group[] GetAttackingZone(bool melee);
 
-    public abstract void place_unit(Unit unit);
+    public abstract void PlaceUnit(Unit unit);
 
-    protected virtual void animate_slot_attack(bool melee) { }
+    protected virtual void AnimateSlotAttack(bool melee) { }
+
+    protected override void Awake() 
+    {
+        base.Awake();
+    }
 
     protected virtual void Update()
     {
-        update_timers(Time.deltaTime);
+        UpdateSlotTimers(Time.deltaTime);
 
-        if (rb.velocity.magnitude > MAX_VELOCITY)
-            MAX_VELOCITY = rb.velocity.magnitude;
+        if (Rigidbody.velocity.magnitude > VelMax)
+            VelMax = Rigidbody.velocity.magnitude;
     }
 
-    protected virtual void FixedUpdate() {
-        if (canMove) {
-            if (stam_regen_timer.Increase(Time.fixedDeltaTime) && 
-                stamina <= MAX_STAMINA - stam_regen_amount)
+    protected virtual void FixedUpdate()
+    {
+        if (CanMove)
+        {
+            if (StamRegenTimer.Increase(Time.fixedDeltaTime) &&
+                Stamina <= StamMax - StamRegenAmount)
             {
-                regen_stamina(stam_regen_amount);
+                RegenStamina(StamRegenAmount);
             }
         }
     }
 
-    public void update_timers(float dt)
+    protected Quaternion TargetRotation;
+    public void RotateTowardsTarget(Vector3 Target)
     {
-        foreach (Group[] gs in zones)
+        //TargetRotation = Quaternion.Euler(new Vector3(0, 0, Mathf.Atan2((pos.z - transform.position.z),
+         //   (pos.x - transform.position.x)) * Mathf.Rad2Deg - 90f));
+
+        // Lerp smooths and thus limits rotation speed.
+        //float str = Mathf.Min(5f * Time.deltaTime, 1f);
+        //transform.rotation = Quaternion.Lerp(transform.rotation, TargetRotation, str);
+        //Rigidbody.rotation = Quaternion.Lerp(transform.rotation, TargetRotation, str);
+        transform.LookAt(Target);
+        transform.rotation = Quaternion.Euler(0f, transform.rotation.eulerAngles.y, 0f);
+        //RotateRigidbodyToTarget(Rigidbody, Target);
+        FaceSlotsToCamera();
+    }
+
+    public void UpdateSlotTimers(float dt)
+    {
+        foreach (Group[] gs in Zones)
         {
             foreach (Group g in gs)
             {
-                foreach (Slot s in g.slots)
+                foreach (Slot s in g.Slots)
                 {
-                    if (s.has_unit)
-                        s.get_unit().update_timers(dt);
+                    if (s.HasUnit)
+                        s.GetUnit().UpdateTimers(dt);
                 }
             }
         }
     }
 
-    public void melee_attack(Group[] zone)
+    public void MeleeAttack(Group[] zone)
     {
-        if (stamina < stam_attack_cost)
+        if (Stamina < StamAttackCost)
             return;
-            
-        stamina -= stam_attack_cost;
+
+        Stamina -= StamAttackCost;
         foreach (Group g in zone)
         {
             for (int i = 0; i < 3; i++)
             {
-                if (g.slots[i].has_unit)
+                if (g.Slots[i].HasUnit)
                 {
-                    g.slots[i].get_unit().melee_attack(target_layer_mask);
+                    g.Slots[i].GetUnit().MeleeAttack(target_layer_mask);
                 }
             }
         }
     }
 
 
-    public void range_attack(Group[] zone, Vector3 target_pos)
+    public void RangeAttack(Group[] zone, Vector3 target_pos)
     {
-        if (stamina < stam_range_cost)
+        if (Stamina < StamRangeCost)
             return;
 
-        stamina -= stam_range_cost;
+        Stamina -= StamRangeCost;
         foreach (Group g in zone)
         {
             for (int i = 0; i < 3; i++)
             {
-                if (g.slots[i].has_unit)
+                if (g.Slots[i].HasUnit)
                 {
-                    Unit u = g.slots[i].get_unit();
-                    u.range_attack(target_layer_mask, target_pos);
+                    Unit u = g.Slots[i].GetUnit();
+                    u.RangeAttack(target_layer_mask, target_pos);
                 }
             }
         }
     }
 
-    public Group get_highest_empty_group(Group[] groups)
+    public Group GetHighestEmptyGroup(Group[] groups)
     {
         foreach (Group g in groups)
         {
-            if (!g.is_full)
+            if (!g.IsFull)
             {
                 return g;
             }
@@ -149,48 +173,34 @@ public abstract class Deployment : PhysicsBody
         return null;
     }
 
-    public void regen_stamina(float amount)
+    public void RegenStamina(float amount)
     {
-        if (stamina >= MAX_STAMINA || blocking)
+        if (Stamina >= StamMax || Blocking)
             return;
         //stamina += StaticOps.GetAdjustedIncrease(stamina, amount, MAX_STAMINA);
-        stamina += amount;
+        Stamina += amount;
     }
 
-    public void update_staminabar()
+    public void UpdateSlider(Slider slider, float maxValue, float value)
     {
-        staminabar.maxValue = MAX_STAMINA;
-        staminabar.value = stamina;
+        slider.maxValue = StamMax;
+        slider.value = Stamina;
 
         //float green = ((float)stamina / (float)MAX_STAMINA);
         //staminabar.fillRect.GetComponent<Image>().color = new Color(.1f, .65f, .1f, green);
     }
 
-    public void rotate(int dir)
-    {
-        if (dir < 0)
-        {
-            transform.Rotate(rotation_right);
-        }
-        else
-        {
-            transform.Rotate(rotation_left);
-        }
-        face_slots_to_camera();
-        determine_unit_img_direction(transform.rotation.eulerAngles);
-    }
-
     private void determine_unit_img_direction(Vector3 dir)
     {
-        if ((dir.z > 90 && dir.z < 270) && unit_img_dir == Group.UP)
+        if ((dir.z > 90 && dir.z < 270) && UnitImgDir == Group.Up)
         {
-            flip_slot_imgs(Group.DOWN);
-            unit_img_dir = Group.DOWN;
+            FlipSlotImgs(Group.Down);
+            UnitImgDir = Group.Down;
         }
-        else if ((dir.z <= 90 || dir.z >= 270) && unit_img_dir == Group.DOWN)
+        else if ((dir.z <= 90 || dir.z >= 270) && UnitImgDir == Group.Down)
         {
-            flip_slot_imgs(Group.UP);
-            unit_img_dir = Group.UP;
+            FlipSlotImgs(Group.Up);
+            UnitImgDir = Group.Up;
         }
     }
 
@@ -199,66 +209,43 @@ public abstract class Deployment : PhysicsBody
         get
         {
             int sum = 0;
-            foreach (Group[] zone in zones)
+            foreach (Group[] zone in Zones)
             {
                 foreach (Group g in zone)
                 {
-                    sum += g.sum_unit_health();
+                    sum += g.SumUnitHealth();
                 }
             }
             return sum;
         }
     }
 
-    public virtual void update_healthbar()
+    protected void FlipSlotImgs(int dir)
     {
-        healthbar.value = hp;
-
-        float red = ((float)hp / (float)100);
-        healthbar.fillRect.GetComponent<Image>().color = new Color(1f, .1f, .1f, red);
-    }
-
-
-    protected void flip_slot_imgs(int dir)
-    {
-        foreach (Group[] zone in zones)
+        foreach (Group[] zone in Zones)
         {
             foreach (Group g in zone)
             {
-                g.rotate_sprites(dir);
+                g.RotateSprites(dir);
             }
         }
     }
 
-    protected void face_slots_to_camera()
+    protected void FaceSlotsToCamera()
     {
-        foreach (Group[] zone in zones)
+        foreach (Group[] zone in Zones)
         {
             foreach (Group g in zone)
             {
-                foreach (Slot s in g.slots)
+                foreach (Slot s in g.Slots)
                 {
-                    s.face_cam();
+                    s.FaceCam();
                 }
             }
         }
     }
 
-    protected void toggle_slot_dust_ps(int active)
-    {
-        foreach (Group[] zone in zones)
-        {
-            foreach (Group g in zone)
-            {
-                foreach (Slot s in g.slots)
-                {
-                    s.toggle_dust_ps(new Vector2(active, 0));
-                }
-            }
-        }
-    }
-
-    public virtual void delete()
+    public virtual void Delete()
     {
         GameObject.Destroy(gameObject);
     }

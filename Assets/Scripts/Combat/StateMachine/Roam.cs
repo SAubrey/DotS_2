@@ -6,7 +6,7 @@ public class Roam : IState
 {
     private EnemyDeployment d;
     private Vector2 target_pos;
-    Timer t = new Timer(5f, 3f, 6f);
+    Timer t = new Timer(5f, false, 3f, 6f);
 
     public Roam(EnemyDeployment d)
     {
@@ -15,7 +15,7 @@ public class Roam : IState
 
     public void Tick()
     {
-        d.Move(target_pos, d.VEL_WALK, PhysicsBody.MoveForce, 3f);
+        d.MoveToDestination(target_pos, d.VelWalk, PhysicsBody.MoveForce, 3f);
 
         if (t.Increase(Time.deltaTime))
         {

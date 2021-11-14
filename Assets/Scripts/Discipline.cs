@@ -5,148 +5,172 @@ using System;
 
 public class Discipline : Storeable, ISaveLoad
 {
-    public const string EXPERIENCE = "experience";
-    public const int ASTRA = 0, ENDURA = 1, MARTIAL = 2;
-    public GameObject piece;
-    public Battalion bat { get; private set; }
-    public bool active = false;
-    public bool restart_battle_from_drawn_card = false;
-    private int mine_qty_multiplier = 3;
-    public int mine_qty
+    public const string Experience = "experience";
+    public const int Astra = 0, Endura = 1, Martial = 2;
+    public GameObject Piece;
+    public Battalion Bat { get; private set; }
+    
+    public bool Active = false;
+    public bool RestartBattleFromDrawnCard = false;
+    private int MineQtyMultiplier = 3;
+    public int MineQty
     {
-        get => mine_qty_multiplier *= bat.count_units(PlayerUnit.MINER);
+        get => MineQtyMultiplier *= Bat.CountUnits(PlayerUnit.MINER);
     }
-    public bool has_mined_in_turn, has_moved_in_turn, has_scouted_in_turn = false;
-    public bool has_acted_in_turn { get => has_moved_in_turn || has_scouted_in_turn; }
-    public bool dead { get; private set; } = false;
+    public bool HasMinedInTurn, HasMovedInTurn, HasScoutedInTurn = false;
+    public bool HasActedInTurn { get => HasMovedInTurn || HasScoutedInTurn; }
+    public bool Dead { get; private set; } = false;
     private MapCell _cell;
-    public MapCell cell
+    // Change cells to change piece location on the map.
+    public MapCell Cell
     {
         get => _cell;
         set
         {
             if (value == null)
                 return;
-            previous_cell = cell;
+            PreviousCell = Cell;
             _cell = value;
-            pos = cell.pos.to_vec3;
+            Position = Cell.Pos.to_vec3;
         }
     }
-    public MapCell previous_cell { get; private set; }
+    public MapCell PreviousCell { get; private set; }
     private Vector3 _pos;
-    public Vector3 pos
+    public Vector3 Position
     {
         get { return _pos; }
         set
         {
             _pos = value;
-            piece.transform.position = new Vector3(value.x, value.y, 0);
+            Piece.transform.position = new Vector3(value.x, value.y, 0);
         }
     }
 
     public EquipmentInventory equipment_inventory;
     public event Action on_unit_count_change;
-    public void trigger_unit_count_change() { on_unit_count_change(); }
+    public void TriggerUnitCountChange() 
+    { 
+        if (on_unit_count_change != null)
+            on_unit_count_change(); 
+    }
 
     protected override void Start()
     {
         base.Start();
-        resources.Add(EXPERIENCE, 0);
-        mine_qty_multiplier = ID == ENDURA ? 4 : 3;
+        Resources.Add(Experience, 0);
+        MineQtyMultiplier = ID == Endura ? 4 : 3;
     }
 
-    public override void init(bool from_save)
+    public override void Init(bool from_save)
     {
-        base.init(from_save);
-        bat = new Battalion(this);
+        base.Init(from_save);
+        Initialized = true;
+        Bat = new Battalion(this);
         equipment_inventory = new EquipmentInventory(this);
 
-        resources[LIGHT] = 4;
-        resources[UNITY] = 5;
-        resources[STAR_CRYSTALS] = 1;
-        resources[EXPERIENCE] = 500;
-        cell = Map.I.city_cell;
-        MapUI.I.update_deployment(bat);
+        Resources[LIGHT] = 4;
+        Resources[UNITY] = 5;
+        Resources[STAR_CRYSTALS] = 1;
+        Resources[Experience] = 500;
+        Cell = Map.I.CityCell;
+        MapUI.I.UpdateDeployment(Bat);
     }
 
-    public override void register_turn()
+    public override void RegisterTurn()
     {
-        if (!initialized)
+        if (!Initialized)
             return;
 
-        if (!dead)
+        if (!Dead)
         {
-            base.register_turn();
-            check_insanity(get_res(UNITY));
+            base.RegisterTurn();
+            CheckInsanity(GetResource(UNITY));
         }
-        has_mined_in_turn = false;
-        has_moved_in_turn = false;
-        has_scouted_in_turn = false;
+        HasMinedInTurn = false;
+        HasMovedInTurn = false;
+        HasScoutedInTurn = false;
     }
 
-    public void move(MapCell cell)
+    public void Move(MapCell cell)
     {
         // Offset position on cell to simulate human placement and prevent perfect overlap.
-        this.cell = cell;
+        this.Cell = cell;
         float randx = UnityEngine.Random.Range(-0.2f, 0.2f);
         float randy = UnityEngine.Random.Range(-0.2f, 0.2f);
-        pos = new Vector3(cell.pos.x + 0.5f + randx, cell.pos.y + 0.5f + randy, 0);
-        has_moved_in_turn = true;
-        MapUI.I.update_cell_text(cell.name);
-        cell.enter();
+        Position = new Vector3(cell.Pos.x + 0.5f + randx, cell.Pos.y + 0.5f + randy, 0);
+        HasMovedInTurn = true;
+        MapUI.I.UpdateCellText(cell.Name);
+        cell.Enter();
     }
 
-    public void move_to_previous_cell()
+    public void MoveToPreviousCell()
     {
-        move(previous_cell);
+        Move(PreviousCell);
     }
 
-    /*
-    Upon death, move the player piece to the city,
-    reset troop composition to default, 
-    lose all resources,
-    drop equipment and experience on the cell of death to be retrieved.
-    */
-    public void die()
+    public void Teleport()
     {
-        if (!cell.battle.is_group)
+        // Rune gates allow free travel to other rune gates.
+        if (Cell.RestoredRuneGate)
         {
-            cell.battle.end();
+            // Indicate rune gates.
+
         }
-        remove_resources_lost_on_death();
-        Map.I.get_cell(pos).drop_XP(resources[EXPERIENCE]);
-        Debug.Log("Dropped XP at: " + pos);
-        pos = new Vector3(-100, -100, 0);
-        dead = true;
+        // Return trip on one-way paid teleport.
+        else if (Cell.TeleportDestination != null) 
+        {
+            // Move player piece to previously logged location.
+            MapCell prevCell = Cell;
+            Cell = Cell.TeleportDestination;
+            prevCell.TeleportDestination = null;
+        }
+        // If No rune gate or return teleport, teleport to city and reduce SC cost.
+        else 
+        {
+            if (GetResource(Storeable.STAR_CRYSTALS) >= 5)
+            {  
+                MapCell mc = Cell;
+                Cell = Map.I.CityCell;
+                Cell.TeleportDestination = mc;
+                AdjustResource(Storeable.STAR_CRYSTALS, -5, true);
+            }
+        }
     }
 
-    public void respawn()
+    public void Die()
     {
-        bat.add_default_troops();
-        move(Map.I.city_cell);
-        has_moved_in_turn = false;
-        dead = false;
+        Move(Map.I.CityCell);
+        Game.I.GameOver();
+        Respawn();
     }
 
-    private void check_insanity(int unity)
+    public void Respawn()
+    {
+        Bat.AddDefaultTroops();
+        Move(Map.I.CityCell);
+        HasMovedInTurn = false;
+        Dead = false;
+    }
+
+    private void CheckInsanity(int unity)
     {
         // 5 == "wavering"
         // 4 == unable to build
         if (unity == 3)
         {
-            roll_for_insanity(1, 20);
+            RollForInsanity(1, 20);
         }
         else if (unity == 2)
         {
-            roll_for_insanity(2, 50);
+            RollForInsanity(2, 50);
         }
         else if (unity < 2)
         {
-            roll_for_insanity(2, 80);
+            RollForInsanity(2, 80);
         }
     }
 
-    private void roll_for_insanity(int quantity, int chance)
+    private void RollForInsanity(int quantity, int chance)
     {
         int roll = UnityEngine.Random.Range(1, 100);
         if (roll <= chance)
@@ -154,32 +178,32 @@ public class Discipline : Storeable, ISaveLoad
             // Units flee into the darkness.
             for (int i = 0; i < quantity; i++)
             {
-                bat.lose_random_unit("Your ranks crumble without the light of the stars.");
+                Bat.LoseRandomUnit("Your ranks crumble without the light of the stars.");
             }
         }
     }
 
-    public void receive_travelcard_consequence()
+    public void ReceiveTravelcardConsequence()
     {
-        if (get_travelcard() == null)
+        if (GetTravelcard() == null)
             return;
-        show_adjustments(cell.get_travelcard_consequence());
-        if (get_travelcard().equipment_reward_amount > 0)
+        ShowAdjustments(Cell.get_travelcard_consequence());
+        if (GetTravelcard().equipment_reward_amount > 0)
         {
-            string name = equipment_inventory.add_random_equipment(cell.tier);
+            string name = equipment_inventory.add_random_equipment(Cell.Tier);
             RisingInfo.create_rising_info_map(
                 RisingInfo.build_resource_text(name, 1),
                 Statics.disc_colors[ID],
                 origin_of_rise_obj.transform,
                 rising_info_prefab);
         }
-        cell.complete_travelcard();
+        Cell.CompleteTravelcard();
     }
 
-    public void add_xp_in_battle(int xp, Enemy enemy)
+    public void AddXPInBattle(int xp, Enemy enemy)
     {
         // Show xp rising over enemy
-        change_var(Discipline.EXPERIENCE, xp, false);
+        AdjustResource(Discipline.Experience, xp, false);
         StartCoroutine(_add_xp_in_battle(xp, enemy));
     }
 
@@ -189,71 +213,71 @@ public class Discipline : Storeable, ISaveLoad
         RisingInfo.create_rising_info_battle(
             RisingInfo.build_resource_text("XP", xp),
             Statics.disc_colors[ID],
-            enemy.get_slot().transform,
+            enemy.GetSlot().transform,
             rising_info_prefab);
     }
 
-    public TravelCard get_travelcard()
+    public TravelCard GetTravelcard()
     {
-        return cell.travelcard;
+        return Cell.Travelcard;
     }
 
-    public void mine(MapCell cell)
+    public void Mine(MapCell cell)
     {
         int mined = 0;
-        if (cell.ID == MapCell.TITRUM_ID || cell.ID == MapCell.MOUNTAIN_ID)
+        if (cell.ID == MapCell.IDTitrum || cell.ID == MapCell.IDMountain)
         {
-            mined = Statics.valid_nonnegative_change(cell.minerals, mine_qty);
-            show_adjustment(Storeable.MINERALS, mined);
-            cell.minerals -= mined;
+            mined = Statics.valid_nonnegative_change(cell.Minerals, MineQty);
+            ShowAdjustment(Storeable.MINERALS, mined);
+            cell.Minerals -= mined;
         }
-        else if (cell.ID == MapCell.STAR_ID)
+        else if (cell.ID == MapCell.IDStar)
         {
-            mined = Statics.valid_nonnegative_change(cell.star_crystals, mine_qty);
-            show_adjustment(Storeable.STAR_CRYSTALS, mined);
-            cell.star_crystals -= mined;
+            mined = Statics.valid_nonnegative_change(cell.StarCrystals, MineQty);
+            ShowAdjustment(Storeable.STAR_CRYSTALS, mined);
+            cell.StarCrystals -= mined;
         }
-        has_mined_in_turn = true;
-        if (MapUI.I.cell_UI_is_open)
+        HasMinedInTurn = true;
+        if (MapUI.I.CellUIIsOpen)
             MapUI.I.open_cell_UI_script.update_mineable_text();
     }
 
-    public void reset()
+    public void Reset()
     {
-        restart_battle_from_drawn_card = false;
-        foreach (int type in PlayerUnit.unit_types)
+        RestartBattleFromDrawnCard = false;
+        foreach (int type in PlayerUnit.UnitTypes)
         {
-            bat.units[type].Clear();
+            Bat.Units[type].Clear();
         }
     }
 
-    public override GameData save()
+    public override GameData Save()
     {
-        return new DisciplineData(this, name);
+        return new DisciplineData(this, Name);
     }
 
-    public override void load(GameData generic)
+    public override void Load(GameData generic)
     {
         DisciplineData data = generic as DisciplineData;
-        reset();
-        resources[LIGHT] = data.sresources.light;
-        resources[UNITY] = data.sresources.unity;
-        resources[STAR_CRYSTALS] = data.sresources.star_crystals;
-        resources[MINERALS] = data.sresources.minerals;
-        resources[ARELICS] = data.sresources.arelics;
-        resources[ERELICS] = data.sresources.erelics;
-        resources[MRELICS] = data.sresources.mrelics;
+        Reset();
+        Resources[LIGHT] = data.sresources.light;
+        Resources[UNITY] = data.sresources.unity;
+        Resources[STAR_CRYSTALS] = data.sresources.star_crystals;
+        Resources[MINERALS] = data.sresources.minerals;
+        Resources[ARELICS] = data.sresources.arelics;
+        Resources[ERELICS] = data.sresources.erelics;
+        Resources[MRELICS] = data.sresources.mrelics;
 
-        pos = new Vector3(data.col, data.row);
-        cell.travelcard = TravelDeck.I.make_card(data.redrawn_travel_card_ID);
-        restart_battle_from_drawn_card = cell.travelcard != null;
+        Position = new Vector3(data.col, data.row);
+        Cell.Travelcard = TravelDeck.I.make_card(data.redrawn_travel_card_ID);
+        RestartBattleFromDrawnCard = Cell.Travelcard != null;
 
         // Create healthy units.
-        Debug.Log("count:" + PlayerUnit.unit_types.Count);
+        Debug.Log("count:" + PlayerUnit.UnitTypes.Count);
         Debug.Log("count:" + data.sbat.unit_types.Count);
-        foreach (int type in PlayerUnit.unit_types)
+        foreach (int type in PlayerUnit.UnitTypes)
         {
-            bat.add_units(type, data.sbat.unit_types[type]);
+            Bat.AddUnits(type, data.sbat.unit_types[type]);
         }
     }
 }

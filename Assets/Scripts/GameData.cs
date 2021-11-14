@@ -10,8 +10,8 @@ public class GameData
 
 interface ISaveLoad
 {
-    GameData save();
-    void load(GameData generic);
+    GameData Save();
+    void Load(GameData generic);
 }
 
 [System.Serializable]
@@ -32,20 +32,20 @@ public class MapData : GameData
     {
         this.name = name;
 
-        foreach (int num in map.bags[1])
+        foreach (int num in map.Bags[1])
             t1_bag.Add(num);
-        foreach (int num in map.bags[2])
+        foreach (int num in map.Bags[2])
             t2_bag.Add(num);
-        foreach (int num in map.bags[3])
+        foreach (int num in map.Bags[3])
             t3_bag.Add(num);
 
-        foreach (MapCell mc in map.map.Values)
+        foreach (MapCell mc in map.MapCells.Values)
         {
             SMapCell mcs =
                 new SMapCell(mc.ID,
-                        mc.pos.x, mc.pos.y,
-                        mc.tier, mc.discovered,
-                        mc.minerals, mc.star_crystals);
+                        mc.Pos.x, mc.Pos.y,
+                        mc.Tier, mc.Discovered,
+                        mc.Minerals, mc.StarCrystals);
             cells.Add(mcs);
         }
     }
@@ -84,11 +84,11 @@ public class DisciplineData : GameData
     public DisciplineData(Discipline disc, string name)
     {
         this.name = name;
-        col = disc.pos.x;
-        row = disc.pos.y;
-        if (disc.bat.in_battle)
-            redrawn_travel_card_ID = disc.get_travelcard().ID;
-        sbat = new SBattalion(disc.bat);
+        col = disc.Position.x;
+        row = disc.Position.y;
+        if (disc.Bat.InBattle)
+            redrawn_travel_card_ID = disc.GetTravelcard().ID;
+        sbat = new SBattalion(disc.Bat);
         sresources = new SStoreableResources(disc);
     }
 }
@@ -99,13 +99,13 @@ public struct SStoreableResources
     public int light, unity, star_crystals, minerals, arelics, erelics, mrelics;
     public SStoreableResources(Storeable s)
     {
-        light = s.get_res(Storeable.LIGHT);
-        unity = s.get_res(Storeable.UNITY);
-        star_crystals = s.get_res(Storeable.STAR_CRYSTALS);
-        minerals = s.get_res(Storeable.MINERALS);
-        arelics = s.get_res(Storeable.ARELICS);
-        erelics = s.get_res(Storeable.ERELICS);
-        mrelics = s.get_res(Storeable.MRELICS);
+        light = s.GetResource(Storeable.LIGHT);
+        unity = s.GetResource(Storeable.UNITY);
+        star_crystals = s.GetResource(Storeable.STAR_CRYSTALS);
+        minerals = s.GetResource(Storeable.MINERALS);
+        arelics = s.GetResource(Storeable.ARELICS);
+        erelics = s.GetResource(Storeable.ERELICS);
+        mrelics = s.GetResource(Storeable.MRELICS);
     }
 }
 
@@ -116,7 +116,7 @@ public struct SBattalion
     public List<int> unit_types;
     public SBattalion(Battalion bat)
     {
-        unit_types = PlayerUnit.unit_types;
+        unit_types = PlayerUnit.UnitTypes;
     }
 }
 

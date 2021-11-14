@@ -5,9 +5,9 @@ using System;
 
 public class PhysicsBody : MonoBehaviour
 {
-    public event Action<Vector2> on_position_change;
-    private Vector2 _position;
-    public Vector2 position { 
+    public event Action<Vector3> OnPositionChange;
+    private Vector3 _position;
+    public Vector3 Position { 
         get 
         {
             return transform.position;
@@ -17,54 +17,94 @@ public class PhysicsBody : MonoBehaviour
             if (value == _position)
                 return;
             _position = value;
-            if (on_position_change != null)
-                on_position_change(position);
+            if (OnPositionChange != null)
+                OnPositionChange(Position);
         } 
     }
 
     public static float MoveForce = 250f;
-    public Rigidbody2D rb;
+    public Rigidbody Rigidbody;
 
-    public virtual bool Move(Vector2 dest, float maxVel, float force, float acceptableDistance)
+    protected virtual void Awake() 
+    {
+        Rigidbody = gameObject.GetComponent<Rigidbody>();
+    }
+
+    public virtual void MoveToDestination(Vector3 dest, float maxVel, float force, float stopDistance=2f)
     {
         // Check if close enough to avoid jittering. 
         // Not ideal for movement without a distant destination.
-        if (maxVel == 0 || arrivedAtPos(dest, acceptableDistance))
-            return false;
+        //Debug.Log(ArrivedAtPos(dest, acceptableDistance));
+        if (maxVel == 0 || WithinDistance(dest, stopDistance))
+            return;
         
-        Vector2 direction = Statics.Direction(transform.position, dest);
-        Move(direction, maxVel, force);
-        return true;
+        if (WithinDistance(dest, 5f))
+        {
+            Brake();
+            return;
+        }
+
+        Vector3 direction = Statics.Direction(Rigidbody.position, dest);
+        MoveInDirection(direction, maxVel, force);
+        RotateWithDirection();
+        return;
     }
 
-    protected virtual void Move(Vector2 direction, float maxVel, float force) {
+    public void RotateWithDirection() 
+    {
+        transform.rotation = Quaternion.LookRotation(Rigidbody.velocity.normalized);
+    }
+
+    protected virtual void MoveInDirection(Vector3 direction, float maxVel, float force) {
         if (maxVel == 0)
             return;
 
         direction.Normalize();
-        force *= (1f - (rb.velocity.magnitude / maxVel));
-        rb.AddForce(direction * force);
-        position =  rb.position;
+        force *= (1f - (Rigidbody.velocity.magnitude / maxVel));
+        Rigidbody.AddForce(direction * force);
+        Position =  Rigidbody.position;
     }
 
-    protected bool arrivedAtPos(Vector2 dest, float acceptable_distance)
+    protected bool WithinDistance(Vector3 dest, float distance)
     {
-        return Vector2.Distance(transform.position, dest) < acceptable_distance;
+        return Vector3.Distance(transform.position, dest) < distance;
     }
 
-    protected void RotateToMouse()
+    protected void Brake()
     {
-        Vector3 mouse_pos = Input.mousePosition;
-        //mouse_pos.z =  Input.mousePosition.z - CamSwitcher.I.battle_cam.transform.position.z;
-        mouse_pos.z = 2000f;
-        mouse_pos = CamSwitcher.I.battle_cam.ScreenToWorldPoint(mouse_pos);
+        if (Rigidbody.velocity.magnitude < .3f)
+            return;
+        Vector3 brakeForce = -Rigidbody.velocity;
+        Rigidbody.AddForce(brakeForce * 8f);
+    }
 
-        float angle = Mathf.Atan2((mouse_pos.y - transform.position.y),
-            (mouse_pos.x - transform.position.x)) * Mathf.Rad2Deg - 90f;
-
-        Quaternion rotation = Quaternion.Euler(new Vector3(0f, 0f, angle));
-        transform.rotation = rotation;
+    protected void RotateToMouse(LayerMask raycastMask)
+    {
+        Vector3 mousePos;
+        mousePos = Statics.GetMouseWorldPos(CamSwitcher.I.battle_cam, raycastMask);
+        if (mousePos == Vector3.zero)
+            return;
+        //float angle = Mathf.Atan2((mouse_pos.z - transform.position.z),
+        //    (mouse_pos.x - transform.position.x)) * Mathf.Rad2Deg;
+        //Vector3 direction = (transform.position - mousePos).normalized;
+        //Quaternion rotation = Quaternion.LookRotation(direction);
+        transform.LookAt(mousePos);
+        transform.rotation = Quaternion.Euler(0f, transform.rotation.eulerAngles.y, 0f);
+        
         //float str = Mathf.Min(10f * Time.fixedDeltaTime, 1f);
         //transform.rotation = Quaternion.Lerp(transform.rotation, rotation, str);
+    }
+
+    public static void RotateRigidbodyToTarget(Rigidbody rb, Vector3 target) 
+    {
+        var angle = Mathf.Atan2(rb.position.x, target.z) * Mathf.Rad2Deg;
+        Quaternion rotation = Quaternion.Euler(0f, angle, 0f);
+        rb.MoveRotation(rotation);// * deltaRotation);
+    }
+
+    public static void RotateTransformToTarget(Transform t, Vector3 target)
+    {
+        t.LookAt(target);
+        t.rotation = Quaternion.Euler(0f, t.rotation.eulerAngles.y, 0f);
     }
 }

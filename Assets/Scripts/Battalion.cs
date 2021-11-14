@@ -4,68 +4,66 @@ using UnityEngine;
 
 public class Battalion
 {
-    public IDictionary<int, List<PlayerUnit>> units =
+    public IDictionary<int, List<PlayerUnit>> Units =
         new Dictionary<int, List<PlayerUnit>>() { };
-    private List<PlayerUnit> dead_units = new List<PlayerUnit>();
-    // Unit selected for placement in battle view
-    public bool in_battle = false;
-    public MapCell pending_group_battle_cell = null;
+    public bool InBattle = false;
     private Discipline _disc;
-    public Discipline disc { get => _disc; private set => _disc = value; }
+    public Discipline Disc { get => _disc; private set => _disc = value; }
+    public MapCell PendingGroupBattleCell;
 
     public Battalion(Discipline disc)
     {
-        this.disc = disc;
+        this.Disc = disc;
 
         // Initialize units dictionary.
-        foreach (int unit_type in PlayerUnit.unit_types)
-            units.Add(unit_type, new List<PlayerUnit>());
+        foreach (int unitType in PlayerUnit.UnitTypes)
+            Units.Add(unitType, new List<PlayerUnit>());
 
-        add_default_troops();
+        AddDefaultTroops();
         if (disc.ID == 0)
         {
-            add_units(PlayerUnit.SEEKER, 1, true);
+            AddUnits(PlayerUnit.SEEKER, 1, true);
         }
         // Units for testing
         //add_units(PlayerUnit.MENDER, 1);
         //add_units(PlayerUnit.SCOUT, 1);
     }
 
-    public void add_default_troops()
+    public void AddDefaultTroops()
     {
-        add_units(PlayerUnit.ARCHER, 1);
-        add_units(PlayerUnit.WARRIOR, 2);
-        add_units(PlayerUnit.SPEARMAN, 2);
-        add_units(PlayerUnit.INSPIRATOR, 1);
-        add_units(PlayerUnit.MINER, 1);
+        AddUnits(PlayerUnit.ARCHER, 1);
+        AddUnits(PlayerUnit.WARRIOR, 2);
+        AddUnits(PlayerUnit.SPEARMAN, 2);
+        AddUnits(PlayerUnit.INSPIRATOR, 1);
+        AddUnits(PlayerUnit.MINER, 1);
     }
 
-    public void add_units(int type, int count, bool show = false)
+    public void AddUnits(int type, int count, bool show = false)
     {
         for (int i = 0; i < count; i++)
         {
-            if (units.ContainsKey(type))
+            if (Units.ContainsKey(type))
             {
-                units[type].Add(PlayerUnit.create_punit(type, disc.ID));
+                Units[type].Add(PlayerUnit.CreatePunit(type, Disc.ID));
             }
         }
-        if (disc.active)
+        if (Disc.Active)
         {
-            disc.trigger_unit_count_change();
+            Disc.TriggerUnitCountChange();
         }
         if (show)
         {
-            disc.show_adjustment(PlayerUnit.create_punit(type, -1).get_name(), count);
+            Disc.ShowAdjustment(PlayerUnit.CreatePunit(type, -1).GetName(), count);
         }
     }
 
-    public void lose_random_unit(string message = "")
+    public void LoseRandomUnit(string message = "")
     {
         // Get indices with available units.
         ArrayList spawned_unit_types = new ArrayList();
-        for (int i = 0; i < units.Count; i++)
+        for (int i = 0; i < Units.Count; i++)
         {
-            if (units[i].Count > 0)
+            if (Units[i].Count > 0)
             {
                 spawned_unit_types.Add(i);
             }
@@ -76,16 +74,16 @@ public class Battalion
         int roll = UnityEngine.Random.Range(0, spawned_unit_types.Count - 1);
         int removed_unit_type_ID = (int)spawned_unit_types[roll];
 
-        string s = units[removed_unit_type_ID][0].get_name() + " " + message;
-        units[removed_unit_type_ID].RemoveAt(0);
-        disc.trigger_unit_count_change();
-        disc.show_adjustment(s, -1);
+        string s = Units[removed_unit_type_ID][0].GetName() + " " + message;
+        Units[removed_unit_type_ID].RemoveAt(0);
+        Disc.TriggerUnitCountChange();
+        Disc.ShowAdjustment(s, -1);
     }
 
-    public PlayerUnit get_unit(int ID)
+    public PlayerUnit GetUnit(int ID)
     {
         List<PlayerUnit> punits;
-        units.TryGetValue(ID, out punits);
+        Units.TryGetValue(ID, out punits);
         if (punits == null)
             return null;
 
@@ -97,74 +95,74 @@ public class Battalion
         return null;
     }
 
-    public PlayerUnit get_placeable_unit(int ID)
+    public PlayerUnit GetPlaceableUnit(int ID)
     {
         List<PlayerUnit> punits;
-        units.TryGetValue(ID, out punits);
+        Units.TryGetValue(ID, out punits);
         if (punits == null)
             return null;
 
         for (int i = 0; i < punits.Count; i++)
         {
             PlayerUnit pu = punits[i];
-            if (pu != null && !pu.is_placed)
+            if (pu != null && !pu.IsPlaced)
                 return pu;
         }
         return null;
     }
 
-    public int count_units(int type = -1)
+    public int CountUnits(int type = -1)
     {
         int i = 0;
         if (type >= 0)
         {
-            i += units[type].Count;
+            i += Units[type].Count;
         }
         else
         { // Count all units.
-            for (int t = 0; t < units.Count; t++)
+            for (int t = 0; t < Units.Count; t++)
             {
-                i += units[t].Count;
+                i += Units[t].Count;
             }
         }
         return i;
     }
 
-    public void remove_dead_unit(PlayerUnit du)
+    public void RemoveDeadUnit(PlayerUnit du)
     {
-        units[du.get_ID()].Remove(du);
+        Units[du.GetID()].Remove(du);
     }
 
-    public void post_battle()
+    public void PostBattle()
     {
-        if (count_units() <= 0)
+        if (CountUnits() <= 0)
         {
-            disc.die();
+            Disc.Die();
             return;
         }
 
-        foreach (PlayerUnit pu in get_all_placed_units())
+        foreach (PlayerUnit pu in GetAllPlacedUnits())
         {
-            pu.health = pu.get_dynamic_max_health();
-            pu.get_slot().update_text_UI();
+            pu.Health = pu.GetDynamicMaxHealth();
+            pu.GetSlot().UpdateTextUI();
         }
     }
 
-    public bool has_miner { get => get_unit(PlayerUnit.MINER) != null; }
+    public bool HasMiner { get => GetUnit(PlayerUnit.MINER) != null; }
 
-    public bool has_seeker { get => get_unit(PlayerUnit.SEEKER) != null; }
+    public bool HasSeeker { get => GetUnit(PlayerUnit.SEEKER) != null; }
 
-    public bool has_scout { get => get_unit(PlayerUnit.SCOUT) != null; }
+    public bool HasScout { get => GetUnit(PlayerUnit.SCOUT) != null; }
 
 
-    public List<PlayerUnit> get_all_placed_units()
+    public List<PlayerUnit> GetAllPlacedUnits()
     {
         List<PlayerUnit> punits = new List<PlayerUnit>();
-        foreach (List<PlayerUnit> type_list in units.Values)
+        foreach (List<PlayerUnit> type_list in Units.Values)
         {
             foreach (PlayerUnit pu in type_list)
             {
-                if (pu.is_placed)
+                if (pu.IsPlaced)
                     punits.Add(pu);
             }
         }

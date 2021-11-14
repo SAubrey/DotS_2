@@ -18,15 +18,15 @@ public class Attack : IState
         // Check for hit some way through animation
         if (timer.Increase(Time.deltaTime))
         {
-            d.melee_attack(d.get_attacking_zone(true));
+            d.MeleeAttack(d.GetAttackingZone(true));
             done_attacking = true;
         }
     }
 
     public void OnEnter()
     {
-        timer = new Timer(0.5f, .4f, .6f);
-        Debug.Log("attack w/ PD: " + d.player_distance);
+        timer = new Timer(0.5f, true, .4f, .6f);
+        Debug.Log("attack w/ PD: " + d.PlayerDistance);
     }
 
     public void OnExit()

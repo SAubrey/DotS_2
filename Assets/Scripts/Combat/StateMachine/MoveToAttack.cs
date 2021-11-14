@@ -15,9 +15,9 @@ public class MoveToAttack : IState
     public void Tick()
     {
         // Move into attack range
-        d.Move(d.player_pos, d.VEL_SPRINT, PhysicsBody.MoveForce, 3f);
+        d.MoveToDestination(d.PlayerPos, d.VelSprint, PhysicsBody.MoveForce, 3f);
 
-        if (d.player_distance <= d.attack_distance) {
+        if (d.PlayerDistance <= d.AttackDistance) {
             begin_attack = true;
         }
         //d.rotate_towards_target(d.player_pos);
@@ -25,7 +25,7 @@ public class MoveToAttack : IState
 
     public void OnEnter()
     {
-        Debug.Log("Move to attack w/ PD: " + d.player_distance);
+        Debug.Log("Move to attack w/ PD: " + d.PlayerDistance);
     }
 
     public void OnExit()

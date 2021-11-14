@@ -4,36 +4,33 @@ using UnityEngine;
 
 public class SpawnZone : MonoBehaviour
 {
-    protected Vector2 low;
-    protected Vector2 high;
-    //public Pos current_pos;
+    protected Vector3 Low, High;
 
     void Start()
     {
         RectTransform rt = (RectTransform)gameObject.transform;
-        low.x = rt.rect.xMin;
-        high.x = rt.rect.xMax;
-        low.y = rt.rect.yMin;
-        high.y = rt.rect.yMax;
-        Debug.Log("low: " + low.x + ", " + low.y + " high: " + high.x +", " + high.y);
+        Low.x = rt.rect.xMin;
+        High.x = rt.rect.xMax;
+        Low.z = rt.rect.yMin;
+        High.z = rt.rect.yMax;
+        Debug.Log("low: " + Low.x + ", " + Low.z + " high: " + High.x +", " + High.z);
     }
 
-    public Vector2 get_spawn_pos()
+    private Vector3 GetSpawnPos()
     {
-        float x = UnityEngine.Random.Range(low.x, high.x);
-        float y = UnityEngine.Random.Range(low.y, high.y);
-        return new Vector2(x, y);
+        float x = UnityEngine.Random.Range(Low.x, High.x);
+        float z = UnityEngine.Random.Range(Low.z, High.z);
+        return new Vector3(x, 0f, z);
     }
 
-    public void place_deployment(GameObject d, GameObject parent_obj)
+    public void PlaceDeployment(GameObject d, GameObject parentObj)
     {
-        //d.transform.SetParent(parent_obj.transform);
-        d.transform.localPosition = get_spawn_pos();
+        d.transform.localPosition = GetSpawnPos();
     }
 
-    public void reset()
+    public void Reset()
     {
-        low = Vector2.zero;
-        high = Vector2.zero;
+        Low = Vector3.zero;
+        High = Vector3.zero;
     }
 }

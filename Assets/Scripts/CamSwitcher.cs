@@ -19,7 +19,10 @@ public class CamSwitcher : MonoBehaviour
     public int current_cam = MENU;
     public int previous_cam = MAP;
     private Transform player_dep_transform;
-    private float initial_z = -2000f;
+    [SerializeField]
+    private float initial_y = 150f;
+    [SerializeField]
+    private float FollowDistance = 150f;
 
     void Awake()
     {
@@ -38,41 +41,46 @@ public class CamSwitcher : MonoBehaviour
         sound_manager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
         pause_panel.SetActive(false);
         battle_pause_panel.SetActive(false);
-        set_active(MENU, true);
-        player_dep_transform = Controller.I.get_deployment().gameObject.transform; 
-        move_battle_camera(player_dep_transform.position);
+        SetActive(MENU, true);
+        player_dep_transform = Game.I.get_deployment().gameObject.transform; 
+        MoveBattleCamera(player_dep_transform.position);
+        battle_cam.transform.LookAt(player_dep_transform);
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            toggle_paused();
+            TogglePaused();
         }
-        if (Input.GetKeyDown(KeyCode.C))
-            cycle();
-        move_battle_camera(player_dep_transform.position);
+        if (Input.GetKeyDown(KeyCode.B) && Game.I.DebugMode)
+        {
+            Cycle(); // Debug
+        }
+        MoveBattleCamera(player_dep_transform.position);
+        if (Game.I.DebugMode)
+            battle_cam.transform.LookAt(player_dep_transform);
     }
 
-    private void move_battle_camera(Vector2 pos)
+    private void MoveBattleCamera(Vector3 pos)
     {
         //Vector3 p = battle_cam.transform.position;
-        battle_cam.transform.position = new Vector3(pos.x, pos.y, initial_z);
+        battle_cam.transform.position = new Vector3(pos.x, initial_y, pos.z - FollowDistance);
     }
 
-    void cycle()
+    void Cycle()
     {
         if (current_cam == MAP)
         {
-            set_active(BATTLE, true);
+            SetActive(BATTLE, true);
         }
         else if (current_cam == BATTLE)
         {
-            set_active(MAP, true);
+            SetActive(MAP, true);
         }
     }
 
-    public void toggle_paused()
+    public void TogglePaused()
     {
         paused = !paused;
         if (current_cam == MAP)
@@ -90,11 +98,11 @@ public class CamSwitcher : MonoBehaviour
     {
         if (current_cam == MENU)
         {
-            set_active(MAP, true);
+            SetActive(MAP, true);
         }
         else if (current_cam == MAP)
         {
-            set_active(MENU, true);
+            SetActive(MENU, true);
         }
     }
 
@@ -102,11 +110,11 @@ public class CamSwitcher : MonoBehaviour
     {
         if (current_cam == MAP)
         {
-            set_active(BATTLE, true);
+            SetActive(BATTLE, true);
         }
         else if (current_cam == BATTLE)
         {
-            set_active(MAP, true);
+            SetActive(MAP, true);
         }
     }
 
@@ -114,20 +122,20 @@ public class CamSwitcher : MonoBehaviour
     {
         if (current_cam == MENU)
         {
-            set_active(BATTLE, true);
+            SetActive(BATTLE, true);
         }
         else if (current_cam == BATTLE)
         {
-            set_active(MENU, true);
+            SetActive(MENU, true);
         }
     }
 
     public void return_previous_cam()
     {
-        set_active(previous_cam, true);
+        SetActive(previous_cam, true);
     }
 
-    public void set_active(int screen, bool active)
+    public void SetActive(int screen, bool active)
     {
         if (screen == MENU)
         {
@@ -135,9 +143,9 @@ public class CamSwitcher : MonoBehaviour
             menu_cam.enabled = active;
             if (active)
             {
-                set_active(MAP, false);
-                set_active(BATTLE, false);
-                Controller.I.check_button_states();
+                SetActive(MAP, false);
+                SetActive(BATTLE, false);
+                Game.I.check_button_states();
             }
         }
         else if (screen == MAP)
@@ -148,10 +156,10 @@ public class CamSwitcher : MonoBehaviour
             if (active)
             {
                 // Set the camera on the active player.
-                Vector3 p = new Vector3(TurnPhaser.I.activeDisc.pos.x, TurnPhaser.I.activeDisc.pos.y, -14);
+                Vector3 p = new Vector3(TurnPhaser.I.ActiveDisc.Position.x, TurnPhaser.I.ActiveDisc.Position.y, -14);
                 map_cam.transform.SetPositionAndRotation(p, Quaternion.identity);
-                set_active(BATTLE, false);
-                set_active(MENU, false);
+                SetActive(BATTLE, false);
+                SetActive(MENU, false);
             }
         }
         else if (screen == BATTLE)
@@ -161,9 +169,9 @@ public class CamSwitcher : MonoBehaviour
             battleUI_canvas.SetActive(active);
             if (active)
             {
-                BackgroundLoader.I.load(Map.I.get_current_cell().ID);
-                set_active(MAP, false);
-                set_active(MENU, false);
+                TerrainLoader.I.Load(Map.I.GetCurrentCell().ID);
+                SetActive(MAP, false);
+                SetActive(MENU, false);
             }
         }
 

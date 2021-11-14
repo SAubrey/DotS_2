@@ -30,15 +30,23 @@ public class Statics
             amount - (max - (current + amount)); // subtract by overflow
     }
 
-    public static Collider2D DetermineClosestCollider(Collider2D[] colliders, Vector2 sourcePoint)
+    public static Vector3 GetMouseWorldPos(Camera cam, LayerMask mask, float maxDistance=2048f) {
+        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit raycastHit, maxDistance, mask)) {
+            return raycastHit.point;
+        }
+        return Vector3.zero;
+    }
+
+    public static Collider2D DetermineClosestCollider(Collider2D[] colliders, Vector3 sourcePoint)
     {
         if (colliders.Length == 0)
             return null;
         Collider2D closest = colliders[0];
-        float closestDistance = Vector2.Distance(sourcePoint, closest.transform.position);
+        float closestDistance = Vector3.Distance(sourcePoint, closest.transform.position);
         foreach (Collider2D col in colliders)
         {
-            float distance = Vector2.Distance(sourcePoint, col.transform.position);
+            float distance = Vector3.Distance(sourcePoint, col.transform.position);
             if (Vector2.Distance(sourcePoint, col.transform.position) < closestDistance)
             {
                 closest = col;
@@ -48,7 +56,7 @@ public class Statics
         return closest;
     }
 
-    public static Vector2 Direction(Vector2 v, Vector2 target)
+    public static Vector3 Direction(Vector3 v, Vector3 target)
     {
         return (target - v).normalized;
     }

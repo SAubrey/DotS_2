@@ -14,12 +14,12 @@ public class BackingUp : IState
     public void Tick()
     {
         //d.move(-d.get_direction_to_player(), d.VEL_SPRINT);
-        d.back_up();
+        d.BackUp();
     }
 
     public void OnEnter()
     {
-        Debug.Log("Backing up w/ PD: " + d.player_distance);
+        Debug.Log("Backing up w/ PD: " + d.PlayerDistance);
     }
 
     public void OnExit()

@@ -4,66 +4,64 @@ using UnityEngine;
 
 public class PlayerDeploymentUI : MonoBehaviour
 {
-    public Group[] zone_front_sword = new Group[3];
-    public Group[] zone_front_polearm = new Group[3];
-    public Group[] zone_center = new Group[1];
-    public Group[] zone_rear = new Group[3];
-    protected List<Group[]> groups = new List<Group[]>();
+    [SerializeField] private Group[] ZoneSword = new Group[3];
+    [SerializeField] private Group[] ZonePolearm = new Group[3];
+    [SerializeField] private Group[] ZoneCenter = new Group[1];
+    [SerializeField] private Group[] ZoneRange = new Group[2];
+    [SerializeField] private Group[] ZoneMage = new Group[1];
+    protected List<Group[]> Groups = new List<Group[]>();
 
     void Start()
     {
-        groups.Add(zone_front_sword);
-        groups.Add(zone_front_polearm);
-        groups.Add(zone_center);
-        groups.Add(zone_rear);
+        Groups.Add(ZoneSword);
+        Groups.Add(ZonePolearm);
+        Groups.Add(ZoneCenter);
+        Groups.Add(ZoneRange);
+        Groups.Add(ZoneMage);
     }
 
-    public void place_units(Battalion b)
+    public void PlaceUnits(Battalion b)
     {
-        foreach (List<PlayerUnit> pu in b.units.Values)
+        foreach (List<PlayerUnit> pu in b.Units.Values)
         {
             foreach (Unit u in pu)
             {
-                place_unit(u);
+                PlaceUnit(u);
             }
         }
     }
 
-    public void place_unit(Unit unit)
+    public void PlaceUnit(Unit unit)
     {
         Group[] zone = null;
-        if (unit.is_melee)
+        if (unit.IsMelee)
         {
-            if (unit.has_attribute(Unit.PIERCING))
-            {
-                zone = zone_front_polearm;
-            }
-            else
-            {
-                zone = zone_front_sword;
-            }
+            zone = unit.HasAttribute(Unit.PIERCING) ? ZonePolearm : ZoneSword;
         }
-        else if (unit.is_range)
+        else if (unit.IsRange)
         {
-            zone = zone_rear;
+            zone = ZoneRange;
         }
-        else
+        else if (unit.IsMage)
         {
-            zone = zone_center;
+            zone = ZoneMage;
+        } else
+        {
+            zone = ZoneCenter;
         }
 
-        Group g = get_highest_empty_group(zone);
+        Group g = GetHighestEmptyGroup(zone);
         if (g != null)
         {
-            g.place_unit(unit);
+            g.PlaceUnit(unit);
         }
     }
 
-    public Group get_highest_empty_group(Group[] groups)
+    public Group GetHighestEmptyGroup(Group[] groups)
     {
         foreach (Group g in groups)
         {
-            if (!g.is_full)
+            if (!g.IsFull)
             {
                 return g;
             }

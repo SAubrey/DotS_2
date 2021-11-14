@@ -8,37 +8,37 @@ public abstract class EnemyDeployment : Deployment
 {
     public enum BehaviorZone
     {
-        roam, chase, comfortable, act, move_to_attack
+        Roam, Chase, Comfortable, Act, MoveToAttack
     }
     // Melee enemy will chase to safe distance then move in for attack.
     // Enemy returns to safe distance after attack, block, or stun
-    public Vector2 player_pos;
+    public Vector3 PlayerPos;
     protected float _player_distance;
-    public float player_distance
+    public float PlayerDistance
     {
         get { return _player_distance; }
         set
         {
-            _player_distance = Mathf.Max(0, value - player_distance_offset);
+            _player_distance = Mathf.Max(0, value - PlayerDistanceOffset);
         }
     }
-    public float comfortable_player_distance_max { get => player_distance_offset + comfortable_distance_max; }
-    public float comfortable_player_distance_min { get => player_distance_offset + comfortable_distance_min; }
-    protected float player_distance_offset = 170f;
-    protected float comfortable_distance_max = 100f;
-    protected float comfortable_distance_min = 80f;
+    public float ComfortablePlayerDistanceMax { get => PlayerDistanceOffset + ComfortableDistanceMax; }
+    public float ComfortablePlayerDistanceMin { get => PlayerDistanceOffset + ComfortableDistanceMin; }
+    protected float PlayerDistanceOffset = 170f;
+    protected float ComfortableDistanceMax = 100f;
+    protected float ComfortableDistanceMin = 80f;
     //protected float search_distance = 1000f;
-    protected float chase_distance = 550f;
+    protected float ChaseDistance = 550f;
     //protected float stand_off_distance = 30f;
-    public float attack_distance = 30f;
-    protected bool locked_on = false;
-    protected Vector2 target = Vector2.zero;
+    public float AttackDistance = 30f;
+    protected bool LockedOn = false;
+    protected Vector2 Target = Vector2.zero;
 
     protected StateMachine state_machine = new StateMachine();
 
     protected void Awake()
     {
-        update_player_pos(GameObject.Find("PlayerSPDeployment").transform.position);
+        UpdatePlayerPos(GameObject.Find("PlayerSPDeployment").transform.position);
         var roam = new Roam(this);
         var chase = new Chase(this);
         var comfortable = new Comfortable(this);
@@ -62,9 +62,9 @@ public abstract class EnemyDeployment : Deployment
         At(backing_up, comfortable, in_comfy_range());
 
 
-        Func<bool> in_roam_range() => () => get_behavior_zone() == BehaviorZone.roam;
-        Func<bool> in_chase_range() => () => get_behavior_zone() == BehaviorZone.chase;
-        Func<bool> in_comfy_range() => () => get_behavior_zone() == BehaviorZone.comfortable;
+        Func<bool> in_roam_range() => () => GetBehaviorZone() == BehaviorZone.Roam;
+        Func<bool> in_chase_range() => () => GetBehaviorZone() == BehaviorZone.Chase;
+        Func<bool> in_comfy_range() => () => GetBehaviorZone() == BehaviorZone.Comfortable;
         //Func<bool> in_act_range() => () => get_behavior_zone() == BehaviorZone.act;
         Func<bool> moving_to_attack() => () => comfortable.move_to_attack;
         Func<bool> time_to_attack() => () => move_to_attack.begin_attack;
@@ -80,7 +80,7 @@ public abstract class EnemyDeployment : Deployment
     protected override void Update()
     {
         base.Update();
-        set_player_distance(player_pos);
+        SetPlayerDistance(PlayerPos);
         state_machine.Tick();
     }
 
@@ -90,61 +90,44 @@ public abstract class EnemyDeployment : Deployment
         base.FixedUpdate();
     }
 
-    protected void init()
+    protected void Init()
     {
-        PlayerDeployment.I.on_position_change += update_player_pos;
-        isEnemy = true;
+        PlayerDeployment.I.OnPositionChange += UpdatePlayerPos;
+        IsEnemy = true;
     }
 
-    private void update_player_pos(Vector2 pos)
+    private void UpdatePlayerPos(Vector3 pos)
     {
-        player_pos = pos;
+        PlayerPos = pos;
     }
 
-    public BehaviorZone get_behavior_zone()
+    public BehaviorZone GetBehaviorZone()
     {
-        float pd = player_distance;
-        if (pd > chase_distance)
-            return BehaviorZone.roam;
-        if (pd <= chase_distance && pd > comfortable_player_distance_max)
-            return BehaviorZone.chase;
-        if (pd <= comfortable_player_distance_max && pd >= comfortable_player_distance_min)
-            return BehaviorZone.comfortable;
-        if (pd < comfortable_player_distance_min)
-            return BehaviorZone.act;
-        return BehaviorZone.roam;
+        float pd = PlayerDistance;
+        if (pd > ChaseDistance)
+            return BehaviorZone.Roam;
+        if (pd <= ChaseDistance && pd > ComfortablePlayerDistanceMax)
+            return BehaviorZone.Chase;
+        if (pd <= ComfortablePlayerDistanceMax && pd >= ComfortablePlayerDistanceMin)
+            return BehaviorZone.Comfortable;
+        if (pd < ComfortablePlayerDistanceMin)
+            return BehaviorZone.Act;
+        return BehaviorZone.Roam;
     }
 
-    public virtual void back_up()
+    public virtual void BackUp()
     {
-        Move(-get_direction_to_player(), VEL_RUN, PhysicsBody.MoveForce);
+        MoveInDirection(-GetDirectionToPlayer(), VelRun, PhysicsBody.MoveForce);
     }
 
-    public void wander()
-    {
-        // Move to a random target location at a random distance
 
+    protected void SetPlayerDistance(Vector3 pos)
+    {
+        PlayerDistance = Vector3.Distance((Vector2)transform.position, (Vector2)pos);
     }
 
-    protected Quaternion target_rotation;
-    public void rotate_towards_target(Vector3 pos)
+    public Vector3 GetDirectionToPlayer()
     {
-        target_rotation = Quaternion.Euler(new Vector3(0, 0, Mathf.Atan2((pos.y - transform.position.y),
-            (pos.x - transform.position.x)) * Mathf.Rad2Deg - 90f));
-
-        // Lerp smooths and thus limits rotation speed.
-        float str = Mathf.Min(5f * Time.deltaTime, 1f);
-        transform.rotation = Quaternion.Lerp(transform.rotation, target_rotation, str);
-        face_slots_to_camera();
-    }
-
-    protected void set_player_distance(Vector3 pos)
-    {
-        player_distance = Vector2.Distance((Vector2)transform.position, (Vector2)pos);
-    }
-
-    public Vector3 get_direction_to_player()
-    {
-        return Statics.Direction(gameObject.transform.position, player_pos);
+        return Statics.Direction(gameObject.transform.position, PlayerPos);
     }
 }

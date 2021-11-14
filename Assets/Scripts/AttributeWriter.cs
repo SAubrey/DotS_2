@@ -41,9 +41,9 @@ public static class AttributeWriter
 
     public static void write_attribute_text(TextMeshProUGUI text, Unit u)
     {
-        text.text = get_description(u.attribute1) + "\n" +
-                    get_description(u.attribute2) + "\n" +
-                    get_description(u.attribute3);
+        text.text = get_description(u.Attribute1) + "\n" +
+                    get_description(u.Attribute2) + "\n" +
+                    get_description(u.Attribute3);
     }
 
     public static string get_description(int attribute)

@@ -3,11 +3,8 @@ using UnityEngine;
 
 public abstract class Unit
 {
-    public const int PLAYER = 0, ENEMY = 1;
-
     // Used to determine post-damage decision making. 
-    public const int ALIVE = 0, DEAD = 1, INJURED = 2;
-
+    public const int ALIVE = 0, DEAD = 1;
     // Boost IDs
     public const int HEALTH = 1, DEFENSE = 2, ATTACK = 3, DAMAGE = 4;
 
@@ -45,64 +42,76 @@ public abstract class Unit
     public const int HEAL_1 = 27;
     public const int COMBINED_EFFORT = 28;
 
+    public bool IsAttributeActive { get { return attribute_active; } }
+    public bool IsMelee { get { return CombatStyle == Melee; } }
+    public bool IsRange { get { return CombatStyle == Range; } }
+    public bool IsMage { get { return CombatStyle == Mage; } }
+    public bool IsDead { get { return Dead; } }
+    public bool IsPlaced { get { return Slot != null; } }
     // Attribute fields
-    public int attribute1, attribute2, attribute3 = 0;
+    public int Attribute1, Attribute2, Attribute3 = 0;
+    public int AbilityEnabled { get; protected set; }
     protected bool attribute_active = false;
-    public bool attribute_requires_action = false; // alters button behavior.
-    public bool passive_attribute = false;
+    public bool AttributeRequiresAction = false; // alters button behavior.
+    public bool PassiveAttribute = false;
 
     // Combat fields
-    public const int MELEE = 1, RANGE = 2, WEAK_MELEE = 3;
-    protected int attack_dmg;
-    protected int defense;
-    protected float block_rating = 0.5f;
-    public int health, max_health;
-    public int combat_style;
-    public float attack_range = 10f;
-    public bool blocking = false;
-    protected float block_time = 1f;
-    protected Timer block_timer;
-    protected float range_time = 1f;
-    protected Timer range_timer;
-    protected bool can_fire = true;
-    public float smooth_speed = .125f;
-
-    protected int type; // Player or Enemy
-    protected int ID; // Code for the particular unit type. (not unique to unit)
-    public int owner_ID { get; protected set; }
-
-    protected string name;
-    // Unique identifier for looking up drawn attack lines and aggregating attacks.
-
-    protected Slot slot = null;
-    protected bool dead = false; // Used to determine what to remove in the Battalion.
-
-    private static int static_unique_ID = 0;
-    private int unique_ID = static_unique_ID;
-
-    public virtual int calc_hp_remaining(int dmg) { return Mathf.Max(health - dmg, 0); }
-    public virtual int get_attack_dmg() { return attack_dmg; }
-    public virtual int get_defense() { return defense; }
-    public virtual int get_health() { return health; }
-    public virtual void remove_boost() { }
-    public abstract void die();
-    public virtual void animate_attack()
-    {
-        slot.play_animation(get_attack_animation_ID());
+    public const int Melee = 1, Range = 2, Mage = 3, WeakMelee = 4;
+    protected int AttackDmg;
+    protected int Defense;
+    protected float BlockRatingBase = .25f;
+    protected float BlockRatingAdditional = 0f;
+    // Damage taken multiplier when actively blocking.
+    protected float BlockRating {
+        get 
+        {
+            return Mathf.Max(0f, 1f - (BlockRatingBase - BlockRatingAdditional));
+        }
+        set { return; }
     }
-    protected abstract string get_attack_animation_ID();
+    public int Health, HealthMax;
+    public int CombatStyle;
+    public float AttackRange = 10f;
+    public bool Blocking = false;
+    protected float BlockTime = 1f;
+    protected Timer BlockTimer;
+    protected float RangeTime = 1f;
+    protected Timer RangeTimer;
+    protected bool CanFire = true;
+    public float SmoothSpeed = .125f;
+
+    public bool IsPlayer { get; protected set; }
+    public bool IsEnemy { get { return !IsPlayer; } }
+    protected int ID; // Code for the particular unit type. (not unique to unit)
+    public int OwnerID { get; protected set; }
+
+    protected string Name;
+    protected Slot Slot = null;
+    protected bool Dead = false;
+
+    public virtual int CalcHpRemaining(int dmg) { return Mathf.Max(Health - dmg, 0); }
+    public virtual int GetAttackDmg() { return AttackDmg; }
+    public virtual int GetDefense() { return Defense; }
+    public virtual int GetHealth() { return Health; }
+    public virtual void RemoveBoost() { }
+    public abstract void Die();
+    public virtual void AnimateAttackEffect()
+    {
+        Slot.PlayAnimationEffect(GetAttackAnimationID());
+    }
+    protected abstract string GetAttackAnimationID();
 
     // Passed damage should have already accounted for possible defense reduction.
-    public virtual int get_post_dmg_state(int dmg_after_def)
+    public virtual int GetPostDmgState(int dmgAfterDef)
     {
-        return calc_hp_remaining(dmg_after_def) > 0 ? ALIVE : DEAD;
+        return CalcHpRemaining(dmgAfterDef) > 0 ? ALIVE : DEAD;
     }
-    public virtual bool set_attribute_active(bool state)
+    public virtual bool SetAttributeActive(bool state)
     {
         attribute_active = state && can_activate_attribute();
-        if (is_placed)
+        if (IsPlaced)
         {
-            slot.update_text_UI();
+            Slot.UpdateTextUI();
         }
         return attribute_active;
     }
@@ -110,160 +119,123 @@ public abstract class Unit
     public Unit(string name, int ID, int att, int def, int hp, int style,
             int atr1 = 0, int atr2 = 0, int atr3 = 0)
     {
-        this.name = name;
+        this.Name = name;
         this.ID = ID;
-        attack_dmg = att;
-        defense = def;
-        combat_style = style;
-        attack_range = style == MELEE ? 1 : 8;
-        health = hp;
-        max_health = hp;
+        AttackDmg = att;
+        Defense = def;
+        CombatStyle = style;
+        AttackRange = style == Melee ? 1 : 8;
+        Health = hp;
+        HealthMax = hp;
 
-        unique_ID = static_unique_ID;
-        static_unique_ID++;
+        Attribute1 = atr1;
+        Attribute2 = atr2;
+        Attribute3 = atr3;
 
-        attribute1 = atr1;
-        attribute2 = atr2;
-        attribute3 = atr3;
-
-        block_timer = new Timer(block_time);
-        range_timer = new Timer(range_time);
-        smooth_speed = Random.Range(.1f, .15f);
+        BlockTimer = new Timer(BlockTime);
+        RangeTimer = new Timer(RangeTime);
+        SmoothSpeed = Random.Range(.1f, .15f);
     }
 
-    public bool has_attribute(int atr_ID)
+    public bool HasAttribute(int atr_ID)
     {
-        return (attribute1 == atr_ID ||
-                attribute2 == atr_ID ||
-                attribute3 == atr_ID);
+        return (Attribute1 == atr_ID ||
+                Attribute2 == atr_ID ||
+                Attribute3 == atr_ID);
     }
 
-
-    public void update_timers(float dt)
+    public void UpdateTimers(float dt)
     {
-        if (get_slot() == null)
+        if (GetSlot() == null)
             return;
-        if (block_timer.Increase(dt))
+        if (BlockTimer.Increase(dt))
         {
-            blocking = false;
+            Blocking = false;
         }
-        if (range_timer.Increase(dt))
+        if (RangeTimer.Increase(dt))
         {
-            can_fire = true;
+            CanFire = true;
         }
     }
 
-    public void melee_attack(LayerMask layer_mask)
+    public void MeleeAttack(LayerMask layerMask)
     {
-        if (get_slot() == null)
+        if (GetSlot() == null)
             return;
-        if (slot.melee_att_zone == null)
+        if (Slot.MeleeAttZone == null)
             return;
 
-        animate_attack();
+        AnimateAttackEffect();
+        Slot.Animator.SetTrigger("Attack");
         Collider2D[] hits =
-            Physics2D.OverlapCircleAll(slot.melee_att_zone.transform.position, attack_range, layer_mask);
+            Physics2D.OverlapCircleAll(Slot.MeleeAttZone.transform.position, AttackRange, layerMask);
         //
         foreach (Collider2D h in hits)
         {
             Slot s = h.GetComponent<Slot>();
             if (s == null)
                 continue;
-            Unit u = s.get_unit();
+            Unit u = s.GetUnit();
             if (u == null)
                 continue;
-            u.take_damage(get_attack_dmg() * 10);
+            u.TakeDamage(GetAttackDmg() * 10);
         }
     }
 
     void OnDrawGizmos() {
         //UnityEditor.Handles.DrawWireDisc(slot.melee_att_zone.transform.position, Vector2.up, attack_range);
-        Gizmos.DrawWireSphere(slot.melee_att_zone.transform.position, attack_range);
+        Gizmos.DrawWireSphere(Slot.MeleeAttZone.transform.position, AttackRange);
     }
 
-    public void range_attack(LayerMask mask, Vector3 target_pos)
+    public void RangeAttack(LayerMask mask, Vector3 target_pos)
     {
-        if (get_slot() == null)
+        if (GetSlot() == null)
             return;
 
 
-        get_slot().range_attack(mask, target_pos);
+        GetSlot().RangeAttack(mask, target_pos);
     }
 
-    public virtual int take_damage(int dmg)
+    public virtual int TakeDamage(int dmg)
     {
-        int final_dmg = calc_dmg_taken(dmg, has_attribute(Unit.PIERCING));
-        int state = get_post_dmg_state(final_dmg);
-        health = (int)calc_hp_remaining(final_dmg);
-        slot.update_healthbar();
+        int final_dmg = CalcDmgTaken(dmg, HasAttribute(Unit.PIERCING));
+        int state = GetPostDmgState(final_dmg);
+        Health = (int)CalcHpRemaining(final_dmg);
+        Slot.UpdateHealthbar();
 
         if (state == DEAD)
         {
-            die();
+            Die();
         }
         return state;
     }
 
-    protected void change_slotpoint(Slot end)
+    protected virtual int CalcDmgTaken(int dmg, bool piercing = false)
     {
-        slot.empty();
-        end.fill(this);
-        end.get_group().validate_unit_order();
-    }
-
-
-    protected virtual int calc_dmg_taken(int dmg, bool piercing = false)
-    {
-        dmg -= get_defense();
-        if (blocking && !piercing)
+        dmg -= GetDefense();
+        if (Blocking && !piercing)
         {
-            dmg = (int)(dmg * block_rating);
+            dmg = (int)(dmg * BlockRating);
         }
         return dmg > 0 ? dmg : 0;
     }
 
-    public bool can_attack()
+    public bool CanDefend()
     {
-        return attack_dmg > 0;
+        return Defense > 0;
     }
 
-    public bool can_defend()
+    public virtual int GetDynamicMaxHealth()
     {
-        return defense > 0;
-    }
-
-    public virtual int get_dynamic_max_health()
-    {
-        return max_health + get_bonus_health() + get_stat_buff(HEALTH);
+        return HealthMax + GetBonusHealth() + get_stat_buff(HEALTH);
     }
 
     // "Bonus" refers to any stat increases not from boost-type attributes.
-    public int get_bonus_health()
+    public int GetBonusHealth()
     {
         int sum_hp = 0;
         // hp from non-boost attr?
         return sum_hp;
-    }
-
-    public int get_bonus_att_dmg()
-    {
-        int sum_dmg = 0;
-        if (is_actively_grouping)
-        {
-            sum_dmg += ((1 + attack_dmg) * (count_grouped_units() - 1));
-        }
-
-        return sum_dmg;
-    }
-
-    public int get_bonus_def()
-    {
-        int sum_def = 0;
-        if (is_actively_grouping)
-        {
-            sum_def += ((1 + defense) * (count_grouped_units() - 1));
-        }
-        return sum_def;
     }
 
     public int get_stat_buff(int type)
@@ -275,22 +247,10 @@ public abstract class Unit
 
     public int get_bonus_from_equipment(int stat_ID)
     {
-        if (is_enemy)
+        if (!IsPlayer)
             return 0;
-        Discipline d = TurnPhaser.I.getDisc(owner_ID).bat.disc;
+        Discipline d = TurnPhaser.I.GetDisc(OwnerID).Bat.Disc;
         return d.equipment_inventory.get_stat_boost_amount(ID, stat_ID);
-    }
-
-    // Returns number of same units in group with Grouping that have actions remaining.
-    public int count_grouped_units()
-    {
-        int grouped_units = slot.get_group().get_num_of_same_active_units_in_group(ID);
-        // Limit grouped units to attribute capacity.
-        if (has_attribute(Unit.GROUPING_1) && grouped_units > 2)
-        {
-            grouped_units = 2;
-        }
-        return grouped_units;
     }
 
     public int active_boost_type = -1;
@@ -302,15 +262,15 @@ public abstract class Unit
 
         if (boost_type == HEALTH)
         {
-            health += amount;
+            Health += amount;
         }
         else if (boost_type == ATTACK)
         {
-            attack_dmg += amount;
+            AttackDmg += amount;
         }
         else if (boost_type == DEFENSE)
         {
-            defense += amount;
+            Defense += amount;
         }
     }
 
@@ -326,8 +286,8 @@ public abstract class Unit
                 active_boost_type = -1;
                 active_boost_amount = 0;
             }
-            if (slot != null)
-                slot.update_text_UI();
+            if (Slot != null)
+                Slot.UpdateTextUI();
         }
     }
 
@@ -337,60 +297,38 @@ public abstract class Unit
     */
     public virtual bool can_activate_attribute()
     {
-        if (passive_attribute)
+        if (PassiveAttribute)
             return false;
         return true;
     }
 
     public int get_raw_attack_dmg()
     {
-        return attack_dmg;
+        return AttackDmg;
     }
 
     public int get_raw_defense()
     {
-        return defense;
+        return Defense;
     }
 
-    public int get_type()
+    public string GetName()
     {
-        return type;
+        return Name;
     }
 
-    public string get_name()
-    {
-        return name;
-    }
-
-    public int get_ID()
+    public int GetID()
     {
         return ID;
     }
 
-    public Slot get_slot()
+    public Slot GetSlot()
     {
-        return slot;
+        return Slot;
     }
 
-    public void set_slot(Slot s)
+    public void SetSlot(Slot s)
     {
-        slot = s;
+        Slot = s;
     }
-
-    public bool is_actively_grouping
-    {
-        get { return attribute_active && has_grouping; }
-    }
-    public bool has_grouping
-    {
-        get { return has_attribute(GROUPING_1) || has_attribute(GROUPING_2); }
-    }
-
-    public bool is_attribute_active { get { return attribute_active; } }
-    public bool is_melee { get { return combat_style == MELEE; } }
-    public bool is_range { get { return combat_style == RANGE; } }
-    public bool is_enemy { get { return type == ENEMY; } }
-    public bool is_playerunit { get { return type == PLAYER; } }
-    public bool is_dead { get { return dead; } }
-    public bool is_placed { get { return slot != null; } }
 }

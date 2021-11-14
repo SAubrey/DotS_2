@@ -39,10 +39,10 @@ public class EquipmentUI : MonoBehaviour
 
 
         }
-        TurnPhaser.I.onDiscChange += load_discipline;
-        foreach (Discipline d in TurnPhaser.I.discs.Values)
+        TurnPhaser.I.OnDiscChange += load_discipline;
+        foreach (Discipline d in TurnPhaser.I.Discs.Values)
         {
-            d.on_resource_change += register_resource_change;
+            d.OnResourceChange += register_resource_change;
         }
     }
 
@@ -53,11 +53,11 @@ public class EquipmentUI : MonoBehaviour
 
     public void register_resource_change(int ID, string field, int amount, int c, int cap)
     {
-        if (ID != TurnPhaser.I.activeDiscID)
+        if (ID != TurnPhaser.I.ActiveDiscID)
             return;
-        if (field == Discipline.EXPERIENCE)
+        if (field == Discipline.Experience)
         {
-            unlock_slots(TurnPhaser.I.getDisc(ID).equipment_inventory);
+            unlock_slots(TurnPhaser.I.GetDisc(ID).equipment_inventory);
         }
     }
 
@@ -67,24 +67,24 @@ public class EquipmentUI : MonoBehaviour
         selecting = true;
         string e = d.captionText.text;
 
-        EquipmentInventory ei = TurnPhaser.I.activeDisc.equipment_inventory;
+        EquipmentInventory ei = TurnPhaser.I.ActiveDisc.equipment_inventory;
         // Undo the selection, the same equipment cannot be worn more than once,
         // and only one of a type can be worn at once.
         if (ei.has_equipped(e) || ei.get_equipment_amount(e) > 1)
         {
-            if (ei.equipment_slots[dropdowns[d]].full)
+            if (ei.EquipmentSlots[dropdowns[d]].full)
             {
-                string name = ei.equipment_slots[dropdowns[d]].equipment.name;
+                string name = ei.EquipmentSlots[dropdowns[d]].equipment.name;
                 d.value = d.options.FindIndex(option => option.text == name);
             }
             else
             {
-                d.value = d.options.FindIndex(option => option.text == "Empty");
+                d.value = d.options.FindIndex(option => option.text == "-");
             }
             return;
         }
         // Unequip existing worn item.
-        if (ei.equipment_slots[dropdowns[d]].full)
+        if (ei.EquipmentSlots[dropdowns[d]].full)
         {
             ei.unequip(dropdowns[d]);
         }
@@ -124,15 +124,15 @@ public class EquipmentUI : MonoBehaviour
     {
         clear_dropdown_options(dropdown);
         List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
-        foreach (string e in ei.equipment.Keys)
+        foreach (string e in ei.Equipment.Keys)
         {
-            if (ei.equipment[e].Count > 1)
+            if (ei.Equipment[e].Count > 1)
             {
-                options.Add(new TMP_Dropdown.OptionData(ei.equipment[e].Count.ToString() + " " + ei.equipment[e][0].name));
+                options.Add(new TMP_Dropdown.OptionData(ei.Equipment[e].Count.ToString() + " " + ei.Equipment[e][0].name));
             }
             else
             {
-                options.Add(new TMP_Dropdown.OptionData(ei.equipment[e][0].name));
+                options.Add(new TMP_Dropdown.OptionData(ei.Equipment[e][0].name));
             }
         }
         dropdown.AddOptions(options);
@@ -142,7 +142,7 @@ public class EquipmentUI : MonoBehaviour
     {
         foreach (TMP_Dropdown d in dropdowns.Keys)
         {
-            EquipmentSlot es = ei.equipment_slots[dropdowns[d]];
+            EquipmentSlot es = ei.EquipmentSlots[dropdowns[d]];
             if (!es.full)
                 continue;
             d.captionText.text = es.equipment.name;
@@ -160,18 +160,18 @@ public class EquipmentUI : MonoBehaviour
         if (!ei.has_equipped(e))
             return;
         descriptionP.SetActive(true);
-        descriptionT.text = ei.equipment[e][0].description;
+        descriptionT.text = ei.Equipment[e][0].description;
     }
 
     public void load_equipment_description(string e)
     {
         if (e == "Empty")
             return;
-        EquipmentInventory ei = TurnPhaser.I.activeDisc.equipment_inventory;
+        EquipmentInventory ei = TurnPhaser.I.ActiveDisc.equipment_inventory;
         if (!ei.has(e))
             return;
         descriptionP.SetActive(true);
-        descriptionT.text = ei.equipment[e][0].description;
+        descriptionT.text = ei.Equipment[e][0].description;
     }
 
     public void hide_equipment_descriptionP()

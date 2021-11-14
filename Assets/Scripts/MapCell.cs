@@ -6,97 +6,97 @@ using UnityEngine.Tilemaps;
 
 public class MapCell
 {
-    public const string PLAINS = "Plains";
-    public const string FOREST = "Forest";
-    public const string RUINS = "Ruins";
-    public const string CLIFF = "Cliff";
-    public const string CAVE = "Cave";
-    public const string STAR = "Star";
-    public const string TITRUM = "Titrum";
-    public const string LUSH_LAND = "Lush Land";
-    public const string MIRE = "Mire";
-    public const string MOUNTAIN = "Mountain";
-    public const string SETTLEMENT = "Settlement";
-    public const string RUNE_GATE = "Rune Gate";
-    public const string CITY = "City";
-    public const string GUARDIAN_PASS = "Guardian Pass";
+    public const string Plains = "Plains";
+    public const string Forest = "Forest";
+    public const string Ruins = "Ruins";
+    public const string Cliff = "Cliff";
+    public const string Cave = "Cave";
+    public const string Star = "Star";
+    public const string Titrum = "Titrum";
+    public const string LushLand = "Lush Land";
+    public const string Mire = "Mire";
+    public const string Mountain = "Mountain";
+    public const string Settlement = "Settlement";
+    public const string RuneGate = "Rune Gate";
+    public const string City = "City";
+    public const string GuardianPass = "Guardian Pass";
 
-    public const int CITY_ID = -1;
-    public const int PLAINS_ID = 0;
-    public const int FOREST_ID = 1;
-    public const int RUINS_ID = 2;
-    public const int CLIFF_ID = 3;
-    public const int CAVE_ID = 4;
-    public const int STAR_ID = 5;
-    public const int TITRUM_ID = 6;
-    public const int LUSH_LAND_ID = 7;
+    public const int IDCity = -1;
+    public const int IDPlains = 0;
+    public const int IDForest = 1;
+    public const int IDRuins = 2;
+    public const int IDCliff = 3;
+    public const int IDCave = 4;
+    public const int IDStar = 5;
+    public const int IDTitrum = 6;
+    public const int IDLushLand = 7;
 
     // Not an actual tile type, just enemy spawn type as determined by travelcards
-    public const int MELD_ID = 8;
-    public const int MOUNTAIN_ID = 9;
-    public const int SETTLEMENT_ID = 10;
-    public const int RUNE_GATE_ID = 11;
-    public const int GUARDIAN_PASS_ID = 12;
+    public const int IDMeld = 8;
+    public const int IDMountain = 9;
+    public const int IDSettlement = 10;
+    public const int IDRuneGate = 11;
+    public const int IDGuardianPass = 12;
 
-    public static MapCell create_cell(int ID, int tier, Tile tile, Pos pos)
+    public static MapCell CreateCell(int ID, int tier, Tile tile, Pos pos)
     {
         MapCell mc = null;
         // Don't extract name from tile if provided.
-        if (ID == PLAINS_ID)
+        if (ID == IDPlains)
         {
             mc = new Plains(tier, tile, pos);
         }
-        else if (ID == FOREST_ID)
+        else if (ID == IDForest)
         {
             mc = new Forest(tier, tile, pos);
         }
-        else if (ID == RUINS_ID)
+        else if (ID == IDRuins)
         {
             mc = new Ruins(tier, tile, pos);
         }
-        else if (ID == CLIFF_ID)
+        else if (ID == IDCliff)
         {
             mc = new Cliff(tier, tile, pos);
         }
-        else if (ID == CAVE_ID)
+        else if (ID == IDCave)
         {
             mc = new Cave(tier, tile, pos);
         }
-        else if (ID == STAR_ID)
+        else if (ID == IDStar)
         {
             mc = new Star(tier, tile, pos);
         }
-        else if (ID == TITRUM_ID)
+        else if (ID == IDTitrum)
         {
             mc = new Titrum(tier, tile, pos);
         }
-        else if (ID == LUSH_LAND_ID)
+        else if (ID == IDLushLand)
         {
             mc = new LushLand(tier, tile, pos);
             //} else if (name == MIRE) {
             //mc = new Mire(tier, tile, pos);
         }
-        else if (ID == MOUNTAIN_ID)
+        else if (ID == IDMountain)
         {
             mc = new Mountain(tier, tile, pos);
         }
-        else if (ID == SETTLEMENT_ID)
+        else if (ID == IDSettlement)
         {
             mc = new Settlement(tier, tile, pos);
         }
-        else if (ID == RUNE_GATE_ID)
+        else if (ID == IDRuneGate)
         {
             mc = new RuneGate(tier, tile, pos);
         }
-        else if (ID == CITY_ID)
+        else if (ID == IDCity)
         {
             mc = new CityCell(tier, tile, pos);
         }
-        else if (ID == GUARDIAN_PASS_ID)
+        else if (ID == IDGuardianPass)
         {
             mc = new GuardianPass(tier, tile, pos);
         }
-        else if (ID == CITY_ID)
+        else if (ID == IDCity)
         {
             mc = new CityCell(tier, tile, pos);
         }
@@ -106,42 +106,45 @@ public class MapCell
         return mc;
     }
 
-    private static Color enemy_color = new Color(1, .5f, .5f, 1f);
-    public readonly Tile tile;
-    public readonly int tier;
-    public readonly Pos pos;
+    private static Color EnemyColor = new Color(1, .5f, .5f, 1f);
+    public readonly Tile Tile;
+    public readonly int Tier;
+    public readonly Pos Pos;
     public readonly int ID;
-    public bool entered { get; private set; }
-    public bool discovered { get; private set; }
-    public string name;
-    public int minerals, star_crystals = 0;
-    private int dropped_XP = 0;
-    public GameObject dropped_XP_obj;
-    public bool creates_travelcard = true;
-    public bool has_rune_gate = false;
-    public bool restored_rune_gate = false;
-    private bool _travelcard_complete = false;
-    public bool travelcard_complete
+    public bool Entered { get; private set; }
+    public bool Discovered { get; private set; }
+    public string Name;
+    public int Minerals, StarCrystals = 0;
+    public bool CreatesTravelcard = true;
+    public bool HasRuneGate = false;
+    public bool RestoredRuneGate = false;
+    public bool HasActiveTeleport 
     {
-        get { return _travelcard_complete; }
+        get { return RestoredRuneGate || TeleportDestination != null; }
+    }
+    public MapCell TeleportDestination;
+    private bool _travelcardComplete = false;
+    public bool TravelcardComplete
+    {
+        get { return _travelcardComplete; }
         set
         {
-            _travelcard_complete = value;
-            if (travelcard != null)
+            _travelcardComplete = value;
+            if (Travelcard != null)
             {
-                travelcard.complete = value;
+                Travelcard.complete = value;
             }
         }
     }
-    public Battle battle;
-    public bool has_seen_combat = false;
-    public bool locked = false;
-    public bool glows, flickers = false;
-    private List<Enemy> enemies = new List<Enemy>();
-    public GameObject fog;
+    public Battle Battle;
+    public bool HasSeenCombat = false;
+    public bool Locked = false;
+    public bool Glows, Flickers = false;
+    private List<Enemy> Enemies = new List<Enemy>();
+    public GameObject Fog;
     // Travelcards cannot be set to null.  
     private TravelCard _travelcard;
-    public TravelCard travelcard
+    public TravelCard Travelcard
     {
         get => _travelcard;
         set
@@ -149,319 +152,292 @@ public class MapCell
             if (value == null)
                 return;
             _travelcard = value;
-            locked = requires_unlock;
+            Locked = RequiresUnlock;
         }
     }
 
     public MapCell(int ID, int tier, Tile tile, Pos pos)
     {
-        this.tile = tile;
-        this.tier = tier;
-        this.pos = pos;
+        this.Tile = tile;
+        this.Tier = tier;
+        this.Pos = pos;
         this.ID = ID;
-        locked = requires_unlock;
+        Locked = RequiresUnlock;
     }
 
-    public void enter()
+    public void Enter()
     {
-        if (creates_travelcard && !travelcard_complete)
+        if (CreatesTravelcard && !TravelcardComplete)
         {
-            MapUI.I.display_travelcard(travelcard);
+            MapUI.I.DisplayTravelcard(Travelcard);
         }
-        if (!entered)
+        if (!Entered)
         {
-            entered = true;
-            discover();
+            Entered = true;
+            Discover();
         }
-        if (dropped_XP > 0)
+
+        MapUI.I.TeleportB.enabled = !RestoredRuneGate;
+        if (HasActiveTeleport)
         {
-            pickup_XP(TurnPhaser.I.activeDisc);
+            // Show all other rune gates
+            // Map.I.ActivateRuneGates();
+            if (TeleportDestination != null)
+            {
+                MapUI.I.TeleportB.enabled = true;
+                MapUI.I.TeleportT.text = "Teleport Back";
+            }
         }
     }
 
-    public void discover()
+    public void Discover()
     {
-        if (discovered)
+        if (Discovered)
             return;
-        discovered = true;
-        Map.I.tm.SetTile(new Vector3Int((int)pos.x, (int)pos.y, 0), tile);
-        MapUI.I.place_cell_light(this);
-        GameObject.Destroy(fog);
-        if (ID == STAR_ID)
+        Discovered = true;
+        Map.I.Tilemap.SetTile(new Vector3Int((int)Pos.x, (int)Pos.y, 0), Tile);
+        MapUI.I.PlaceCellLight(this);
+        GameObject.Destroy(Fog);
+        if (ID == IDStar)
         {
-            MapUI.I.place_sparkle_ps(this);
+            MapUI.I.PlaceSparklePS(this);
         }
     }
 
-    public void post_battle()
+    public void PostBattle()
     {
-        foreach (Enemy e in enemies)
-            e.get_slot().update_text_UI();
+        foreach (Enemy e in Enemies)
+            e.GetSlot().UpdateTextUI();
     }
 
-    public void kill_enemy(Enemy enemy)
+    public void KillEnemy(Enemy enemy)
     {
-        enemies.Remove(enemy);
-        if (enemies.Count == 0)
+        Enemies.Remove(enemy);
+        if (Enemies.Count == 0)
         {
-            set_tile_color();
+            SetTileColor();
         }
     }
 
-    public void set_tile_color()
+    public void SetTileColor()
     {
-        if (enemies.Count > 0)
+        if (Enemies.Count > 0)
         {
-            Vector3Int vec = new Vector3Int(pos.x, pos.y, 0);
-            Map.I.tm.SetTileFlags(vec, TileFlags.None);
-            Map.I.tm.SetColor(vec, enemy_color); // Dark red
+            Vector3Int vec = new Vector3Int(Pos.x, Pos.y, 0);
+            Map.I.Tilemap.SetTileFlags(vec, TileFlags.None);
+            Map.I.Tilemap.SetColor(vec, EnemyColor); // Dark red
         }
         else
         {
             Debug.Log("setting tile color to white");
-            end_color_oscillation();
-            Map.I.tm.SetColor(new Vector3Int(pos.x, pos.y, 0), Color.white);
+            EndColorOscillation();
+            Map.I.Tilemap.SetColor(new Vector3Int(Pos.x, Pos.y, 0), Color.white);
             //tile.color = Color.white;
         }
     }
 
-    public bool should_activate_travelcard_without_showing
+    public void CompleteTravelcard()
     {
-        get =>
-creates_travelcard && !travelcard_complete && entered && !has_battle;
+        TravelcardComplete = true;
     }
 
-    public void complete_travelcard()
+    public void AssignGroupLeader()
     {
-        travelcard_complete = true;
+        Battle = new Battle(Map.I, this, TurnPhaser.I.ActiveDisc, true);
+        BeginColorOscillation();
     }
 
-    public void assign_group_leader()
+    public void ClearBattle()
     {
-        battle = new Battle(Map.I, this, TurnPhaser.I.activeDisc, true);
-        begin_color_oscillation();
+        Battle = null;
+        EndColorOscillation();
+        SetTileColor();
     }
 
-    public void clear_battle()
+    private void BeginColorOscillation()
     {
-        if (battle != null)
-        {
-            foreach (Discipline d in battle.participants)
-            {
-                d.bat.pending_group_battle_cell = null;
-            }
-        }
-        battle = null;
-        end_color_oscillation();
-        set_tile_color();
+        Map.I.AddOscillatingCell(this);
     }
 
-    private void begin_color_oscillation()
+    private void EndColorOscillation()
     {
-        Map.I.add_oscillating_cell(this);
+        if (Map.I.RemoveOscillatingCell(this))
+            Map.I.Tilemap.SetColor(new Vector3Int(Pos.x, Pos.y, 0), Color.white);
     }
 
-    private void end_color_oscillation()
-    {
-        if (Map.I.remove_oscillating_cell(this))
-            Map.I.tm.SetColor(new Vector3Int(pos.x, pos.y, 0), Color.white);
-    }
-
-    public void oscillate_color()
+    public void OscillateColor()
     {
         float y = 0.75f + (Mathf.Sin(Time.time) / 4f);
-        Tile t = (Tile)Map.I.tm.GetTile(new Vector3Int(pos.x, pos.y, 0));
-        Map.I.tm.SetColor(new Vector3Int(pos.x, pos.y, 0), new Color(1, y, y, 1));
+        Tile t = (Tile)Map.I.Tilemap.GetTile(new Vector3Int(Pos.x, Pos.y, 0));
+        Map.I.Tilemap.SetColor(new Vector3Int(Pos.x, Pos.y, 0), new Color(1, y, y, 1));
     }
 
     // Can currently only group battle if the player has retreated/scouted the tile
     // and a group has not already been formed on this cell.
-    public bool can_setup_group_battle()
+    public bool CanSetupGroupBattle()
     {
-        return has_enemies && Map.check_adjacent(TurnPhaser.I.activeDisc.pos, pos.to_vec3);
+        return HasEnemies && Map.CheckAdjacentCells(TurnPhaser.I.ActiveDisc.Position, Pos.to_vec3);
     }
 
-    public void add_enemy(Enemy e)
+    public void AddEnemy(Enemy e)
     {
         if (e != null)
-            enemies.Add(e);
-        set_tile_color();
+            Enemies.Add(e);
+        SetTileColor();
     }
 
-    public List<Enemy> get_enemies()
+    public List<Enemy> GetEnemies()
     {
-        return enemies;
+        return Enemies;
     }
 
-    public bool has_enemies
+    public bool HasEnemies
     {
-        get { return (get_enemies().Count > 0); }
+        get { return (GetEnemies().Count > 0); }
     }
 
-    public bool requires_unlock
+    public bool RequiresUnlock
     {
         get
         {
-            if (has_rune_gate && !restored_rune_gate)
+            if (HasRuneGate && !RestoredRuneGate)
             {
                 return true;
             }
-            else if (has_travelcard)
+            else if (HasTravelcard)
             {
-                if (travelcard.unlockable != null)
+                if (Travelcard.unlockable != null)
                     return true;
             }
             return false;
         }
     }
 
-    public TravelCardUnlockable get_unlockable()
+    public TravelCardUnlockable GetUnlockable()
     {
-        return travelcard.unlockable;
+        return Travelcard.unlockable;
     }
 
-    public int get_unlock_cost()
+    public int GetUnlockCost()
     {
-        if (has_rune_gate)
+        if (HasRuneGate)
             return 10;
-        else if (travelcard.unlockable != null)
-            return travelcard.unlockable.resource_cost;
+        else if (Travelcard.unlockable != null)
+            return Travelcard.unlockable.resource_cost;
         return 0;
     }
 
-    public string get_unlock_type()
+    public string GetUnlockType()
     {
-        if (has_rune_gate)
+        if (HasRuneGate)
             return Storeable.STAR_CRYSTALS;
         else
-            return travelcard.unlockable.resource_type;
+            return Travelcard.unlockable.resource_type;
     }
 
-    public bool has_travelcard { get => travelcard != null; }
-    public bool has_battle { get => battle != null; }
-    public bool has_group_pending
+    public bool HasTravelcard { get => Travelcard != null; }
+    public bool HasBattle { get => Battle != null; }
+    public bool HasGroupPending
     {
         get
         {
-            if (!has_battle)
+            if (!HasBattle)
                 return false;
-            return battle.group_pending;
+            return Battle.GroupPending;
         }
     }
 
     public Dictionary<string, int> get_travelcard_consequence()
     {
-        return travelcard.consequence;
+        return Travelcard.consequence;
     }
 
-    public bool can_mine(Battalion b)
+    public bool CanMine(Battalion b)
     {
-        return b.has_miner && !b.disc.has_mined_in_turn &&
-            b.disc.cell == this &&
-            (minerals > 0 || star_crystals > 0);
-    }
-
-    public void drop_XP(int xp)
-    {
-        dropped_XP = xp;
-        //show
-        dropped_XP_obj = GameObject.Instantiate(MapUI.I.dropped_XP_prefab);
-        dropped_XP_obj.transform.SetParent(MapUI.I.map_canvas.transform);
-        // Move to center of cell from corner.
-        Vector3 p = dropped_XP_obj.transform.position;
-        dropped_XP_obj.transform.position = pos.to_vec3;
-        dropped_XP_obj.transform.position = new Vector3(p.x + 0.5f, p.y + 0.5f, 0);
-    }
-
-    public int pickup_XP(Discipline d)
-    {
-        //d.change_var(Storeable.EXPERIENCE, dropped_XP, true);
-        d.resources[Discipline.EXPERIENCE] += dropped_XP;
-        d.show_adjustment("Experience", dropped_XP);
-        dropped_XP = 0;
-        GameObject.Destroy(dropped_XP_obj);
-        return dropped_XP;
+        return b.HasMiner && !b.Disc.HasMinedInTurn &&
+            b.Disc.Cell == this &&
+            (Minerals > 0 || StarCrystals > 0);
     }
 }
 
 public class CityCell : MapCell
 {
-    public CityCell(int tier, Tile tile, Pos pos) : base(CITY_ID, tier, tile, pos)
+    public CityCell(int tier, Tile tile, Pos pos) : base(IDCity, tier, tile, pos)
     {
-        name = "City";
-        creates_travelcard = false;
+        Name = "City";
+        CreatesTravelcard = false;
         //pos = new
     }
 }
 
 public class Plains : MapCell
 {
-    public Plains(int tier, Tile tile, Pos pos) : base(PLAINS_ID, tier, tile, pos)
+    public Plains(int tier, Tile tile, Pos pos) : base(IDPlains, tier, tile, pos)
     {
-        name = PLAINS;
+        Name = Plains;
     }
 }
 
 public class Forest : MapCell
 {
-    public Forest(int tier, Tile tile, Pos pos) : base(FOREST_ID, tier, tile, pos)
+    public Forest(int tier, Tile tile, Pos pos) : base(IDForest, tier, tile, pos)
     {
-        name = FOREST;
+        Name = Forest;
     }
 }
 
 public class Ruins : MapCell
 {
-    public Ruins(int tier, Tile tile, Pos pos) : base(RUINS_ID, tier, tile, pos)
+    public Ruins(int tier, Tile tile, Pos pos) : base(IDRuins, tier, tile, pos)
     {
-        name = RUINS;
+        Name = Ruins;
     }
 }
 
 public class Cliff : MapCell
 {
-    public Cliff(int tier, Tile tile, Pos pos) : base(CLIFF_ID, tier, tile, pos)
+    public Cliff(int tier, Tile tile, Pos pos) : base(IDCliff, tier, tile, pos)
     {
-        name = CLIFF;
+        Name = Cliff;
     }
 }
 
 public class Cave : MapCell
 {
-    public Cave(int tier, Tile tile, Pos pos) : base(CAVE_ID, tier, tile, pos)
+    public Cave(int tier, Tile tile, Pos pos) : base(IDCave, tier, tile, pos)
     {
-        name = CAVE;
+        Name = Cave;
     }
 }
 
 public class Star : MapCell
 {
-    public Star(int tier, Tile tile, Pos pos) : base(STAR_ID, tier, tile, pos)
+    public Star(int tier, Tile tile, Pos pos) : base(IDStar, tier, tile, pos)
     {
-        name = STAR;
-        star_crystals = 18;
-        creates_travelcard = false;
-        travelcard_complete = true;
-        glows = true;
+        Name = Star;
+        StarCrystals = 18;
+        CreatesTravelcard = false;
+        TravelcardComplete = true;
+        Glows = true;
     }
 }
 
 public class Titrum : MapCell
 {
-    public Titrum(int tier, Tile tile, Pos pos) : base(TITRUM_ID, tier, tile, pos)
+    public Titrum(int tier, Tile tile, Pos pos) : base(IDTitrum, tier, tile, pos)
     {
-        name = TITRUM;
-        minerals = 24;
-        glows = true;
+        Name = Titrum;
+        Minerals = 24;
+        Glows = true;
     }
 }
 public class LushLand : MapCell
 {
-    public LushLand(int tier, Tile tile, Pos pos) : base(LUSH_LAND_ID, tier, tile, pos)
+    public LushLand(int tier, Tile tile, Pos pos) : base(IDLushLand, tier, tile, pos)
     {
-        name = LUSH_LAND;
-        creates_travelcard = false;
-        travelcard_complete = true;
+        Name = LushLand;
+        CreatesTravelcard = false;
+        TravelcardComplete = true;
     }
 }
 /*
@@ -472,34 +448,34 @@ public class Mire : MapCell {
 }*/
 public class Mountain : MapCell
 {
-    public Mountain(int tier, Tile tile, Pos pos) : base(MOUNTAIN_ID, tier, tile, pos)
+    public Mountain(int tier, Tile tile, Pos pos) : base(IDMountain, tier, tile, pos)
     {
-        name = MOUNTAIN;
-        minerals = 21;
+        Name = Mountain;
+        Minerals = 21;
     }
 }
 public class Settlement : MapCell
 {
-    public Settlement(int tier, Tile tile, Pos pos) : base(SETTLEMENT_ID, tier, tile, pos)
+    public Settlement(int tier, Tile tile, Pos pos) : base(IDSettlement, tier, tile, pos)
     {
-        name = SETTLEMENT;
-        creates_travelcard = false;
+        Name = Settlement;
+        CreatesTravelcard = false;
     }
 }
 public class RuneGate : MapCell
 {
-    public RuneGate(int tier, Tile tile, Pos pos) : base(RUNE_GATE_ID, tier, tile, pos)
+    public RuneGate(int tier, Tile tile, Pos pos) : base(IDRuneGate, tier, tile, pos)
     {
-        name = RUNE_GATE;
-        has_rune_gate = true;
-        glows = true;
+        Name = RuneGate;
+        HasRuneGate = true;
+        Glows = true;
     }
 }
 
 public class GuardianPass : MapCell
 {
-    public GuardianPass(int tier, Tile tile, Pos pos) : base(GUARDIAN_PASS_ID, tier, tile, pos)
+    public GuardianPass(int tier, Tile tile, Pos pos) : base(IDGuardianPass, tier, tile, pos)
     {
-        name = GUARDIAN_PASS;
+        Name = GuardianPass;
     }
 }

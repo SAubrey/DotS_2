@@ -9,11 +9,11 @@ public class Line : MonoBehaviour
     public bool fading = false;
     public LineRenderer lr;
     public int id;
-    public virtual void init(Unit u, int id,
+    public virtual void Init(Unit u, int id,
                 Vector3 start_pos, Vector3 end_pos)
     {
         this.id = id;
-        draw(u, start_pos, end_pos);
+        Draw(u, start_pos, end_pos);
     }
 
     void Update()
@@ -21,13 +21,13 @@ public class Line : MonoBehaviour
         if (!fading)
             return;
 
-        fade();
+        Fade();
         time_alive += Time.deltaTime;
         if (time_alive >= TIMEOUT)
-            remove();
+            Remove();
     }
 
-    private void fade()
+    private void Fade()
     {
         Vector4 sc = lr.startColor;
         Vector4 ec = lr.endColor;
@@ -35,7 +35,7 @@ public class Line : MonoBehaviour
         lr.endColor = new Color(ec[0], ec[1], ec[2], 1 - (time_alive / TIMEOUT));
     }
 
-    public void draw(Unit u, Vector3 start_pos, Vector3 end_pos)
+    public void Draw(Unit u, Vector3 start_pos, Vector3 end_pos)
     {
         if (u == null)
         {
@@ -47,7 +47,7 @@ public class Line : MonoBehaviour
         lr.positionCount = 2;
         lr.startWidth = 20f;
         lr.endWidth = 1f;
-        if (u.get_type() == Unit.ENEMY)
+        if (u.IsPlayer)
         {
             lr.startColor = new Color(.9f, .1f, .1f, 0);
             lr.endColor = new Color(.9f, .1f, .1f, .4f);
@@ -62,12 +62,12 @@ public class Line : MonoBehaviour
         lr.useWorldSpace = true;
     }
 
-    public void begin_fade()
+    public void BeginFade()
     {
         fading = true;
     }
 
-    public void remove()
+    public void Remove()
     {
         GameObject.Destroy(this.gameObject);
     }

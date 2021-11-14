@@ -10,9 +10,9 @@ public class LargeEnemyDeployment : EnemyDeployment
 
     void Start()
     {
-        zones.Add(zone_front);
-        zones.Add(zone_rear);
-        base.init();
+        Zones.Add(zone_front);
+        Zones.Add(zone_rear);
+        base.Init();
     }
 
     protected override void Update()
@@ -20,16 +20,16 @@ public class LargeEnemyDeployment : EnemyDeployment
         base.Update();
     }
 
-    public override Group[] get_attacking_zone(bool melee)
+    public override Group[] GetAttackingZone(bool melee)
     {
         return melee ? zone_front : zone_rear;
     }
 
 
-    public override void place_unit(Unit unit)
+    public override void PlaceUnit(Unit unit)
     {
         Group[] zone = null;
-        if (unit.is_melee)
+        if (unit.IsMelee)
         {
             zone = zone_front;
         }
@@ -38,10 +38,10 @@ public class LargeEnemyDeployment : EnemyDeployment
             zone = zone_rear;
         }
 
-        Group g = get_highest_empty_group(zone);
+        Group g = GetHighestEmptyGroup(zone);
         if (g != null)
         {
-            g.place_unit(unit);
+            g.PlaceUnit(unit);
         }
     }
 

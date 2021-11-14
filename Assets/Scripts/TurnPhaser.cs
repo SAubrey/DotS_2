@@ -11,31 +11,31 @@ public class TurnPhaser : MonoBehaviour, ISaveLoad
 {
     public static TurnPhaser I { get; private set; }
 
-    public event Action<Discipline> onDiscChange;
-    public event Action onTurnChange;
-    public int turn { get; private set; }
-    public Discipline astra, martial, endura;
+    public event Action<Discipline> OnDiscChange;
+    public event Action OnTurnChange;
+    public int Turn { get; private set; }
+    public Discipline Astra, Martial, Endura;
 
-    public IDictionary<int, Discipline> discs = new Dictionary<int, Discipline>();
+    public IDictionary<int, Discipline> Discs = new Dictionary<int, Discipline>();
 
     // <arbitrary turn order index, Discipline>
-    public Discipline[] discsInPlay;
-    public int numPlayers { get; private set; } = 1;
+    public Discipline[] DiscsInPlay;
+    public int NumPlayers { get; private set; } = 1;
 
     private int _activeDiscID;
-    public int activeDiscID
+    public int ActiveDiscID
     {
         get { return _activeDiscID; }
         set
         {
-            _activeDiscID = value % numPlayers;
-            activeDisc = discsInPlay[value % numPlayers];
-            activeDisc.active = true;
-            getDisc((_activeDiscID + 1) % 3).active = false;
-            getDisc((_activeDiscID + 2) % 3).active = false;
+            _activeDiscID = value % NumPlayers;
+            ActiveDisc = DiscsInPlay[value % NumPlayers];
+            ActiveDisc.Active = true;
+            GetDisc((_activeDiscID + 1) % 3).Active = false;
+            GetDisc((_activeDiscID + 2) % 3).Active = false;
         }
     } // disciplines are like sub factions.
-    public Discipline activeDisc { get; private set; }
+    public Discipline ActiveDisc { get; private set; }
 
     void Awake()
     {
@@ -49,76 +49,72 @@ public class TurnPhaser : MonoBehaviour, ISaveLoad
         }
     }
 
-    public void Init(Discipline chosen_disc) {
-        astra.ID = Discipline.ASTRA;
-        martial.ID = Discipline.MARTIAL;
-        endura.ID = Discipline.ENDURA;
-        discs.Add(Discipline.ASTRA, astra);
-        discs.Add(Discipline.MARTIAL, martial);
-        discs.Add(Discipline.ENDURA, endura);
+    public void Init(Discipline chosenDisc) {
+        Astra.ID = Discipline.Astra;
+        Martial.ID = Discipline.Martial;
+        Endura.ID = Discipline.Endura;
+        Discs.Add(Discipline.Astra, Astra);
+        Discs.Add(Discipline.Martial, Martial);
+        Discs.Add(Discipline.Endura, Endura);
 
-        discsInPlay = new Discipline[] {chosen_disc};
-        numPlayers = discsInPlay.Length;
-        activeDisc = chosen_disc;
-        activeDisc.piece.SetActive(true);
+        DiscsInPlay = new Discipline[] {chosenDisc};
+        NumPlayers = DiscsInPlay.Length;
+        ActiveDisc = chosenDisc;
+        ActiveDisc.Piece.SetActive(true);
     }
 
-    public void advance_turn()
+    public void AdvanceTurn()
     {
-        turn++;
-        onTurnChange();
+        Turn++;
+        OnTurnChange();
     }
 
-    public void end_disciplines_turn()
+    public void EndDisciplinesTurn()
     {
-        MapUI.I.close_cell_UI();
-        advance_player();
+        MapUI.I.CloseCellUI();
+        AdvancePlayer();
     }
 
-    private void advance_player()
+    private void AdvancePlayer()
     {
-        activeDiscID++;
-        if (onDiscChange != null)
-            onDiscChange(activeDisc);
-        if (activeDiscID == discsInPlay[0].ID)
-            advance_turn();
-
-        if (activeDisc.dead)
-        {
-            activeDisc.respawn();
+        ActiveDiscID++;
+        if (OnDiscChange != null)
+            OnDiscChange(ActiveDisc);
+        if (ActiveDiscID == DiscsInPlay[0].ID) {
+            AdvanceTurn();
         }
 
-        reset();
-        CamSwitcher.I.set_active(CamSwitcher.MAP, true);
+        Reset();
+        CamSwitcher.I.SetActive(CamSwitcher.MAP, true);
     }
 
-    public void reset()
+    public void Reset()
     { // New game, new player
-        MapUI.I.set_active_ask_to_enterP(false);
-        MapUI.I.update_cell_text(activeDisc.cell.name);
+        MapUI.I.SetActiveAskToEnterP(false);
+        MapUI.I.UpdateCellText(ActiveDisc.Cell.Name);
     }
 
-    public GameData save()
+    public GameData Save()
     {
         TurnPhaserData data = new TurnPhaserData();
         data.name = "TurnPhaser";
-        data.turn = turn;
-        data.activeDiscID = activeDiscID;
+        data.turn = Turn;
+        data.activeDiscID = ActiveDiscID;
         return data;
     }
 
-    public void load(GameData generic)
+    public void Load(GameData generic)
     {
         TurnPhaserData data = generic as TurnPhaserData;
-        activeDiscID = data.activeDiscID;
-        turn = data.turn;
+        ActiveDiscID = data.activeDiscID;
+        Turn = data.turn;
     }
     
-    public Discipline getDisc(int ID)
+    public Discipline GetDisc(int ID)
     {
-        if (!discs.Keys.Contains(ID)) {
-            return activeDisc;
+        if (!Discs.Keys.Contains(ID)) {
+            return ActiveDisc;
         }
-        return discs[ID];
+        return Discs[ID];
     }
 }

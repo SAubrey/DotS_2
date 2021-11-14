@@ -4,35 +4,35 @@ using UnityEngine;
 
 public class MapCellLight : MonoBehaviour
 {
-    public UnityEngine.Experimental.Rendering.Universal.Light2D cell_light;
-    public LightFlicker light_flicker;
-    public LightGlow light_glow;
+    public UnityEngine.Experimental.Rendering.Universal.Light2D CellLight;
+    public LightFlicker LightFlicker;
+    public LightGlow LightGlow;
 
-    public void init(MapCell cell)
+    public void Init(MapCell cell)
     {
-        if (light_flicker == null && light_glow == null)
+        if (LightFlicker == null && LightGlow == null)
             return;
-        light_flicker.light2d = cell_light;
-        light_glow.light2d = cell_light;
+        LightFlicker.light2d = CellLight;
+        LightGlow.light2d = CellLight;
 
-        if (MapUI.I.cell_light_colors.ContainsKey(cell.ID))
-            set_color(MapUI.I.cell_light_colors[cell.ID]);
-        set_glow(cell.glows);
-        set_flicker(cell.flickers);
+        if (MapUI.I.CellLightColors.ContainsKey(cell.ID))
+            SetColor(MapUI.I.CellLightColors[cell.ID]);
+        SetGlow(cell.Glows);
+        SetFlicker(cell.Flickers);
     }
 
-    public void set_glow(bool active)
+    public void SetGlow(bool active)
     {
-        light_glow.active = active;
+        LightGlow.active = active;
     }
 
-    public void set_flicker(bool active)
+    public void SetFlicker(bool active)
     {
-        light_flicker.active = active;
+        LightFlicker.active = active;
     }
 
-    public void set_color(Color c)
+    public void SetColor(Color c)
     {
-        cell_light.color = c;
+        CellLight.color = c;
     }
 }

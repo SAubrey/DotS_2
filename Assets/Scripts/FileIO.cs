@@ -53,7 +53,7 @@ public static class FileIO
 
     public static bool load_file_exists()
     {
-        return File.Exists(concat_path(Controller.CONTROLLER));
+        return File.Exists(concat_path(Game.CONTROLLER));
     }
 
     private static string concat_path(string class_name)

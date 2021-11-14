@@ -36,13 +36,13 @@ public class TravelCard
     public virtual void use_roll_result(int result) { }
 
     // Only accessed if ruins.
-    public int enemy_biome_ID = MapCell.TITRUM_ID;
+    public int enemy_biome_ID = MapCell.IDTitrum;
 
     public TravelCard(int id, int type)
     {
         ID = id;
         this.type = type;
-        foreach (string field in TurnPhaser.I.activeDisc.resources.Keys)
+        foreach (string field in TurnPhaser.I.ActiveDisc.Resources.Keys)
         {
             consequence.Add(field, 0);
         }
@@ -295,7 +295,7 @@ public class RuinsCard : TravelCard
 {
     public RuinsCard(int ID) : base(ID, RUINS)
     {
-        enemy_biome_ID = MapCell.TITRUM_ID;
+        enemy_biome_ID = MapCell.IDTitrum;
         type_text = "Ruins";
     }
 }
@@ -314,7 +314,7 @@ public class Ruins1_1 : RuinsCard
 
     public override void on_continue(TravelCardManager tcm)
     {
-        TurnPhaser.I.activeDisc.bat.add_units(PlayerUnit.SEEKER, 1, true);
+        TurnPhaser.I.ActiveDisc.Bat.AddUnits(PlayerUnit.SEEKER, 1, true);
     }
 }
 
@@ -337,7 +337,7 @@ public class Ruins1_3 : RuinsCard
     {
         rules.enter_combat = true;
         rules.affect_resources = true;
-        enemy_biome_ID = MapCell.MELD_ID;
+        enemy_biome_ID = MapCell.IDMeld;
         enemy_count = 5;
         consequence[Storeable.ERELICS] = 2;
         consequence[Storeable.MRELICS] = 2;
@@ -357,7 +357,7 @@ public class Ruins1_4 : RuinsCard
         rules.enter_combat = true;
         rules.affect_resources = true;
         equipment_reward_amount = 1;
-        enemy_biome_ID = MapCell.TITRUM_ID;
+        enemy_biome_ID = MapCell.IDTitrum;
         enemy_count = 7;
         description = "These ruins have been overrun by the creatures of a nearby titrum forest.\n " +
         "To find our past we must slay these lingering creatures.";
@@ -486,7 +486,7 @@ public class Event1_3 : Event
     public override void on_continue(TravelCardManager tcm)
     {
         //tcm.c.map.move_player(tcm.c.get_disc().prev_pos);
-        TurnPhaser.I.activeDisc.move(TurnPhaser.I.activeDisc.previous_cell);
+        TurnPhaser.I.ActiveDisc.Move(TurnPhaser.I.ActiveDisc.PreviousCell);
     }
 }
 public class Event1_4 : Event
@@ -565,10 +565,10 @@ public class Event2_3 : Event
     public override void on_continue(TravelCardManager tcm)
     {
         // Kill 2 random units
-        if (!TurnPhaser.I.activeDisc.bat.has_scout)
+        if (!TurnPhaser.I.ActiveDisc.Bat.HasScout)
         {
-            TurnPhaser.I.activeDisc.bat.lose_random_unit("Caught in a trap");
-            TurnPhaser.I.activeDisc.bat.lose_random_unit("Caught in a trap");
+            TurnPhaser.I.ActiveDisc.Bat.LoseRandomUnit("Caught in a trap");
+            TurnPhaser.I.ActiveDisc.Bat.LoseRandomUnit("Caught in a trap");
         }
     }
 }

@@ -8,8 +8,8 @@ public class SlotUI : Slot
     public Image image;
     void Awake()
     {
-        cam = GameObject.Find("MapCamera").GetComponent<Camera>();
-        face_cam();
+        Cam = GameObject.Find("MapCamera").GetComponent<Camera>();
+        FaceCam();
     }
 
     protected override void Start() {
@@ -18,51 +18,51 @@ public class SlotUI : Slot
     }
 
     void Update() {
-        move();
+        Move();
     }
 
     protected override void FixedUpdate() {}
 
-    public override bool fill(Unit u)
+    public override bool Fill(Unit u)
     {
         if (u == null)
             return false;
-        set_unit(u);
-        init_UI(u);
+        SetUnit(u);
+        InitUI(u);
         image.color = Color.white;
-        image.sprite = BatLoader.I.get_unit_img(u, Group.DOWN);
+        image.sprite = BatLoader.I.GetUnitImg(u, Group.Down);
         return true;
     }
 
-    protected void move()
+    protected void Move()
     {
         // Slots hold units and smooth lerp towards the static slot points. 
         // Slots points are fixed in a grid in group. Thus, slots are not under the hierarchy of groups anymore.
         // Rotation, movement, and formation change will incur smooth movement. 
         // This also allows slots to move forward towards a destination.
 
-        Vector3 desired_pos = slot_point_transform.position;
+        Vector3 desired_pos = SlotPointTransform.position;
         transform.position = Vector2.Lerp(transform.position, desired_pos, .025f);
     }
 
-    public override void face_cam()
+    public override void FaceCam()
     { 
         //image.transform.LookAt(cam.transform);
-        frame.transform.LookAt(cam.transform);
-        frame.transform.forward *= -1;
+        Frame.transform.LookAt(Cam.transform);
+        Frame.transform.forward *= -1;
     }
 
-    protected override void set_unit(Unit u)
+    protected override void SetUnit(Unit u)
     {
         if (u == null)
             return;
-        if (u.is_playerunit)
+        if (u.IsPlayer)
         {
-            unit = u as PlayerUnit;
+            Unit = u as PlayerUnit;
         }
-        else if (u.is_enemy)
+        else if (u.IsEnemy)
         {
-            unit = u as Enemy;
+            Unit = u as Enemy;
         }
 
     }

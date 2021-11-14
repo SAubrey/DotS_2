@@ -7,30 +7,45 @@ using System;
 public class PlayerDeployment : Deployment
 {
     public static PlayerDeployment I { get; private set; }
+    private GameObject LockedOnEnemy;
 
-    public UnityEngine.Experimental.Rendering.Universal.Light2D light2d;
+    [SerializeField] private LayerMask GroundMask;
+    [SerializeField] protected Group[] ZoneSword = new Group[3];
+    [SerializeField] protected Group[] ZonePolearm = new Group[3];
+    [SerializeField] protected Group[] ZoneCenter = new Group[1];
+    [SerializeField] protected Group[] ZoneRange = new Group[2];
+    [SerializeField] protected Group[] ZoneMage = new Group[1];
 
-    // Movement
-    public Group[] zone_front_sword = new Group[3];
-    public Group[] zone_front_polearm = new Group[3];
-    public Group[] zone_center = new Group[1];
-    public Group[] zone_rear = new Group[3];
+    [SerializeField] private GameObject ZoneSwordParent;
+    [SerializeField] private Vector3 ZoneSwordParentPos;
+    [SerializeField] private GameObject ZonePolearmParent;
+    [SerializeField] private Vector3 ZonePolearmParentPos;
+    [SerializeField] private GameObject ZoneRangeParent;
+    [SerializeField] private Vector3 ZoneRangeParentPos;
+    [SerializeField] private GameObject ZoneMageParent;
+    [SerializeField] private Vector3 ZoneMageParentPos;
 
-    public GameObject zone_front_sword_parent;
-    public GameObject zone_front_polearm_parent;
-
-    public bool swordsmen_forward = true;
-    public Group[] forward_zone
+    private Group[] ForwardZone;
+    private Timer AttackDelayTimer = new Timer(.0005f);
+    public Slider Manabar;
+    public float ManaMax = 100f;
+    private float _Mana = 100f;
+    public float Mana
     {
-        get
+        get { return _Mana; }
+        set
         {
-            if (swordsmen_forward) return zone_front_sword;
-            else return zone_front_polearm;
+            _Mana = Mathf.Max(value, 0f);
+            if (Manabar != null)
+            {
+                UpdateSlider(Manabar, ManaMax, Mana);
+            }
         }
     }
-
-    void Awake()
+    
+    protected override void Awake()
     {
+        base.Awake();
         if (I == null)
         {
             I = this;
@@ -39,59 +54,94 @@ public class PlayerDeployment : Deployment
         {
             Destroy(gameObject);
         }
+        ZoneSwordParentPos = ZoneSwordParent.transform.localPosition;
+        ZonePolearmParentPos = ZonePolearmParent.transform.localPosition;
+        ZoneRangeParentPos = ZoneRangeParent.transform.localPosition;
+        ZoneMageParentPos = ZoneMageParent.transform.localPosition;
+        Destination = transform.position;
     }
 
     void Start()
     {
-        rb = gameObject.GetComponent<Rigidbody2D>();
-        zones.Add(zone_front_sword);
-        zones.Add(zone_front_polearm);
-        zones.Add(zone_center);
-        zones.Add(zone_rear);
-        stamina = MAX_STAMINA;
-        isPlayer = true;
-        VEL_RUN = VEL_RUN + 100f;
+        Zones.Add(ZoneSword);
+        Zones.Add(ZonePolearm);
+        Zones.Add(ZoneCenter);
+        Zones.Add(ZoneRange);
+        Stamina = StamMax;
+        IsPlayer = true;
+        VelRun = VelRun + 50f;
+        Init();
     }
 
-    protected void init()
+    protected void Init()
     {
-        update_healthbar();
-        update_staminabar();
-        stamina = MAX_STAMINA;
+        UpdateSlider(staminabar, StamMax, Stamina);
+        Stamina = StamMax;
+        Mana = ManaMax;
+        ForwardZone = ZoneSword;
+        Destination = transform.position;
     }
 
     protected override void Update()
     {
+        if (!CamSwitcher.I.battle_cam.isActiveAndEnabled)
+            return;
+
         base.Update();
-        if (Input.GetMouseButtonDown(0))
+        PollControlScheme2();
+    }
+    
+    protected override void FixedUpdate()
+    {
+        if (!CamSwitcher.I.battle_cam.isActiveAndEnabled)
+            return;
+
+        base.FixedUpdate();
+        FixedUpdateControlScheme2();
+    }
+
+    private void FixedUpdateControlScheme1()
+    {
+        Vector3 movement = GetMovementInput();
+        if (movement != Vector3.zero && CanMove)
+        {
+            MoveInDirection(movement, VelRun, PhysicsBody.MoveForce);
+        }
+        //RotateToMouse(GroundMask);
+    }
+
+    // Click to move/rotate, enemy lock on
+    private void FixedUpdateControlScheme2()
+    {
+        if (CanMove)
+        {
+            MoveToDestination(Destination, VelRun, PhysicsBody.MoveForce);
+            //RotateTowardsTarget(Destination);
+        }
+    }
+
+    private void PollControlScheme1() 
+    {
+        if (Input.GetMouseButtonDown(0) && AttackDelayTimer.finished)
         { // Left click
-            melee_attack(forward_zone);
+            MeleeAttack(ForwardZone);
         }
         else if (Input.GetMouseButtonDown(1))
         { // Right click
-            block(true);
+            Block(true);
         }
         else if (Input.GetMouseButtonUp(1)) {
-            block(false);
+            Block(false);
         }
         else if (Input.GetKeyDown(KeyCode.Space))
         {
             // show range_attack landing zone
         }
-
         if (Input.GetKeyUp(KeyCode.Space))
         {
-            Vector3 p = Input.mousePosition;
-            p.z = 2000f;
-            p = CamSwitcher.I.battle_cam.ScreenToWorldPoint(p);
-            range_attack(zone_rear, p);
-        }
-
-        // Swap melee and polearm troops.
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            swordsmen_forward = !swordsmen_forward;
-            SwapForwardZone();
+            Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.battle_cam, GroundMask);
+            if (p != Vector3.zero)
+                RangeAttack(ZoneRange, p);
         }
         else if (Input.GetKeyDown(KeyCode.R))
         {
@@ -101,108 +151,229 @@ public class PlayerDeployment : Deployment
                 lockedOnEnemy = null;
             }*/
         }
-    }
-
-    protected override void FixedUpdate()
-    {
-        base.FixedUpdate();
-        Vector2 movement = get_movement_input();
-        if (movement != Vector2.zero && canMove)
+        Group[] g = CheckFormationInput();
+        if (g != null)
         {
-            Move(movement, VEL_RUN, PhysicsBody.MoveForce);
+            ForwardZone = g;
+            MoveFormations(g[0].Parent);
         }
-        RotateToMouse();
     }
 
-    private void SwapForwardZone()
+    private void PollControlScheme2() 
     {
-        Vector3 p = zone_front_sword_parent.transform.position;
-        zone_front_sword_parent.transform.position = zone_front_polearm_parent.transform.position;
-        zone_front_polearm_parent.transform.position = p;
+        if (Input.GetMouseButtonDown(0))
+        { // Left click
+            Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.battle_cam, GroundMask);
+            if (p != Vector3.zero)
+                Destination = p;
+        } else if (Input.GetMouseButton(0))
+        {
+            Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.battle_cam, GroundMask);
+            if (p != Vector3.zero)
+                Destination = p;
+        }
+        if (Input.GetKeyDown(KeyCode.A) && AttackDelayTimer.finished)
+        {
+            MeleeAttack(ForwardZone);
+        }
+        else if (Input.GetKeyDown(KeyCode.D))
+        { // Right click
+            Block(true);
+        }
+        else if (Input.GetKeyUp(KeyCode.D)) {
+            Block(false);
+        }
+        else if (Input.GetKeyDown(KeyCode.Space))
+        {
+            // show range_attack landing zone
+        }
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.battle_cam, GroundMask);
+            if (p != Vector3.zero)
+                RangeAttack(ZoneRange, p);
+        }
+        else if (Input.GetKeyDown(KeyCode.R))
+        {
+            if (LockedOnEnemy == null) {
+                LockedOnEnemy = FindNearestEnemyInSight();
+            } else {
+                LockedOnEnemy = null;
+            }
+        }
+        Group[] g = CheckFormationInput();
+        if (g != null)
+        {
+            ForwardZone = g;
+            MoveFormations(g[0].Parent);
+        }
     }
 
-    /*    void OnDrawGizmosSelected() {
-            Vector2 mouse_pos = (Vector2)
-                CamSwitcher.I.battle_cam.ScreenToWorldPoint(Input.mousePosition);
-
-            Gizmos.DrawLine(transform.position, mouse_pos);
-        }*/
-
-    private Vector2 GetDirToMouse(Vector2 mouse_pos)
+    private GameObject FindNearestEnemyInSight()
     {
-        return Statics.Direction(transform.position, mouse_pos);
+        GameObject[] gos = GameObject.FindGameObjectsWithTag("Enemy");
+        GameObject nearest = null;
+        float nearestDistance = Mathf.Infinity;
+        float distance = 0;
+        foreach (GameObject go in gos)
+        {
+            distance = Vector3.Distance(transform.position, go.transform.position);
+            if (distance < nearestDistance)
+            {
+                nearest = go;
+                nearestDistance = distance;
+            }
+        }
+        return nearest;
     }
 
-    private Vector2 get_movement_input()
+    protected void MoveFormations(GameObject forwardGameObject) 
     {
-        Vector2 vec = Vector2.zero;
+        if (forwardGameObject == ZoneSwordParent) 
+        {      
+            ZoneSword[0].Parent.transform.localPosition = ZoneSwordParentPos;
+            ZonePolearm[0].Parent.transform.localPosition = ZonePolearmParentPos;
+            ZoneRange[0].Parent.transform.localPosition = ZoneRangeParentPos;
+            ZoneMage[0].Parent.transform.localPosition = ZoneMageParentPos;
+        } else if (forwardGameObject == ZonePolearmParent)
+        {
+            ZonePolearm[0].Parent.transform.localPosition = ZoneSwordParentPos;
+            ZoneSword[0].Parent.transform.localPosition = ZonePolearmParentPos;
+            ZoneRange[0].Parent.transform.localPosition = ZoneRangeParentPos;
+            ZoneMage[0].Parent.transform.localPosition = ZoneMageParentPos;
+        } else if (forwardGameObject == ZoneRangeParent)
+        {
+            ZoneRange[0].Parent.transform.localPosition = ZoneSwordParentPos;
+            ZoneSword[0].Parent.transform.localPosition = ZonePolearmParentPos;
+            ZonePolearm[0].Parent.transform.localPosition = ZoneRangeParentPos;
+            ZoneMage[0].Parent.transform.localPosition = ZoneMageParentPos;
+        } else if (forwardGameObject == ZoneMageParent)
+        {  
+            ZoneMage[0].Parent.transform.localPosition = ZoneSwordParentPos;
+            ZoneSword[0].Parent.transform.localPosition = ZonePolearmParentPos;
+            ZonePolearm[0].Parent.transform.localPosition = ZoneRangeParentPos;
+            ZoneRange[0].Parent.transform.localPosition = ZoneMageParentPos;
+        }
+    }
+
+    private int CheckAbilityInput() 
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1)) 
+        {
+            return 1;
+        } else if (Input.GetKeyDown(KeyCode.Alpha2)) 
+        {
+            return 2;
+        } else if (Input.GetKeyDown(KeyCode.Alpha3)) 
+        {
+            return 3;
+        } else if (Input.GetKeyDown(KeyCode.Alpha4)) 
+        {
+            return 4;
+        } else if (Input.GetKeyDown(KeyCode.Alpha5)) 
+        {
+            return 5;
+        }
+        return 0;
+    }
+
+    private Group[] CheckFormationInput() {
+        if (Input.GetKeyDown(KeyCode.Z)) 
+        {
+            return ZoneSword;
+        } else if (Input.GetKeyDown(KeyCode.X)) 
+        {
+            return ZonePolearm;
+        } else if (Input.GetKeyDown(KeyCode.C)) 
+        {
+            return ZoneRange;
+        } else if (Input.GetKeyDown(KeyCode.V)) 
+        {
+            return ZoneCenter;
+        }
+        return null;
+    }
+
+    private Vector3 GetMovementInput()
+    {
+        Vector3 vec = Vector3.zero;
         if (Input.GetKey(KeyCode.W))
-            vec += VEC_UP;
+            vec += Vector3.forward;
         else if (Input.GetKey(KeyCode.S))
-            vec += VEC_DOWN;
+            vec += Vector3.back;
         if (Input.GetKey(KeyCode.A))
-            vec += VEC_LEFT;
+            vec += Vector3.left;
         else if (Input.GetKey(KeyCode.D))
-            vec += VEC_RIGHT;
+            vec += Vector3.right;
         return vec;
     }
 
-    public override void place_unit(Unit unit)
+    public override void PlaceUnit(Unit unit)
     {
         Group[] zone = null;
-        if (unit.is_melee)
+        if (unit.IsMelee)
         {
-            zone = unit.has_attribute(Unit.PIERCING) ? zone_front_polearm : zone_front_sword;
+            zone = unit.HasAttribute(Unit.PIERCING) ? ZonePolearm : ZoneSword;
         }
-        else
+        else if (unit.IsRange)
         {
-            zone = unit.is_range ? zone_rear : zone_center;
+            zone = ZoneRange;
+        }
+        else if (unit.IsMage)
+        {
+            zone = ZoneMage;
+        } else
+        {
+            zone = ZoneCenter;
         }
 
-        Group g = get_highest_empty_group(zone);
+        Group g = GetHighestEmptyGroup(zone);
         if (g != null)
         {
-            g.place_unit(unit);
+            g.PlaceUnit(unit);
         }
     }
 
-    public void place_units(Battalion b)
+    public void PlaceUnits(Battalion b)
     {
-        foreach (List<PlayerUnit> pu in b.units.Values)
+        foreach (List<PlayerUnit> pu in b.Units.Values)
         {
             foreach (Unit u in pu)
             {
-                place_unit(u);
+                PlaceUnit(u);
             }
         }
-        MapUI.I.update_deployment(b);
+        MapUI.I.UpdateDeployment(b);
     }
 
-    protected void block(bool active)
+    protected void Block(bool active)
     {
-        blocking = active;
-        if (stamina < stam_block_cost)
+        if (Stamina < StamBlockCost)
+        {
+            Blocking = false;
             return;
+        }
+        Blocking = active;
 
-        foreach (Group g in forward_zone)
+        foreach (Group g in ForwardZone)
         {
             for (int i = 0; i < 3; i++)
             {
-                if (g.slots[i].has_unit)
+                if (g.Slots[i].HasUnit)
                 {
-                    Unit u = g.slots[i].get_unit();
-                    u.blocking = active;
+                    Unit u = g.Slots[i].GetUnit();
+                    u.Blocking = active;
                 }
             }
         }
     }
 
-    public override Group[] get_attacking_zone(bool melee)
+    public override Group[] GetAttackingZone(bool melee)
     {
-        return melee ? forward_zone : zone_rear;
+        return melee ? ForwardZone : ZoneRange;
     }
 
-    private GameObject find_nearest_enemy_in_sight()
+    /*private GameObject find_nearest_enemy_in_sight()
     {
         int mask = 1 << 9;
         // Scan for enemies with enemy layer mask.
@@ -215,20 +386,20 @@ public class PlayerDeployment : Deployment
             return null;
 
         return closestEnemy.gameObject;
-    }
+    }*/
 
-    private void validate_all_punits()
+    private void ValidateAllPunits()
     {
-        foreach (Group g in zone_front_sword)
+        foreach (Group g in ZoneSword)
         {
-            g.validate_unit_order();
+            g.ValidateUnitOrder();
         }
     }
 
-    public float get_stam_regen_amount()
+    public float GetStamRegenAmount()
     {
         float vel = 0;//Mathf.Abs(body.velocity.x) + Mathf.Abs(body.velocity.y);
         // Double regeneration when not moving.
-        return vel < VEL_RUN / 10 ? stam_regen_amount * 2 : stam_regen_amount;
+        return vel < VelRun / 10 ? StamRegenAmount * 2 : StamRegenAmount;
     }
 }

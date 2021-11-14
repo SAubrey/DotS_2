@@ -8,291 +8,270 @@ using System;
 
 public class Slot : PhysicsBody
 {
-    private static readonly Color healthbar_fill_color = new Color(.8f, .1f, .1f, .45f);
-    private static readonly Color statbar_bg_color = new Color(.4f, .4f, .4f, .3f);
-    private static readonly Color equipment_text_color = new Color(1f, .67f, .32f, 1f);
+    private static readonly Color ColorHealthbar = new Color(.8f, .1f, .1f, .45f);
+    private static readonly Color ColorStatbarBg = new Color(.4f, .4f, .4f, .3f);
+    private static readonly Color ColorEquipmentText = new Color(1f, .67f, .32f, 1f);
     
-    public SpriteRenderer sprite_unit;
-    protected Camera cam;
-    public GameObject frame;
-    public Slider healthbar;
-    public Image healthbar_bg, healthbar_fill;
-    public GameObject healthbar_obj;
-    //public UnityEngine.Experimental.Rendering.Universal.Light2D light2d;
-    public Sprite range_icon, melee_icon, shield_icon, armor_icon;
+    public SpriteRenderer SpriteUnit;
+    protected Camera Cam;
+    public GameObject Frame;
+    public Slider Healthbar;
+    public Image HealthbarBg, HealthbarFill;
+    public GameObject HealthbarObj;
+    public Sprite IconRange, IconMelee, IconShield;
 
-    public TextMeshProUGUI name_T;
-    public TextMeshProUGUI attT, defT, hpT;
+    public TextMeshProUGUI TName;
+    public TextMeshProUGUI THp;
 
-    [HideInInspector]
-    public int col, row;
-    protected Unit unit;
-    public Group group;
-    //public Button button;
-    public AnimationPlayer animation_player;
-    public GameObject animation_obj;
+    protected Unit Unit;
+    public Group Group;
+    public AnimationPlayer AnimationPlayer;
+    public GameObject AnimatorObj;
+    public ParticleSystem PSDust;
+    public Transform SlotPointTransform;
+    public Transform SlotLookPointTransform;
+    public Deployment Deployment;
+    public GameObject MeleeAttZone;
+    public GameObject PrefabArrow;
+    public event Action<Vector2> OnVelocityChange;
+    public float MovementForce = 400f;
+    public float MaxVelocity = 400f;
+    [SerializeField] public Animator Animator;
+    [SerializeField] private GameObject CharacterModel;
 
-    ////// New
-    public ParticleSystem dust_ps;
-    public Transform slot_point_transform;
-    public Deployment deployment;
-    public GameObject melee_att_zone;
-    public GameObject arrow_prefab;
-    public event Action<Vector2> on_velocity_change;
-
-    void Awake()
+    protected override void Awake()
     {
-        cam = GameObject.Find("BattleCamera").GetComponent<Camera>();
-        face_cam();
+        base.Awake();
+        Cam = GameObject.Find("BattleCamera").GetComponent<Camera>();
+        FaceCam();
         gameObject.SetActive(false);
     }
 
     protected virtual void Start()
     {
-        healthbar_fill.color = healthbar_fill_color;
-        healthbar_bg.color = statbar_bg_color;
-        on_velocity_change += toggle_dust_ps;
-        dust_ps.enableEmission = false;
-        rb = gameObject.GetComponent<Rigidbody2D>();
+        HealthbarFill.color = ColorHealthbar;
+        HealthbarBg.color = ColorStatbarBg;
+        OnVelocityChange += ToggleDustPs;
+        PSDust.enableEmission = false;
     }
 
     protected virtual void FixedUpdate() {
-        on_velocity_change(rb.velocity);
-        Move(slot_point_transform.position, 100f, PhysicsBody.MoveForce, 3f);
+        OnVelocityChange(Rigidbody.velocity);
+
+        Animator.SetFloat("Velocity", Rigidbody.velocity.magnitude);
+        Vector3 destPos = new Vector3(SlotPointTransform.position.x, Rigidbody.position.y, SlotPointTransform.position.z);
+        MoveToDestination(destPos, MaxVelocity, PhysicsBody.MoveForce);
+        //RotateRigidbodyToTarget(Rigidbody, SlotPointTransform.position);
+        //RotateTransformToTarget(transform, SlotLookPointTransform.position);
+        FaceCam();
     }
 
-    public virtual bool fill(Unit u)
+    public virtual bool Fill(Unit u)
     {
         if (u == null)
             return false;
         gameObject.SetActive(true);
-        set_unit(u);
-        init_UI(u);
-        //unit_img.color = Color.white;
-        sprite_unit.color = Color.white;
-        sprite_unit.sprite = BatLoader.I.get_unit_img(u, 0);
+        SetUnit(u);
+        InitUI(u);
+        //SpriteUnit.color = Color.white;
+        SpriteUnit.sprite = BatLoader.I.GetUnitImg(u, 0);
+        CharacterModel.SetActive(true);
         return true;
     }
 
     // Full slots below the removed slot will be moved up if validated.
-    public Unit empty(bool validate = true)
+    public Unit Empty(bool validate = true)
     {
-        Unit removed_unit = unit;
-        if (unit != null)
+        Unit removedUnit = Unit;
+        if (Unit != null)
         {
-            unit.set_slot(null);
-            unit = null;
+            Unit.SetSlot(null);
+            Unit = null;
         }
         gameObject.SetActive(false);
 
-        update_unit_img(0);
-        set_active_UI(false);
-        set_nameT("");
-        sprite_unit.color = Color.clear;
-        dust_ps.enableEmission = false;
+        UpdateUnitImg(0);
+        SetActiveUI(false);
+        SetNameT("");
+        SpriteUnit.color = Color.clear;
+        CharacterModel.SetActive(false);
+        PSDust.enableEmission = false;
         if (validate)
-            group.validate_unit_order();
-        return removed_unit;
+            Group.ValidateUnitOrder();
+        return removedUnit;
     }
 
-    protected virtual void set_unit(Unit u)
+    protected virtual void SetUnit(Unit u)
     {
         if (u == null)
             return;
-        if (u.is_playerunit)
+        if (u.IsPlayer)
         {
-            unit = u as PlayerUnit;
+            Unit = u as PlayerUnit;
         }
-        else if (u.is_enemy)
+        else if (!u.IsPlayer)
         {
-            unit = u as Enemy;
+            Unit = u as Enemy;
         }
-        unit.set_slot(this);
+        Unit.SetSlot(this);
     }
 
-    public Unit get_unit()
+    public Unit GetUnit()
     {
-        return unit;
+        return Unit;
     }
 
-    public void range_attack(LayerMask mask, Vector2 target_pos)
+    public void RangeAttack(LayerMask mask, Vector2 targetPos)
     {
-        GameObject a = Instantiate(arrow_prefab, gameObject.transform);
+        GameObject a = Instantiate(PrefabArrow, gameObject.transform);
         a.gameObject.transform.position = gameObject.transform.position;
         Arrow a_script = a.GetComponent<Arrow>();
-        Vector2 launch_pos = new Vector2(gameObject.transform.position.x,
+        Vector2 launchPos = new Vector2(gameObject.transform.position.x,
                                         gameObject.transform.position.y);
-        a_script.init(mask, launch_pos, target_pos);
+        a_script.init(mask, launchPos, targetPos);
+        Animator.SetTrigger("Attack");
     }
 
-    public void init_UI(Unit u)
+    public void InitUI(Unit u)
     {
-        update_healthbar_color();
-        show_equipment_boosts();
-        set_nameT(unit.get_name());
-        //update_unit_img(group.direction);
-        set_active_UI(true);
-        update_text_UI();
+        ShowEquipmentBoosts();
+        SetNameT(Unit.GetName());
+        SetActiveUI(true);
+        UpdateTextUI();
+    }
+    
+    public void RotateToDirection(int direction)
+    {
+        if (HasUnit)
+        {
+            SpriteUnit.sprite = BatLoader.I.GetUnitImg(Unit, direction);
+        }
+        FaceCam();
     }
 
-    public void toggle_dust_ps(Vector2 v)
+    public void ToggleDustPs(Vector2 v)
     {
-        if (is_empty)
+        if (IsEmpty)
         {
             return;
         }
-        dust_ps.enableEmission = v.magnitude > 0;
+        PSDust.enableEmission = v.magnitude > 0;
     }
 
     // Updated when a boost is removed or applied,
     // or an attribute is activated or deactivated.
-    public void update_text_UI()
+    public void UpdateTextUI()
     {
-        update_healthbar();
+        UpdateHealthbar();
     }
 
-    public void update_healthbar()
+    public void UpdateHealthbar()
     {
-        healthbar.maxValue = get_unit().get_dynamic_max_health();
-        healthbar.value = get_unit().health;
-        update_healthbar_color();
-        hpT.text = build_health_string(get_unit().health, 0);
+        Healthbar.maxValue = GetUnit().GetDynamicMaxHealth();
+        Healthbar.value = GetUnit().Health;
+        THp.text = BuildHealthString(GetUnit().Health, 0);
+        Animator.SetFloat("Health", GetUnit().Health);
     }
 
-    public string build_health_string(float hp, float preview_damage)
+    public string BuildHealthString(float hp, float previewDamage)
     {
-        //float hp = get_unit().health; // This will already include the boost but not the bonus.
-        float hp_boost = get_unit().get_stat_buff(Unit.HEALTH)
-            + get_unit().get_bonus_health();
+        //float hp = GetUnit().health; // This will already include the boost but not the bonus.
+        float hp_boost = GetUnit().get_stat_buff(Unit.HEALTH)
+            + GetUnit().GetBonusHealth();
 
-        string str = (hp + get_unit().get_bonus_from_equipment(Unit.HEALTH)).ToString();
-        if (preview_damage > 0)
-            str += " (-" + preview_damage.ToString() + ")";
+        string str = (hp + GetUnit().get_bonus_from_equipment(Unit.HEALTH)).ToString();
+        if (previewDamage > 0)
+            str += " (-" + previewDamage.ToString() + ")";
         if (hp_boost > 0)
             str += " (+" + hp_boost.ToString() + ")";
         return str;
     }
 
-    private void update_healthbar_color()
+
+    public void SetActiveUI(bool state)
     {
-        //healthbar.fillRect.GetComponent<Image>().color = new Color(1, red, red, 1);
-        healthbar.fillRect.GetComponent<Image>().color = healthbar_fill_color;
+        HealthbarObj.SetActive(state);
     }
 
-    public void set_active_UI(bool state)
+    public void PlayAnimationEffect(string anim)
     {
-        healthbar_obj.SetActive(state);
+        AnimationPlayer.Play(anim);
     }
 
-    private void show_equipment_boosts()
+    private void UpdateUnitImg(int dir)
     {
-        if (unit.is_enemy)
+        SpriteUnit.color = Color.white;
+        SpriteUnit.sprite = BatLoader.I.GetUnitImg(Unit, dir);
+        if (SpriteUnit.sprite == null)
+            SpriteUnit.color = Color.clear;
+        RotateToDirection(dir);
+    }
+
+
+    private void ShowEquipmentBoosts()
+    {
+        if (Unit.IsEnemy)
             return;
 
-        EquipmentInventory ei = TurnPhaser.I.getDisc(get_punit().owner_ID).equipment_inventory;
-        hpT.color = ei.get_stat_boost_amount(unit.get_ID(), Unit.HEALTH) > 0 ?
-            equipment_text_color : Color.white;
+        EquipmentInventory ei = TurnPhaser.I.GetDisc(GetPunit().OwnerID).equipment_inventory;
+        THp.color = ei.get_stat_boost_amount(Unit.GetID(), Unit.HEALTH) > 0 ?
+            ColorEquipmentText : Color.white;
     }
 
-    public void play_animation(string anim)
+    public virtual void FaceCam()
     {
-        animation_player.play(anim);
-    }
-
-    private void update_unit_img(int dir)
-    {
-        sprite_unit.color = Color.white;
-        sprite_unit.sprite = BatLoader.I.get_unit_img(unit, dir);
-        if (sprite_unit.sprite == null)
-            sprite_unit.color = Color.clear;
-        rotate_to_direction(dir);
-    }
-
-    public void rotate_to_direction(int direction)
-    {
-        if (has_unit)
-        {
-            sprite_unit.sprite = BatLoader.I.get_unit_img(unit, direction);
-        }
-        set_animation_depth(direction);
-        //unit_img.transform.forward *= -1;
-        // Used if only using forward/back images to mirror them for right/left.
-        /*
-       if (direction == 0 || direction == 180) {
-           unit_img.transform.rotation = Quaternion.AngleAxis(0, Vector3.up);
-       } else 
-           unit_img.transform.rotation = Quaternion.AngleAxis(180, Vector3.up);
-       */
-        face_cam();
-    }
-
-    public virtual void face_cam()
-    {
-        //sprite_unit.transform.LookAt(cam.transform);
-        frame.transform.LookAt(cam.transform);
-        frame.transform.forward *= -1;
-    }
-
-    public void set_animation_depth(int direction)
-    {
-        if (direction == Group.UP || direction == Group.RIGHT)
-        {
-            animation_obj.transform.SetAsFirstSibling();
-        }
-        else
-        {
-            animation_obj.transform.SetAsLastSibling();
-        }
+        Frame.transform.LookAt(Cam.transform);
+        Frame.transform.forward *= -1;
     }
     // ---End GRAPHICAL--- 
 
-    public bool has_punit
+    public bool HasPunit
     {
         get
         {
-            if (unit == null) return false;
-            if (unit.is_playerunit) return true;
+            if (Unit == null) return false;
+            if (Unit.IsPlayer) return true;
             return false;
         }
     }
 
-    public bool has_enemy
+    public bool HasEnemy
     {
         get
         {
-            if (unit == null) return false;
-            if (unit.is_enemy) return true;
+            if (Unit == null) return false;
+            if (Unit.IsEnemy) return true;
             return false;
         }
     }
 
-    public bool has_unit
+    public bool HasUnit
     {
-        get { return unit != null ? true : false; }
+        get { return Unit != null ? true : false; }
     }
 
-    public bool is_empty
+    public bool IsEmpty
     {
-        get { return unit == null ? true : false; }
+        get { return Unit == null ? true : false; }
     }
 
-    public PlayerUnit get_punit()
+    public PlayerUnit GetPunit()
     {
-        return has_punit ? unit as PlayerUnit : null;
+        return HasPunit ? Unit as PlayerUnit : null;
     }
 
-    public Enemy get_enemy()
+    public Enemy GetEnemy()
     {
-        return has_enemy ? unit as Enemy : null;
+        return HasEnemy ? Unit as Enemy : null;
     }
 
-    private void set_nameT(string txt)
+    public Group GetGroup()
     {
-        name_T.text = txt;
+        return Group;
     }
 
-    public Group get_group()
+    private void SetNameT(string txt)
     {
-        return group;
+        TName.text = txt;
     }
 }

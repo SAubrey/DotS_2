@@ -238,54 +238,54 @@ public class CityUI : MonoBehaviour
         upgrade_buttons.Add(BOW_ILUHATAR, bow_iluhatarB);
         upgrade_buttons.Add(BARRACKS2, barracks2B);
 
-        foreach (Discipline d in TurnPhaser.I.discs.Values)
+        foreach (Discipline d in TurnPhaser.I.Discs.Values)
         {
-            d.on_resource_change += update_stat_text;
-            d.on_capacity_change += register_capacity_change;
+            d.OnResourceChange += UpdateStatText;
+            d.OnCapacityChange += RegisterCapacityChange;
         }
-        Controller.I.city.on_resource_change += update_stat_text;
+        Game.I.city.OnResourceChange += UpdateStatText;
 
-        new_game();
+        NewGame();
     }
 
-    public void new_game()
+    public void NewGame()
     {
         // Reset hire buttons
         foreach (Button b in hire_buttons.Values)
             b.interactable = false;
-        unlock_unit_purchase(PlayerUnit.WARRIOR);
-        unlock_unit_purchase(PlayerUnit.SPEARMAN);
-        unlock_unit_purchase(PlayerUnit.ARCHER);
-        unlock_unit_purchase(PlayerUnit.MINER);
-        unlock_unit_purchase(PlayerUnit.INSPIRATOR);
+        UnlockUnitPurchase(PlayerUnit.WARRIOR);
+        UnlockUnitPurchase(PlayerUnit.SPEARMAN);
+        UnlockUnitPurchase(PlayerUnit.ARCHER);
+        UnlockUnitPurchase(PlayerUnit.MINER);
+        UnlockUnitPurchase(PlayerUnit.INSPIRATOR);
 
         // Reset upgrades
         foreach (Button b in upgrade_buttons.Values)
         {
-            set_color(b, false, false);
+            SetColor(b, false, false);
         }
-        set_color(TEMPLE, false, true);
-        set_color(CRAFT_SHOP, false, true);
-        set_color(FORGE, false, true);
+        SetColor(TEMPLE, false, true);
+        SetColor(CRAFT_SHOP, false, true);
+        SetColor(FORGE, false, true);
 
-        switch_upgradeP(TurnPhaser.I.activeDiscID);
+        switch_upgradeP(TurnPhaser.I.ActiveDiscID);
         upgradesP.SetActive(false);
     }
 
 
     // ---Hire units UI---
-    public void update_stat_text(int calling_class, string field, int val, int sum, int capacity)
+    public void UpdateStatText(int calling_class, string field, int val, int sum, int capacity)
     {
         TextMeshProUGUI t = null;
         if (calling_class == City.CITY)
         {
             city_inv.TryGetValue(field, out t);
-            MapUI.update_capacity_text(city_capacityT, sum, capacity);
+            MapUI.UpdateCapacityText(city_capacityT, sum, capacity);
         }
-        else if (calling_class == TurnPhaser.I.activeDiscID)
+        else if (calling_class == TurnPhaser.I.ActiveDiscID)
         {
             disc_inv.TryGetValue(field, out t);
-            MapUI.update_capacity_text(bat_capacityT, sum, capacity);
+            MapUI.UpdateCapacityText(bat_capacityT, sum, capacity);
         }
         if (t != null)
         {
@@ -297,68 +297,68 @@ public class CityUI : MonoBehaviour
     {
         foreach (int type in unit_counts.Keys)
             unit_counts[type].text =
-                TurnPhaser.I.activeDisc.bat.units[type].Count.ToString();
+                TurnPhaser.I.ActiveDisc.Bat.Units[type].Count.ToString();
     }
 
-    public void try_hire_unit(string args_str)
+    public void TryHireUnit(string args_str)
     {
         string[] args = args_str.Split(',');
         int type = Int32.Parse(args[0]);
         int sc_cost = Int32.Parse(args[1]);
         int mineral_cost = Int32.Parse(args[2]);
 
-        if (verify_avail_unit_resources(sc_cost, mineral_cost))
+        if (VerifyAvailUnitResources(sc_cost, mineral_cost))
         {
-            TurnPhaser.I.activeDisc.bat.add_units(type, 1);
-            TurnPhaser.I.activeDisc.show_adjustments(
+            TurnPhaser.I.ActiveDisc.Bat.AddUnits(type, 1);
+            TurnPhaser.I.ActiveDisc.ShowAdjustments(
                 new Dictionary<string, int>() {
                     {Storeable.STAR_CRYSTALS, -sc_cost},
                     {Storeable.MINERALS, -mineral_cost}
             });
             // Update TextMeshProUGUI in city ui and map ui
-            unit_counts[type].text = TurnPhaser.I.activeDisc.bat.units[type].Count.ToString();
-            MapUI.I.unit_countsT[type].text = unit_counts[type].text;
+            unit_counts[type].text = TurnPhaser.I.ActiveDisc.Bat.Units[type].Count.ToString();
+            MapUI.I.TextUnitCounts[type].text = unit_counts[type].text;
         }
     }
 
-    public void move_resource_to_city(string type)
+    public void MoveResourceToCity(string type)
     {
         if (type == Storeable.EQUIMARES &&
-            Controller.I.city.get_res(Storeable.EQUIMARES) >= 10)
+            Game.I.city.GetResource(Storeable.EQUIMARES) >= 10)
         {
             return;
         }
-        if (Controller.I.city.get_valid_change_amount(type, 1) != 0 &&
-                TurnPhaser.I.activeDisc.get_valid_change_amount(type, -1) != 0)
+        if (Game.I.city.GetValidChangeAmount(type, 1) != 0 &&
+                TurnPhaser.I.ActiveDisc.GetValidChangeAmount(type, -1) != 0)
         {
-            Controller.I.city.change_var(type, 1);
-            TurnPhaser.I.activeDisc.change_var(type, -1);
+            Game.I.city.AdjustResource(type, 1);
+            TurnPhaser.I.ActiveDisc.AdjustResource(type, -1);
         }
     }
 
-    public void move_resource_to_disc(string type)
+    public void MoveResourceToDisc(string type)
     {
-        if (Controller.I.city.get_valid_change_amount(type, -1) != 0 &&
-                TurnPhaser.I.activeDisc.get_valid_change_amount(type, 1) != 0)
+        if (Game.I.city.GetValidChangeAmount(type, -1) != 0 &&
+                TurnPhaser.I.ActiveDisc.GetValidChangeAmount(type, 1) != 0)
         {
-            Controller.I.city.change_var(type, -1);
-            TurnPhaser.I.activeDisc.change_var(type, 1);
+            Game.I.city.AdjustResource(type, -1);
+            TurnPhaser.I.ActiveDisc.AdjustResource(type, 1);
         }
     }
 
-    private bool verify_avail_unit_resources(int sc_cost, int mineral_cost)
+    private bool VerifyAvailUnitResources(int sc_cost, int mineral_cost)
     {
-        Discipline disc = TurnPhaser.I.activeDisc;
+        Discipline disc = TurnPhaser.I.ActiveDisc;
 
-        if (disc.get_res(Storeable.STAR_CRYSTALS) >= sc_cost &&
-            disc.get_res(Storeable.MINERALS) >= mineral_cost)
+        if (disc.GetResource(Storeable.STAR_CRYSTALS) >= sc_cost &&
+            disc.GetResource(Storeable.MINERALS) >= mineral_cost)
         {
             return true;
         }
         return false;
     }
 
-    private void unlock_unit_purchase(int player_unit)
+    private void UnlockUnitPurchase(int player_unit)
     {
         if (hire_buttons.ContainsKey(player_unit))
         {
@@ -366,26 +366,26 @@ public class CityUI : MonoBehaviour
         }
     }
 
-    public void register_capacity_change(int ID, int sum, int capacity)
+    public void RegisterCapacityChange(int ID, int sum, int capacity)
     {
-        if (TurnPhaser.I.activeDiscID != ID)
+        if (TurnPhaser.I.ActiveDiscID != ID)
             return;
-        MapUI.update_capacity_text(city_capacityT, sum, capacity);
+        MapUI.UpdateCapacityText(city_capacityT, sum, capacity);
     }
 
 
 
     // ---Upgrades UI---
-    public void press_upgrade_button(int upgrade_ID)
+    public void PressUpgradeButton(int upgrade_ID)
     {
         selected_upgrade_ID = upgrade_ID;
         bool purchased = upgrades[upgrade_ID].purchased;
-        set_color(upgrade_ID, purchased, requirements_met(upgrade_ID));
-        set_active_purchaseB(!purchased && can_purchase_upgrade(upgrade_ID));
+        SetColor(upgrade_ID, purchased, RequirementsMet(upgrade_ID));
+        set_active_purchaseB(!purchased && CanPurchaseUpgrade(upgrade_ID));
         fill_infoT(upgrade_ID);
     }
 
-    private void set_color(int upgrade_ID, bool purchased, bool unlocked = false)
+    private void SetColor(int upgrade_ID, bool purchased, bool unlocked = false)
     {
         Button b = upgrade_buttons[upgrade_ID];
         if (purchased)
@@ -394,7 +394,7 @@ public class CityUI : MonoBehaviour
             b.image.color = unlocked ? UNLOCKED_COLOR : LOCKED_COLOR;
     }
 
-    private void set_color(Button b, bool purchased, bool unlocked = false)
+    private void SetColor(Button b, bool purchased, bool unlocked = false)
     {
         if (purchased)
             b.image.color = PURCHASED_COLOR;
@@ -402,25 +402,25 @@ public class CityUI : MonoBehaviour
             b.image.color = unlocked ? UNLOCKED_COLOR : LOCKED_COLOR;
     }
 
-    private bool can_purchase_upgrade(int upgrade_ID)
+    private bool CanPurchaseUpgrade(int upgrade_ID)
     {
-        return can_afford_upgrade(upgrade_ID) && requirements_met(upgrade_ID);
+        return CanAffordUpgrade(upgrade_ID) && RequirementsMet(upgrade_ID);
     }
 
-    private bool can_afford_upgrade(int upgrade_ID)
+    private bool CanAffordUpgrade(int upgrade_ID)
     {
-        Discipline b = TurnPhaser.I.activeDisc;
+        Discipline b = TurnPhaser.I.ActiveDisc;
         Upgrade u = upgrades[upgrade_ID];
-        if (b.get_res(Storeable.STAR_CRYSTALS) < u.star_crystals ||
-            b.get_res(Storeable.MINERALS) < u.minerals ||
-            b.get_res(Storeable.ARELICS) < u.arelics ||
-            b.get_res(Storeable.MRELICS) < u.mrelics ||
-            b.get_res(Storeable.ERELICS) < u.erelics)
+        if (b.GetResource(Storeable.STAR_CRYSTALS) < u.star_crystals ||
+            b.GetResource(Storeable.MINERALS) < u.minerals ||
+            b.GetResource(Storeable.ARELICS) < u.arelics ||
+            b.GetResource(Storeable.MRELICS) < u.mrelics ||
+            b.GetResource(Storeable.ERELICS) < u.erelics)
             return false;
         return true;
     }
 
-    private bool requirements_met(int upgrade_ID)
+    private bool RequirementsMet(int upgrade_ID)
     {
         foreach (int req in upgrades[upgrade_ID].required_unlocks)
         {
@@ -432,18 +432,18 @@ public class CityUI : MonoBehaviour
         return true;
     }
 
-    public void purchase_upgrade()
+    public void PurchaseUpgrade()
     {
         int ID = selected_upgrade_ID;
         if (ID <= 0)
             return;
-        if (!can_purchase_upgrade(ID))
+        if (!CanPurchaseUpgrade(ID))
         {
 
             return;
         }
         Upgrade u = upgrades[ID];
-        TurnPhaser.I.activeDisc.show_adjustments(
+        TurnPhaser.I.ActiveDisc.ShowAdjustments(
             new Dictionary<string, int>() {
                 {Storeable.STAR_CRYSTALS, -u.star_crystals},
                 {Storeable.MINERALS, -u.minerals},
@@ -451,101 +451,101 @@ public class CityUI : MonoBehaviour
                 {Storeable.MRELICS, -u.mrelics},
                 {Storeable.ERELICS, -u.erelics},
             });
-        set_color(ID, true);
+        SetColor(ID, true);
         upgrades[ID].purchased = true;
-        upgrade(ID);
+        Upgrade(ID);
         set_active_purchaseB(false);
 
-        check_upstream_unlocks(ID);
+        CheckUpstreamUnlocks(ID);
     }
 
-    private void check_upstream_unlocks(int upgrade_ID)
+    private void CheckUpstreamUnlocks(int upgrade_ID)
     {
         // Make available any unlocked upgrades.
         foreach (int req in upgrades[upgrade_ID].required_to_unlock)
         {
             Upgrade u = upgrades[req];
-            if (u.ID != 0 && requirements_met(u.ID))
+            if (u.ID != 0 && RequirementsMet(u.ID))
             {
-                set_color(u.ID, false, true);
+                SetColor(u.ID, false, true);
             }
         }
     }
 
-    private void upgrade(int ID)
+    private void Upgrade(int ID)
     {
         if (is_purchased(FORGE2))
         {
             if (is_purchased(STABLE, BARRACKS2))
-                unlock_unit_purchase(PlayerUnit.DRAGOON);
+                UnlockUnitPurchase(PlayerUnit.DRAGOON);
             if (is_purchased(CRAFT_SHOP, BARRACKS2))
-                unlock_unit_purchase(PlayerUnit.GUARDIAN);
+                UnlockUnitPurchase(PlayerUnit.GUARDIAN);
             if (ID == BARRACKS2)
-                unlock_unit_purchase(PlayerUnit.SCOUT);
+                UnlockUnitPurchase(PlayerUnit.SCOUT);
 
         }
         else if (is_purchased(FORGE))
         {
             if (ID == BARRACKS)
             {
-                unlock_unit_purchase(PlayerUnit.GUARDIAN);
-                unlock_unit_purchase(PlayerUnit.ARBALEST);
-                unlock_unit_purchase(PlayerUnit.SKIRMISHER);
+                UnlockUnitPurchase(PlayerUnit.GUARDIAN);
+                UnlockUnitPurchase(PlayerUnit.ARBALEST);
+                UnlockUnitPurchase(PlayerUnit.SKIRMISHER);
             }
             else if (ID == BARRACKS2)
-                unlock_unit_purchase(PlayerUnit.PALADIN);
+                UnlockUnitPurchase(PlayerUnit.PALADIN);
             else if (ID == TEMPLE2)
-                unlock_unit_purchase(PlayerUnit.MENDER);
+                UnlockUnitPurchase(PlayerUnit.MENDER);
             else if (ID == STABLE)
-                unlock_unit_purchase(PlayerUnit.CARTER);
+                UnlockUnitPurchase(PlayerUnit.CARTER);
             if (is_purchased(CRAFT_SHOP2, TEMPLE))
             {
-                unlock_unit_purchase(PlayerUnit.DRUMMER);
+                UnlockUnitPurchase(PlayerUnit.DRUMMER);
             }
         }
 
         if (ID == TEMPLE)
         {
-            unlock_unit_purchase(PlayerUnit.SEEKER);
+            UnlockUnitPurchase(PlayerUnit.SEEKER);
         }
         if (ID == RUNE_PORT)
         {
-            Map.I.city_cell.has_rune_gate = true;
-            Map.I.city_cell.restored_rune_gate = true;
+            Map.I.CityCell.HasRuneGate = true;
+            Map.I.CityCell.RestoredRuneGate = true;
         }
         else if (ID == SHARED_WISDOM)
         {
-            TurnPhaser.I.astra.change_var(Storeable.UNITY, 10);
-            TurnPhaser.I.endura.change_var(Storeable.UNITY, 10);
-            TurnPhaser.I.martial.change_var(Storeable.UNITY, 10);
+            TurnPhaser.I.Astra.AdjustResource(Storeable.UNITY, 10);
+            TurnPhaser.I.Endura.AdjustResource(Storeable.UNITY, 10);
+            TurnPhaser.I.Martial.AdjustResource(Storeable.UNITY, 10);
         }
         else if (ID == STOREHOUSE)
         {
-            Controller.I.city.capacity += 36;
-            MapUI.update_capacity_text(city_capacityT,
-                Controller.I.city.get_sum_storeable_resources(), 108);
-            MapUI.update_capacity_text(MapUI.I.city_capacityT,
-                Controller.I.city.get_sum_storeable_resources(), 108);
+            Game.I.city.Capacity += 36;
+            MapUI.UpdateCapacityText(city_capacityT,
+                Game.I.city.GetSumStoreableResources(), 108);
+            MapUI.UpdateCapacityText(MapUI.I.TextCityCapacity,
+                Game.I.city.GetSumStoreableResources(), 108);
         }
         else if (ID == STOREHOUSE2)
         {
-            Controller.I.city.capacity += 36;
-            MapUI.update_capacity_text(city_capacityT,
-                Controller.I.city.get_sum_storeable_resources(), 144);
-            MapUI.update_capacity_text(MapUI.I.city_capacityT,
-                Controller.I.city.get_sum_storeable_resources(), 144);
+            Game.I.city.Capacity += 36;
+            MapUI.UpdateCapacityText(city_capacityT,
+                Game.I.city.GetSumStoreableResources(), 144);
+            MapUI.UpdateCapacityText(MapUI.I.TextCityCapacity,
+                Game.I.city.GetSumStoreableResources(), 144);
         }
         else if (ID == FAITHFUL)
         {
-            TurnPhaser.I.astra.change_var(Storeable.UNITY, 10);
-            TurnPhaser.I.endura.change_var(Storeable.UNITY, 10);
-            TurnPhaser.I.martial.change_var(Storeable.UNITY, 10);
+            TurnPhaser.I.Astra.AdjustResource(Storeable.UNITY, 10);
+            TurnPhaser.I.Endura.AdjustResource(Storeable.UNITY, 10);
+            TurnPhaser.I.Martial.AdjustResource(Storeable.UNITY, 10);
         }
         else if (ID == REFINED_STARDUST)
         {
-            TurnPhaser.I.astra.light_refresh_amount = 5;
-            TurnPhaser.I.endura.light_refresh_amount = 5;
-            TurnPhaser.I.martial.light_refresh_amount = 5;
+            TurnPhaser.I.Astra.LightRefreshAmount = 5;
+            TurnPhaser.I.Endura.LightRefreshAmount = 5;
+            TurnPhaser.I.Martial.LightRefreshAmount = 5;
         }
         else if (ID == STABLE)
         {
@@ -554,7 +554,7 @@ public class CityUI : MonoBehaviour
         }
         else if (ID == RESTORE_GREAT_TORCH)
         {
-            Controller.I.city.light_refresh_amount = 11;
+            Game.I.city.LightRefreshAmount = 11;
         }
         else if (ID == REFINED)
         {
@@ -594,17 +594,17 @@ public class CityUI : MonoBehaviour
         astra_upgradeB.image.color = UNLOCKED_COLOR;
         endura_upgradeB.image.color = UNLOCKED_COLOR;
         martial_upgradeB.image.color = UNLOCKED_COLOR;
-        if (disc == Discipline.ASTRA)
+        if (disc == Discipline.Astra)
         {
             astra_upgradeP.SetActive(true);
             astra_upgradeB.image.color = PURCHASED_COLOR;
         }
-        else if (disc == Discipline.ENDURA)
+        else if (disc == Discipline.Endura)
         {
             endura_upgradeP.SetActive(true);
             endura_upgradeB.image.color = PURCHASED_COLOR;
         }
-        else if (disc == Discipline.MARTIAL)
+        else if (disc == Discipline.Martial)
         {
             martial_upgradeP.SetActive(true);
             martial_upgradeB.image.color = PURCHASED_COLOR;
@@ -613,7 +613,7 @@ public class CityUI : MonoBehaviour
 
     public void update_info_text(int punit_ID)
     {
-        AttributeWriter.write_attribute_text(infoT, PlayerUnit.create_punit(punit_ID, -1));
+        AttributeWriter.write_attribute_text(infoT, PlayerUnit.CreatePunit(punit_ID, -1));
     }
 
     public void toggle_city_panel()

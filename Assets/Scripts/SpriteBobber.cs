@@ -4,51 +4,51 @@ using UnityEngine;
 
 public class SpriteBobber : MonoBehaviour
 {
-    public const float FREQ_IDLE = 1f;
-    public const float FREQ_WALK = 5f;
-    public const float FREQ_RUN = 20f;
-    public float bob_power = 0.1f;
-    public float random_offset = 1f;
-    private float velocity;
-    private Deployment deployment;
-    public Slot slot;
-    private Vector2 default_pos;
+    public const float FreqIdle = 1f;
+    public const float FreqWalk = 5f;
+    public const float FreqRun = 20f;
+    public float BobPower = 0.1f;
+    public float RandomOffset = 1f;
+    public Slot Slot;
+    private Deployment Deployment;
+    private Vector2 DefaultPos;
+    private float Velocity;
 
     void Start()
     {
-        default_pos = transform.localPosition;
-        random_offset = UnityEngine.Random.Range(0, 100);
-        deployment = slot.deployment;
-        slot.on_velocity_change += set_velocity;
+        DefaultPos = transform.localPosition;
+        RandomOffset = UnityEngine.Random.Range(0, 100);
+        Deployment = Slot.Deployment;
+        Slot.OnVelocityChange += SetVelocity;
     }
 
     void Update()
     {
-        bob_step();
+        BobStep();
     }
 
-    private void set_velocity(Vector2 v)
+    private void SetVelocity(Vector2 v)
     {
-        velocity = v.magnitude;
+        Velocity = v.magnitude;
     }
 
-    private float get_bob_frequency(float v) {
-        float vm = v / deployment.MAX_VELOCITY;
+    private float GetBobFrequency(float v) {
+        float vm = v / Deployment.VelMax;
         if (vm > .6f) 
         {
-            return FREQ_RUN;
+            return FreqRun;
         }
         if (vm > .2f) 
         {
-            return FREQ_WALK;
+            return FreqWalk;
         }
-        return FREQ_IDLE;
+        return FreqIdle;
     }
 
-    private void bob_step()
+    private void BobStep()
     {
-        float bp = bob_power;
-        if (velocity > 2f)
+        float bp = BobPower;
+        if (Velocity > 2f)
         {
             bp += 0.5f;
         }
@@ -57,10 +57,10 @@ public class SpriteBobber : MonoBehaviour
         // Time determines position along wave, animating the sprite.
         // Bob power determines amplitude (height).
         // Note: rapid change in velocity will cause jittering 
-        float sin_y = Mathf.Sin(get_bob_frequency(velocity) * ((Time.time) + random_offset)) * bp;
+        float sin_y = Mathf.Sin(GetBobFrequency(Velocity) * ((Time.time) + RandomOffset)) * bp;
         //float sin_y = Mathf.Sin(velocity * ((Time.time) + random_offset)) * bp;
         //sin_y = Mathf.Lerp(transform.localPosition.y, sin_y, smoothe);
-        transform.localPosition = new Vector3(default_pos.x,
-            default_pos.y + sin_y, 0);
+        transform.localPosition = new Vector3(DefaultPos.x,
+            DefaultPos.y + sin_y, 0);
     }
 }

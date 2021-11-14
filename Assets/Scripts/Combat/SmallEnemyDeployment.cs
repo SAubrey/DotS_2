@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class SmallEnemyDeployment : EnemyDeployment
 {
-    public Group[] zone = new Group[1];
-    public int combat_style = Unit.MELEE;
+    public Group[] Zone = new Group[1];
+    public int CombatStyle = Unit.Melee;
 
     void Start()
     {
-        base.init();
-        zones.Add(zone);
+        base.Init();
+        Zones.Add(Zone);
     }
 
     protected override void Update()
@@ -18,26 +18,26 @@ public class SmallEnemyDeployment : EnemyDeployment
         base.Update();
     }
 
-    public override Group[] get_attacking_zone(bool melee)
+    public override Group[] GetAttackingZone(bool melee)
     {
-        return zone;
+        return Zone;
     }
 
     public void place_units(List<Unit> units)
     {
         foreach (Unit u in units)
         {
-            place_unit(u);
+            PlaceUnit(u);
         }
-        combat_style = units[0].combat_style;
+        CombatStyle = units[0].CombatStyle;
     }
 
-    public override void place_unit(Unit unit)
+    public override void PlaceUnit(Unit unit)
     {
-        Group g = zone[0];
+        Group g = Zone[0];
         if (g != null)
         {
-            g.place_unit(unit);
+            g.PlaceUnit(unit);
         }
     }
 }

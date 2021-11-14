@@ -26,7 +26,7 @@ public class LineDrawer : MonoBehaviour
         preview_line.init();
     }
 
-    public void draw_line(Unit start_u, Vector3 start_pos, Vector3 end_pos, int id)
+    public void DrawLine(Unit start_u, Vector3 start_pos, Vector3 end_pos, int id)
     {
         if (start_u == null)
         {
@@ -34,7 +34,7 @@ public class LineDrawer : MonoBehaviour
         }
         GameObject L = GameObject.Instantiate(LinePrefab);
         Line line = L.GetComponent<Line>();
-        line.init(start_u, id, start_pos, end_pos);
+        line.Init(start_u, id, start_pos, end_pos);
 
         // manage ID
         lines.Add(id, line);
@@ -51,7 +51,7 @@ public class LineDrawer : MonoBehaviour
     {
         if (lines.ContainsKey(id))
         {
-            lines[id].remove();
+            lines[id].Remove();
             lines.Remove(id);
         }
     }
@@ -61,7 +61,7 @@ public class LineDrawer : MonoBehaviour
         foreach (Line l in lines.Values)
         {
             if (l != null && l.gameObject != null)
-                l.remove();
+                l.Remove();
         }
         lines.Clear();
         preview_line.erase();
