@@ -83,6 +83,7 @@ public class TravelDeck : MonoBehaviour
     {
         cards = new int[][] { tier1_cards, tier2_cards, tier3_cards };
 
+        // Which card types can be found in which biomes?
         allowed_cards[MapCell.IDPlains].AddRange(new int[] {
             TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE,
             TravelCard.EVENT, TravelCard.LOCATION});

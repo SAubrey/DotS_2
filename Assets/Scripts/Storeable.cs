@@ -178,7 +178,7 @@ public class Storeable : MonoBehaviour, ISaveLoad
     {
         // Return change without going lower than 0.
         //Debug.Log(type + " " + get_res(type) + " + " + change);
-        int amount = Statics.valid_nonnegative_change(GetResource(type), change);
+        int amount = Statics.CalcValidNonnegativeChange(GetResource(type), change);
 
         //return change - (get_var(type) - change);
         // Return change without going higher than cap.

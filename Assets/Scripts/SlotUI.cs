@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 public class SlotUI : Slot
 {
     public Image image;
-    void Awake()
+    protected override void Awake()
     {
         Cam = GameObject.Find("MapCamera").GetComponent<Camera>();
         FaceCam();

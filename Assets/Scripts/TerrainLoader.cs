@@ -6,8 +6,9 @@ using UnityEngine.UI;
 public class TerrainLoader : MonoBehaviour
 {
     public static TerrainLoader I { get; private set; }
-    public Dictionary<int, Terrain> Terrains = new Dictionary<int, Terrain>();
-    public Terrain Plains, Forest, Titrum;
+    //public Dictionary<int, Terrain> Terrains = new Dictionary<int, Terrain>();
+    public Dictionary<int, GameObject> Terrains = new Dictionary<int, GameObject>();
+    public GameObject Plains, Forest, Titrum;
 
     void Awake()
     {
@@ -30,17 +31,17 @@ public class TerrainLoader : MonoBehaviour
 
     public void Load(int TerrainID)
     {
-        foreach (Terrain t in Terrains.Values) 
+        foreach (GameObject t in Terrains.Values) 
         {
-            t.enabled = false;
+            t.SetActive(false);
         }
         //Terrains[TerrainID].enabled = true;
         if (Terrains.ContainsKey(TerrainID))
         {
-            Terrains[TerrainID].enabled = true;
+            Terrains[TerrainID].SetActive(true);
         } else
         {
-            Plains.enabled = true;
+            Plains.SetActive(true);
         }
 
     }

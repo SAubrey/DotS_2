@@ -613,7 +613,7 @@ public class CityUI : MonoBehaviour
 
     public void update_info_text(int punit_ID)
     {
-        AttributeWriter.write_attribute_text(infoT, PlayerUnit.CreatePunit(punit_ID, -1));
+        AttributeWriter.WriteAttributeText(infoT, PlayerUnit.CreatePunit(punit_ID, -1));
     }
 
     public void toggle_city_panel()

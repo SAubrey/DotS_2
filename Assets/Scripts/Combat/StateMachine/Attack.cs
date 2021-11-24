@@ -4,34 +4,34 @@ using UnityEngine;
 
 public class Attack : IState
 {
-    private EnemyDeployment d;
-    private Timer timer;
-    public bool done_attacking = false;
+    private EnemyDeployment D;
+    private Timer Timer;
+    public bool DoneAttacking = false;
 
     public Attack(EnemyDeployment d)
     {
-        this.d = d;
+        D = d;
     }
 
     public void Tick()
     {
         // Check for hit some way through animation
-        if (timer.Increase(Time.deltaTime))
+        if (Timer.Increase(Time.deltaTime))
         {
-            d.MeleeAttack(d.GetAttackingZone(true));
-            done_attacking = true;
+            D.MeleeAttack(D.GetAttackingZone(true));
+            DoneAttacking = true;
         }
     }
 
     public void OnEnter()
     {
-        timer = new Timer(0.5f, true, .4f, .6f);
-        Debug.Log("attack w/ PD: " + d.PlayerDistance);
+        Timer = new Timer(0.5f, true, .4f, .6f);
+        Debug.Log("attack w/ PD: " + D.PlayerDistance);
     }
 
     public void OnExit()
     {
-        timer.Reset();
-        done_attacking = false;
+        Timer.Reset();
+        DoneAttacking = false;
     }
 }

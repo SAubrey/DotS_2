@@ -19,11 +19,11 @@ public class Statics
 
     public static readonly Vector3 CITY_POS = new Vector3(10.5f, 10.5f, 0);
 
-    public static float AngleBetweenTwoPoints(Vector3 a, Vector3 b) {
+    public static float CalcAngleBetweenTwoPoints(Vector3 a, Vector3 b) {
          return Mathf.Atan2(a.y - b.y, a.x - b.x) * Mathf.Rad2Deg;
      }
 
-    public static float GetAdjustedIncrease(float current, float amount, float max)
+    public static float CalcAdjustedIncrease(float current, float amount, float max)
     {
         // Increase as much as possible without exceeding.
         return current + amount <= max ? amount :
@@ -31,14 +31,14 @@ public class Statics
     }
 
     public static Vector3 GetMouseWorldPos(Camera cam, LayerMask mask, float maxDistance=2048f) {
-        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        Ray ray = cam.ScreenPointToRay(Controller.I.MousePosition.ReadValue<Vector2>());
         if (Physics.Raycast(ray, out RaycastHit raycastHit, maxDistance, mask)) {
             return raycastHit.point;
         }
         return Vector3.zero;
     }
 
-    public static Collider2D DetermineClosestCollider(Collider2D[] colliders, Vector3 sourcePoint)
+    public static Collider2D FindClosestCollider(Collider2D[] colliders, Vector3 sourcePoint)
     {
         if (colliders.Length == 0)
             return null;
@@ -56,29 +56,39 @@ public class Statics
         return closest;
     }
 
-    public static Vector3 Direction(Vector3 v, Vector3 target)
+    public static Vector3 CalcDirection(Vector3 v, Vector3 target)
     {
         return (target - v).normalized;
     }
 
-    public static Vector3 GetSmoothedNextPosition(Vector3 pos, Vector3 end_pos, float smooth_speed)
+    public static Quaternion CalcRotationToPoint(Transform t, Vector3 point)
+    {   
+        return Quaternion.LookRotation(Statics.CalcDirection(t.position, point));
+    }
+
+    public static Vector3 CalcSmoothedNextPosition(Vector3 pos, Vector3 end_pos, float smooth_speed)
     {
         return Vector2.Lerp(pos, end_pos, smooth_speed);
     }
     
-    public static int calc_map_distance(Pos pos1, Pos pos2)
+    public static int CalcMapDistance(Pos pos1, Pos pos2)
     {
         int dx = Mathf.Abs(pos1.x - pos2.x);
         int dy = Mathf.Abs(pos1.y - pos2.y);
         return dx + dy;
     }
 
-    public static int valid_nonnegative_change(int starting_amount, int change)
+    public static int CalcValidNonnegativeChange(int startingAmount, int change)
     {
-        if (starting_amount + change < 0)
+        if (startingAmount + change < 0)
         {
-            return starting_amount;
+            return startingAmount;
         }
         return change;
+    }
+
+    public static Vector3 CalcPositionInDirection(Vector3 startPoint, Vector3 direction, float length)
+    {
+        return startPoint + (direction.normalized * length);
     }
 }

@@ -68,7 +68,7 @@ public class STController : MonoBehaviour
 
         if (showNow)
         {
-            rect.anchoredPosition = Input.mousePosition;
+            rect.anchoredPosition = Controller.I.MousePosition.ReadValue<Vector2>();
         }
 
         showInFrames -= 1;

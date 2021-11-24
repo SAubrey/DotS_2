@@ -9,33 +9,32 @@ public class FOVZoomer : MonoBehaviour
     [SerializeField] private int MaxFov = 30;
     [SerializeField] private int MinFov = 10;
     public Camera BattleCam;
-    private CamSwitcher cs;
     void Start()
     {
-        cs = GameObject.Find("CamSwitcher").GetComponent<CamSwitcher>();
+        BattleCam = CamSwitcher.I.battle_cam;
     }
 
     void Update()
     {
-        if (cs.current_cam == CamSwitcher.BATTLE)
+        if (CamSwitcher.I.current_cam == CamSwitcher.BATTLE)
         {
-            if (verify_input(BattleCam.fieldOfView + (Input.mouseScrollDelta.y * -ScrollFactor)))
-                BattleCam.fieldOfView += Input.mouseScrollDelta.y * -ScrollFactor;
+            if (VerifyInput(BattleCam.fieldOfView + (Controller.I.mouse.scroll.ReadValue().y * -ScrollFactor)))
+                BattleCam.fieldOfView += Controller.I.mouse.scroll.ReadValue().y * -ScrollFactor;
 
-            if (Input.GetKey(KeyCode.Plus))
+            if (Controller.I.Plus.triggered)
             {
-                if (verify_input(BattleCam.fieldOfView + ButtonZoomIncrement))
+                if (VerifyInput(BattleCam.fieldOfView + ButtonZoomIncrement))
                     BattleCam.fieldOfView += ButtonZoomIncrement;
             }
-            else if (Input.GetKey(KeyCode.Minus))
+            else if (Controller.I.Minus.triggered)
             {
-                if (verify_input(BattleCam.fieldOfView - ButtonZoomIncrement))
+                if (VerifyInput(BattleCam.fieldOfView - ButtonZoomIncrement))
                     BattleCam.fieldOfView -= ButtonZoomIncrement;
             }
         }
     }
 
-    private bool verify_input(float fov)
+    private bool VerifyInput(float fov)
     {
         return (fov >= MinFov && fov <= MaxFov);
     }

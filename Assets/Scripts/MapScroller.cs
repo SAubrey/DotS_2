@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class MapScroller : MonoBehaviour
 {
@@ -16,7 +17,6 @@ public class MapScroller : MonoBehaviour
     private const float BATTLE_MIN_Y = -1600f;
     private const float BATTLE_MAX_Y = 1500f;
 
-
     void Start()
     {
         cs = GameObject.Find("CamSwitcher").GetComponent<CamSwitcher>();
@@ -25,31 +25,33 @@ public class MapScroller : MonoBehaviour
     void Update()
     {
         if (cs.current_cam == CamSwitcher.MAP)
-            check_input(-0.5f);
+            CheckInput(-.3f);
         else if (cs.current_cam == CamSwitcher.BATTLE)
-            check_input(-30f);
+            CheckInput(-20f);
     }
 
-    private void check_input(float scale)
+    private void CheckInput(float scale)
     {
-        if (Input.GetMouseButton(1))
+        if (Controller.I.RightClickHeld.phase == InputActionPhase.Performed)
         {
-            float h = scale * Input.GetAxis("Mouse X");
-            float v = scale * Input.GetAxis("Mouse Y");
-            translate(h, v);
+            //dx = Mathf.Abs(dx - Controller.I.MousePosition.ReadValue<Vector2>().x);
+            //dy = Mathf.Abs(dy - Controller.I.MousePosition.ReadValue<Vector2>().y);
+            var vec = Controller.I.MouseDelta.ReadValue<Vector2>();
+            Translate(vec.x * scale, vec.y * scale);
+            return;
         }
 
-        if (Input.GetKey(KeyCode.UpArrow))
-            translate(0, scale * -ARROW_TRANS);
+      /*  if (Input.GetKey(KeyCode.UpArrow))
+            Translate(0, scale * -ARROW_TRANS);
         else if (Input.GetKey(KeyCode.DownArrow))
-            translate(0, scale * ARROW_TRANS);
+            Translate(0, scale * ARROW_TRANS);
         else if (Input.GetKey(KeyCode.LeftArrow))
-            translate(scale * ARROW_TRANS, 0);
+            Translate(scale * ARROW_TRANS, 0);
         else if (Input.GetKey(KeyCode.RightArrow))
-            translate(scale * -ARROW_TRANS, 0);
+            Translate(scale * -ARROW_TRANS, 0); */
     }
 
-    private void translate(float h, float v)
+    private void Translate(float h, float v)
     {
         float x = transform.localPosition.x;
         float y = transform.localPosition.y;

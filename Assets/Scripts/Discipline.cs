@@ -227,13 +227,13 @@ public class Discipline : Storeable, ISaveLoad
         int mined = 0;
         if (cell.ID == MapCell.IDTitrum || cell.ID == MapCell.IDMountain)
         {
-            mined = Statics.valid_nonnegative_change(cell.Minerals, MineQty);
+            mined = Statics.CalcValidNonnegativeChange(cell.Minerals, MineQty);
             ShowAdjustment(Storeable.MINERALS, mined);
             cell.Minerals -= mined;
         }
         else if (cell.ID == MapCell.IDStar)
         {
-            mined = Statics.valid_nonnegative_change(cell.StarCrystals, MineQty);
+            mined = Statics.CalcValidNonnegativeChange(cell.StarCrystals, MineQty);
             ShowAdjustment(Storeable.STAR_CRYSTALS, mined);
             cell.StarCrystals -= mined;
         }

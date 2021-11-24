@@ -4,41 +4,41 @@ using UnityEngine;
 
 public class Roam : IState
 {
-    private EnemyDeployment d;
-    private Vector2 target_pos;
-    Timer t = new Timer(5f, false, 3f, 6f);
+    private EnemyDeployment D;
+    private Vector2 TargetPos;
+    Timer T = new Timer(5f, false, 3f, 6f);
 
     public Roam(EnemyDeployment d)
     {
-        this.d = d;
+        this.D = d;
     }
 
     public void Tick()
     {
-        d.MoveToDestination(target_pos, d.VelWalk, PhysicsBody.MoveForce, 3f);
-
-        if (t.Increase(Time.deltaTime))
+        //d.MoveToDestination(target_pos, d.VelWalk, PhysicsBody.MoveForce, 3f);
+        D.MoveAgentToLocation(TargetPos);
+        if (T.Increase(Time.deltaTime))
         {
-            target_pos = get_random_target_pos();
+            TargetPos = GetRandomTargetPos();
         }
     }
 
     public void OnEnter()
     {
         // Set random target, update when target entered
-        target_pos = get_random_target_pos();
-        Debug.Log("Roam: " + target_pos);
+        TargetPos = GetRandomTargetPos();
+        Debug.Log("Roam: " + TargetPos);
     }
 
     public void OnExit()
     {
-        target_pos = Vector2.zero;
-        t.Reset();
+        TargetPos = Vector2.zero;
+        T.Reset();
     }
 
-    private Vector2 get_random_target_pos()
+    private Vector2 GetRandomTargetPos()
     {
-        Vector2 v = d.gameObject.transform.position;
+        Vector2 v = D.gameObject.transform.position;
         v.x += UnityEngine.Random.Range(-50f, 50f);
         v.y += UnityEngine.Random.Range(-50f, 50f);
         return v;

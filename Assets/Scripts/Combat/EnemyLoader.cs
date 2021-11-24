@@ -37,6 +37,7 @@ public class EnemyLoader : MonoBehaviour
     public List<EnemyDeployment> EnemyDeployments = new List<EnemyDeployment>();
     public GameObject SmallEnemyDeploymentPrefab;
     public GameObject DeploymentParent;
+    public List<Enemy> Enemies = new List<Enemy>();
 
     void Awake()
     {
@@ -122,8 +123,8 @@ public class EnemyLoader : MonoBehaviour
     public void LoadEnemies(List<Enemy> enemies, int groupSize)
     {
         // Enemies are grouped by combat style and assigned to deployments with 75/25 distribution.
-        List<Enemy> meleeEnemies = ExtractEnemiesOfType(enemies, Unit.Melee);
-        List<Enemy> rangeEnemies = ExtractEnemiesOfType(enemies, Unit.Range);
+        List<Enemy> meleeEnemies = ExtractEnemiesOfType(enemies, true);
+        List<Enemy> rangeEnemies = ExtractEnemiesOfType(enemies, false);
         int numMeleeGroups =
             (int)UnityEngine.Random.Range(meleeEnemies.Count / groupSize, meleeEnemies.Count / 2f) + 1;
         int numRangeGroups =
@@ -164,6 +165,8 @@ public class EnemyLoader : MonoBehaviour
     // Returns the remaining enemies not placed.
     public List<Enemy> SpawnDeployments(List<Enemy> enemies, int numEnemies, int numGroups)
     {
+        Enemies.AddRange(enemies);
+
         int enemiesPerGroup = (int)(numEnemies / numGroups);
         GameObject ed;
         EnemyDeployment edScript;
@@ -171,7 +174,7 @@ public class EnemyLoader : MonoBehaviour
         int enemiesPlaced = 0;
         for (int i = 0; i < numGroups; i++)
         {
-            ed = Instantiate(SmallEnemyDeploymentPrefab, DeploymentParent.transform);
+            ed = Instantiate(SmallEnemyDeploymentPrefab, SpawnZone.GetSpawnPos(), Quaternion.identity, DeploymentParent.transform);
 
             Group g = ed.GetComponentInChildren<Group>();
             g.SlotParent = DeploymentParent;
@@ -184,7 +187,7 @@ public class EnemyLoader : MonoBehaviour
                 enemiesPlaced++;
             }
             EnemyDeployments.Add(edScript);
-            SpawnZone.PlaceDeployment(ed, DeploymentParent);
+            //SpawnZone.PlaceDeployment(ed, DeploymentParent);
         }
         // Remove placed enemies.
         Debug.Log("before: " + enemies.Count);
@@ -193,12 +196,12 @@ public class EnemyLoader : MonoBehaviour
         return enemies;
     }
 
-    public List<Enemy> ExtractEnemiesOfType(List<Enemy> enemies, int type)
+    public List<Enemy> ExtractEnemiesOfType(List<Enemy> enemies, bool isMelee)
     {
         List<Enemy> units = new List<Enemy>();
         foreach (Enemy e in enemies)
         {
-            if (e.CombatStyle == type)
+            if (e.IsMelee == isMelee)
             {
                 units.Add(e);
             }

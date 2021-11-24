@@ -36,7 +36,7 @@ public class PlayerDeploymentUI : MonoBehaviour
         Group[] zone = null;
         if (unit.IsMelee)
         {
-            zone = unit.HasAttribute(Unit.PIERCING) ? ZonePolearm : ZoneSword;
+            zone = unit.HasAttribute(Unit.Attributes.Piercing) ? ZonePolearm : ZoneSword;
         }
         else if (unit.IsRange)
         {

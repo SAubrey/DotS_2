@@ -10,7 +10,7 @@ public class UIElementDragger : EventTrigger
     {
         if (dragging)
         {
-            Vector3 pos = (Input.mousePosition);
+            Vector3 pos = (Controller.I.MousePosition.ReadValue<Vector2>());
             transform.position = new Vector3(pos.x, pos.y, 0);
         }
     }

@@ -153,19 +153,19 @@ public class MapUI : MonoBehaviour
             mc.OscillateColor();
         }
 
-        if (!Input.anyKeyDown)
-            return;
+        //if (!Controller.I.AnyKey.triggered)
+          //  return;
 
         // Process left mouse click
-        if (Input.GetMouseButtonDown(0))
+        if (Controller.I.Move.triggered)
         {
             HandleLeftClick();
             return;
         }
 
         // Decide whether to advance or close windows.
-        bool advance = Input.GetKeyDown(KeyCode.Space);
-        bool exit = Input.GetKeyDown(KeyCode.X);
+        bool advance = Controller.I.FireArrow.triggered;
+        bool exit = Controller.I.Escape.triggered;
         bool UIopen = CityUI.I.cityP.activeSelf || CellUIIsOpen ||
             game_overP.activeSelf || travel_cardP.activeSelf;
         if (advance)
@@ -226,7 +226,7 @@ public class MapUI : MonoBehaviour
 
     public void AdjustLightSize(MapCell cell)
     {
-        int dist = Statics.calc_map_distance(cell.Pos, new Pos(10, 10));
+        int dist = Statics.CalcMapDistance(cell.Pos, new Pos(10, 10));
         Debug.Log("distance from city: " + dist);
         if (dist > max_discovered_tile_distance)
         {
@@ -280,8 +280,9 @@ public class MapUI : MonoBehaviour
 
     private void HandleLeftClick()
     {
+        Vector2 mousePos = Controller.I.MousePosition.ReadValue<Vector2>();
         PointerEventData m_PointerEventData = new PointerEventData(EventSystem.current);
-        m_PointerEventData.position = Input.mousePosition;
+        m_PointerEventData.position = mousePos;
         List<RaycastResult> objects = new List<RaycastResult>();
 
         graphic_raycaster.Raycast(m_PointerEventData, objects);
@@ -309,7 +310,7 @@ public class MapUI : MonoBehaviour
             hit_window = true;
         }
 
-        Vector3 pos = CamSwitcher.I.map_cam.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 pos = CamSwitcher.I.map_cam.ScreenToWorldPoint(mousePos);
         bool over_tile = Map.I.GetTile(pos.x, pos.y) != null;
         bool forced_tc_interaction = (travel_cardP.activeSelf && !travelcard_exitB.interactable)
             || ask_to_enterP.activeSelf;

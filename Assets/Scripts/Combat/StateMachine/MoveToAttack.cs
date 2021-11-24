@@ -15,7 +15,8 @@ public class MoveToAttack : IState
     public void Tick()
     {
         // Move into attack range
-        d.MoveToDestination(d.PlayerPos, d.VelSprint, PhysicsBody.MoveForce, 3f);
+        //d.MoveToDestination(d.PlayerPos, d.VelSprint, PhysicsBody.MoveForce, 3f);
+        d.MoveAgentToLocation(d.PlayerPos);
 
         if (d.PlayerDistance <= d.AttackDistance) {
             begin_attack = true;

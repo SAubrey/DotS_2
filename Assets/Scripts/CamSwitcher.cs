@@ -18,7 +18,7 @@ public class CamSwitcher : MonoBehaviour
     private bool paused = false;
     public int current_cam = MENU;
     public int previous_cam = MAP;
-    private Transform player_dep_transform;
+    [SerializeField] public Transform FollowTransform;
     [SerializeField]
     private float initial_y = 150f;
     [SerializeField]
@@ -42,24 +42,24 @@ public class CamSwitcher : MonoBehaviour
         pause_panel.SetActive(false);
         battle_pause_panel.SetActive(false);
         SetActive(MENU, true);
-        player_dep_transform = Game.I.get_deployment().gameObject.transform; 
-        MoveBattleCamera(player_dep_transform.position);
-        battle_cam.transform.LookAt(player_dep_transform);
+        //FollowTransform = Game.I.get_deployment().gameObject.transform; 
+        MoveBattleCamera(FollowTransform.position);
+        battle_cam.transform.LookAt(FollowTransform);
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Controller.I.Escape.triggered)
         {
             TogglePaused();
         }
-        if (Input.GetKeyDown(KeyCode.B) && Game.I.DebugMode)
+        if (Controller.I.B.triggered && Game.I.DebugMode)
         {
             Cycle(); // Debug
         }
-        MoveBattleCamera(player_dep_transform.position);
+        MoveBattleCamera(FollowTransform.position);
         if (Game.I.DebugMode)
-            battle_cam.transform.LookAt(player_dep_transform);
+            battle_cam.transform.LookAt(FollowTransform);
     }
 
     private void MoveBattleCamera(Vector3 pos)

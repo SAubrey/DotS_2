@@ -13,8 +13,7 @@ public class BackingUp : IState
 
     public void Tick()
     {
-        //d.move(-d.get_direction_to_player(), d.VEL_SPRINT);
-        d.BackUp();
+        d.MoveAgentToLocation(Statics.CalcPositionInDirection(d.transform.position, d.GetDirectionToPlayer(), d.ComfortablePlayerDistanceMin));
     }
 
     public void OnEnter()
