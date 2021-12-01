@@ -306,7 +306,7 @@ public class MapCell
             }
             else if (HasTravelcard)
             {
-                if (Travelcard.unlockable != null)
+                if (Travelcard.Unlockable != null)
                     return true;
             }
             return false;
@@ -315,15 +315,15 @@ public class MapCell
 
     public TravelCardUnlockable GetUnlockable()
     {
-        return Travelcard.unlockable;
+        return Travelcard.Unlockable;
     }
 
     public int GetUnlockCost()
     {
         if (HasRuneGate)
             return 10;
-        else if (Travelcard.unlockable != null)
-            return Travelcard.unlockable.resource_cost;
+        else if (Travelcard.Unlockable != null)
+            return Travelcard.Unlockable.ResourceCost;
         return 0;
     }
 
@@ -332,7 +332,7 @@ public class MapCell
         if (HasRuneGate)
             return Storeable.STAR_CRYSTALS;
         else
-            return Travelcard.unlockable.resource_type;
+            return Travelcard.Unlockable.ResourceType;
     }
 
     public bool HasTravelcard { get => Travelcard != null; }
@@ -349,7 +349,7 @@ public class MapCell
 
     public Dictionary<string, int> get_travelcard_consequence()
     {
-        return Travelcard.consequence;
+        return Travelcard.Consequence;
     }
 
     public bool CanMine(Battalion b)

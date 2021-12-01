@@ -60,7 +60,7 @@ public class Game : MonoBehaviour
         // Order matters
         Map.I.Init(from_save);
         TurnPhaser.I.Reset();
-        EquipmentUI.I.init(TurnPhaser.I.ActiveDisc);
+        EquipmentUI.I.Init(TurnPhaser.I.ActiveDisc);
 
         MapUI.I.RegisterDiscChange(TurnPhaser.I.ActiveDisc);
 

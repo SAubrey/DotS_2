@@ -1,12 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 public class CamSwitcher : MonoBehaviour
 {
     public static CamSwitcher I { get; private set; }
     public const int MENU = 1, MAP = 2, BATTLE = 3;
-    public Camera menu_cam, map_cam, battle_cam;
+    public Camera menu_cam, map_cam, BattleCamCaster;
+    public CinemachineVirtualCamera BattleCam;
     public GameObject menu_canvas;
     public GameObject battle_canvas;
     public GameObject battleUI_canvas;
@@ -43,8 +45,8 @@ public class CamSwitcher : MonoBehaviour
         battle_pause_panel.SetActive(false);
         SetActive(MENU, true);
         //FollowTransform = Game.I.get_deployment().gameObject.transform; 
-        MoveBattleCamera(FollowTransform.position);
-        battle_cam.transform.LookAt(FollowTransform);
+        //MoveBattleCamera(FollowTransform.position);
+        //BattleCam.transform.LookAt(FollowTransform);
     }
 
     void Update()
@@ -57,15 +59,15 @@ public class CamSwitcher : MonoBehaviour
         {
             Cycle(); // Debug
         }
-        MoveBattleCamera(FollowTransform.position);
-        if (Game.I.DebugMode)
-            battle_cam.transform.LookAt(FollowTransform);
+        //MoveBattleCamera(FollowTransform.position);
+        //if (Game.I.DebugMode)
+            //BattleCam.transform.LookAt(FollowTransform);
     }
 
     private void MoveBattleCamera(Vector3 pos)
     {
         //Vector3 p = battle_cam.transform.position;
-        battle_cam.transform.position = new Vector3(pos.x, initial_y, pos.z - FollowDistance);
+        BattleCam.transform.position = new Vector3(pos.x, initial_y, pos.z - FollowDistance);
     }
 
     void Cycle()
@@ -165,7 +167,7 @@ public class CamSwitcher : MonoBehaviour
         else if (screen == BATTLE)
         {
             battle_canvas.SetActive(active);
-            battle_cam.enabled = active;
+            BattleCam.enabled = active;
             battleUI_canvas.SetActive(active);
             if (active)
             {

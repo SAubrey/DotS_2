@@ -194,12 +194,12 @@ public class Map : MonoBehaviour, ISaveLoad
         TurnPhaser.I.ActiveDisc.HasScoutedInTurn = true;
 
         // Draw card in advance to reveal enemy count if applicable.
-        cell.Travelcard = TravelDeck.I.draw_card(cell.Tier, cell.ID);
+        cell.Travelcard = TravelDeck.I.DrawCard(cell.Tier, cell.ID);
         if (!cell.HasTravelcard)
             return;
-        if (cell.Travelcard.enemy_count > 0)
+        if (cell.Travelcard.EnemyCount > 0)
         {
-            EnemyLoader.I.GenerateNewEnemies(cell, cell.Travelcard.enemy_count);
+            EnemyLoader.I.GenerateNewEnemies(cell, cell.Travelcard.EnemyCount);
             cell.HasSeenCombat = true; // Will bypass enemy generation when cell is entered.
         }
     }
@@ -258,7 +258,7 @@ public class Map : MonoBehaviour, ISaveLoad
 
         if (cell.CreatesTravelcard)
         {
-            cell.Travelcard = TravelDeck.I.draw_card(cell.Tier, cell.ID);
+            cell.Travelcard = TravelDeck.I.DrawCard(cell.Tier, cell.ID);
         }
         //get_cell(pos.to_vec3).discover(); // debug
     }

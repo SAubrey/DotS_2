@@ -66,9 +66,9 @@ public class MapCellUI : MonoBehaviour
         {
             // Enemies have not spawned yet but we know they are there.
             if (enemy_count == 0 && cell.Discovered && !cell.TravelcardComplete
-                    && cell.Travelcard.enemy_count > 0)
+                    && cell.Travelcard.EnemyCount > 0)
             {
-                enemy_count = cell.Travelcard.enemy_count;
+                enemy_count = cell.Travelcard.EnemyCount;
             }
         }
         if (!cell.Discovered)
@@ -138,13 +138,13 @@ public class MapCellUI : MonoBehaviour
         }
 
         TravelCardUnlockable u = cell.GetUnlockable();
-        if (u.requires_seeker)
+        if (u.RequiresSeeker)
         {
             return TurnPhaser.I.ActiveDisc.Bat.HasSeeker;
         }
         // Must be a resource requirement.
-        if (TurnPhaser.I.ActiveDisc.GetResource(u.resource_type) >=
-            Mathf.Abs(u.resource_cost))
+        if (TurnPhaser.I.ActiveDisc.GetResource(u.ResourceType) >=
+            Mathf.Abs(u.ResourceCost))
         {
             return true;
         }
@@ -160,7 +160,7 @@ public class MapCellUI : MonoBehaviour
         }
         else if (cell.HasTravelcard)
         {
-            if (cell.GetUnlockable().requires_seeker)
+            if (cell.GetUnlockable().RequiresSeeker)
             {
                 TurnPhaser.I.ActiveDisc.ReceiveTravelcardConsequence();
             }

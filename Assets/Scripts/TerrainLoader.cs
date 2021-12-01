@@ -35,6 +35,8 @@ public class TerrainLoader : MonoBehaviour
         {
             t.SetActive(false);
         }
+        Plains.SetActive(true);
+        return;
         //Terrains[TerrainID].enabled = true;
         if (Terrains.ContainsKey(TerrainID))
         {

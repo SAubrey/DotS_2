@@ -11,8 +11,6 @@ public abstract class Deployment : PhysicsBody
     public bool IsEnemy { get; protected set; } = false;
 
     protected NavMeshAgent Agent;
-    public Vector3 Destination;
-    
     public float VelRun = 30f;
     [HideInInspector] public float VelWalk = 10f;
     [HideInInspector] public float VelSprint = 50f;
@@ -71,6 +69,7 @@ public abstract class Deployment : PhysicsBody
     protected override void Awake() 
     {
         base.Awake();
+        Agent = GetComponent<NavMeshAgent>();
     }
 
     protected virtual void Update()
@@ -193,21 +192,7 @@ public abstract class Deployment : PhysicsBody
         //staminabar.fillRect.GetComponent<Image>().color = new Color(.1f, .65f, .1f, green);
     }
 
-    private void determine_unit_img_direction(Vector3 dir)
-    {
-        if ((dir.z > 90 && dir.z < 270) && UnitImgDir == Group.Up)
-        {
-            FlipSlotImgs(Group.Down);
-            UnitImgDir = Group.Down;
-        }
-        else if ((dir.z <= 90 || dir.z >= 270) && UnitImgDir == Group.Down)
-        {
-            FlipSlotImgs(Group.Up);
-            UnitImgDir = Group.Up;
-        }
-    }
-
-    public int hp
+    public int CollectiveHealth
     {
         get
         {
@@ -223,17 +208,6 @@ public abstract class Deployment : PhysicsBody
         }
     }
 
-    protected void FlipSlotImgs(int dir)
-    {
-        foreach (Group[] zone in Zones)
-        {
-            foreach (Group g in zone)
-            {
-                g.RotateSprites(dir);
-            }
-        }
-    }
-
     protected void FaceSlotsToCamera()
     {
         foreach (Group[] zone in Zones)
@@ -242,7 +216,7 @@ public abstract class Deployment : PhysicsBody
             {
                 foreach (Slot s in g.Slots)
                 {
-                    s.FaceCam();
+                    s.FaceUIToCam();
                 }
             }
         }

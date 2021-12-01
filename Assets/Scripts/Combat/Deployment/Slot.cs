@@ -26,6 +26,7 @@ public class Slot : PhysicsBody
     public AnimationPlayer AnimationPlayer;
     public ParticleSystem PSDust;
     public Transform SlotPointTransform;
+    [SerializeField] private Transform ArrowOriginTransform;
     public Deployment Deployment;
     [SerializeField] public GameObject MeleeAttZone;
     [SerializeField] public GameObject PrefabArrow;
@@ -33,7 +34,6 @@ public class Slot : PhysicsBody
     public Animator Animator;
     private GameObject CharacterModel;
     [SerializeField] private GameObject SwordsmanPrefab, PolearmPrefab, RangerPrefab, MagePrefab, CenterCharPrefab;
-    //[SerializeField] private RuntimeAnimatorController SwordController, PolearmController, RangeController, MageController;
     private NavMeshAgent Agent;
     private float MaxVel = 20f;
     private float MaxAcceleration = 20f;
@@ -42,7 +42,7 @@ public class Slot : PhysicsBody
     {
         base.Awake();
         Cam = GameObject.Find("BattleCamera").GetComponent<Camera>();
-        FaceCam();
+        FaceUIToCam();
         gameObject.SetActive(false);
     }
 
@@ -58,36 +58,41 @@ public class Slot : PhysicsBody
         Agent.updateRotation = false;
         MaxVel = Agent.speed;
         MaxAcceleration = Agent.acceleration;
-        PlayerDeployment.I.OnNewDestination += UpdateDeploymentDestination;
     }
 
-    Vector2 smoothDeltaPosition = Vector2.zero;
-    Vector2 velocity = Vector2.zero;
+    Vector2 SmoothDeltaPosition = Vector2.zero;
+    Vector2 Velocity = Vector2.zero;
     protected virtual void FixedUpdate() {
         OnVelocityChange(Agent.velocity);
-        Vector3 worldDeltaPosition = Agent.nextPosition - transform.position;
+        Move();
+        Rotate();        
+        FaceUIToCam();
+    }
 
+    private void Move() 
+    {
+        Vector3 worldDeltaPosition = Agent.nextPosition - transform.position;
 
         if (Vector3.Distance(SlotPointTransform.position, transform.position) > 1f)
         {
             Agent.SetDestination(SlotPointTransform.position);
         }
 
-         // Map 'worldDeltaPosition' to local space
-        float dx = Vector3.Dot (transform.right, worldDeltaPosition);
-        float dy = Vector3.Dot (transform.forward, worldDeltaPosition);
+        // Map 'worldDeltaPosition' to local space
+        float dx = Vector3.Dot(transform.right, worldDeltaPosition);
+        float dy = Vector3.Dot(transform.forward, worldDeltaPosition);
         Vector2 deltaPosition = new Vector2 (dx, dy);
 
         // Low-pass filter the deltaMove
         float smooth = Mathf.Min(1.0f, Time.deltaTime/0.15f);
-        smoothDeltaPosition = Vector2.Lerp (smoothDeltaPosition, deltaPosition, smooth);
+        SmoothDeltaPosition = Vector2.Lerp(SmoothDeltaPosition, deltaPosition, smooth);
 
-         // Update velocity if time advances
+        // Update velocity if time advances
         if (Time.deltaTime > 1e-5f)
-            velocity = smoothDeltaPosition / Time.deltaTime;
+            Velocity = SmoothDeltaPosition / Time.deltaTime;
 
-        Vector2 normalVelX = new Vector2(velocity.x, MaxVel).normalized;
-        Vector2 normalVelY = new Vector2(velocity.y, MaxVel).normalized;
+        Vector2 normalVelX = new Vector2(Velocity.x, MaxVel).normalized;
+        Vector2 normalVelY = new Vector2(Velocity.y, MaxVel).normalized;
         if (Animator != null) {
             Animator.SetFloat("VelocityX", normalVelX.x, .1f, Time.fixedDeltaTime);
             Animator.SetFloat("VelocityZ", normalVelY.x, .1f, Time.fixedDeltaTime);
@@ -96,7 +101,10 @@ public class Slot : PhysicsBody
         if (Agent.hasPath) // & arrived
             Agent.acceleration = (Agent.remainingDistance < 4f) ? 4 * MaxAcceleration : MaxAcceleration;
         transform.position = Agent.nextPosition;
+    }
 
+    private void Rotate()
+    {
         // Correct for rotation error by aligning with deployment.
         if (Agent.remainingDistance < Agent.stoppingDistance)
         {
@@ -105,21 +113,6 @@ public class Slot : PhysicsBody
         } else {
             RotateWithDirection(Agent.velocity);
         }
-
-        //Vector3 destPos = new Vector3(SlotPointTransform.position.x, Rigidbody.position.y, SlotPointTransform.position.z);
-        //MoveToDestination(destPos, MaxVelocity, PhysicsBody.MoveForce);
-        //RotateRigidbodyToTarget(Rigidbody, SlotPointTransform.position);
-        //RotateTransformToTarget(transform, SlotLookPointTransform.position);
-        FaceCam();
-    }
-
-    private void UpdateDeploymentDestination(Vector3 destination)
-    {   
-        Agent.speed = MaxVel;
-    }
-
-    void OnAnimatorMove() {
-
     }
 
     public virtual bool Fill(Unit u)
@@ -129,7 +122,6 @@ public class Slot : PhysicsBody
         gameObject.SetActive(true);
         SetUnit(u);
         InitUI(u);
-        SpriteUnit.sprite = BatLoader.I.GetUnitImg(u, 0);
         InstantiateCharacterModel(DetermineCharacterModel(u));
         Animator = CharacterModel.GetComponent<Animator>();
         if (u.IsPlayer)
@@ -153,10 +145,8 @@ public class Slot : PhysicsBody
         }
         gameObject.SetActive(false);
 
-        UpdateUnitImg(0);
         SetActiveUI(false);
         SetNameT("");
-        SpriteUnit.color = Color.clear;
         GameObject.Destroy(CharacterModel);
         Animator = null;
         PSDust.Play();
@@ -211,14 +201,14 @@ public class Slot : PhysicsBody
         Animator = CharacterModel.GetComponent<Animator>();
     }
 
-    public void RangeAttack(LayerMask mask, Vector2 targetPos)
+    public void ShootArrow(LayerMask mask, Vector3 targetPos, float attackDmg)
     {
-        GameObject a = Instantiate(PrefabArrow, gameObject.transform);
-        a.gameObject.transform.position = gameObject.transform.position;
-        Arrow a_script = a.GetComponent<Arrow>();
-        Vector2 launchPos = new Vector2(gameObject.transform.position.x,
-                                        gameObject.transform.position.y);
-        a_script.init(mask, launchPos, targetPos);
+        GameObject a = Instantiate(PrefabArrow, ArrowOriginTransform);
+        //a.transform.position = ArrowOriginTransform.position;
+        a.transform.localPosition = Vector3.zero;
+        Arrow arrowScript = a.GetComponent<Arrow>();
+        arrowScript.Fly(ArrowOriginTransform.position, targetPos, attackDmg);
+
         if (Animator != null)
             Animator.SetTrigger("Attack");
     }
@@ -229,15 +219,6 @@ public class Slot : PhysicsBody
         SetNameT(Unit.GetName());
         SetActiveUI(true);
         UpdateTextUI();
-    }
-    
-    public void RotateToDirection(int direction)
-    {
-        if (HasUnit)
-        {
-            SpriteUnit.sprite = BatLoader.I.GetUnitImg(Unit, direction);
-        }
-        FaceCam();
     }
 
     public void ToggleDustPs(Vector2 v)
@@ -285,7 +266,6 @@ public class Slot : PhysicsBody
         return str;
     }
 
-
     public void SetActiveUI(bool state)
     {
         HealthbarObj.SetActive(state);
@@ -295,16 +275,6 @@ public class Slot : PhysicsBody
     {
         AnimationPlayer.Play(anim);
     }
-
-    private void UpdateUnitImg(int dir)
-    {
-        SpriteUnit.color = Color.white;
-        SpriteUnit.sprite = BatLoader.I.GetUnitImg(Unit, dir);
-        if (SpriteUnit.sprite == null)
-            SpriteUnit.color = Color.clear;
-        RotateToDirection(dir);
-    }
-
 
     private void ShowEquipmentBoosts()
     {
@@ -316,12 +286,11 @@ public class Slot : PhysicsBody
             ColorEquipmentText : Color.white;
     }
 
-    public virtual void FaceCam()
+    public virtual void FaceUIToCam()
     {
         Frame.transform.LookAt(Cam.transform);
         Frame.transform.forward *= -1;
     }
-    // ---End GRAPHICAL--- 
 
     public bool HasPunit
     {
@@ -361,11 +330,6 @@ public class Slot : PhysicsBody
     public Enemy GetEnemy()
     {
         return HasEnemy ? Unit as Enemy : null;
-    }
-
-    public Group GetGroup()
-    {
-        return Group;
     }
 
     private void SetNameT(string txt)

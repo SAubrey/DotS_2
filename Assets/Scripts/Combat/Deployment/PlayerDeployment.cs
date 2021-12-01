@@ -10,7 +10,6 @@ public class PlayerDeployment : Deployment
 {
     public static PlayerDeployment I { get; private set; }
     private GameObject LockedOnEnemy;
-    public event Action<Vector3> OnNewDestination;
 
     [SerializeField] private LayerMask GroundMask;
     [SerializeField] protected Group[] ZoneSword = new Group[3];
@@ -63,8 +62,7 @@ public class PlayerDeployment : Deployment
         ZonePolearmParentPos = ZonePolearmParent.transform.localPosition;
         ZoneRangeParentPos = ZoneRangeParent.transform.localPosition;
         ZoneMageParentPos = ZoneMageParent.transform.localPosition;
-        Destination = transform.position;
-        Agent = GetComponent<NavMeshAgent>();
+        
         Agent.updateRotation = false;
     }
 
@@ -78,15 +76,8 @@ public class PlayerDeployment : Deployment
         IsPlayer = true;
         VelRun = VelRun + 50f;
 
-        CenterCamOnTransform(FollowSlotObject.transform);
+        //CenterCamOnTransform(FollowSlotObject.transform);
         Init();
-    }
-
-    private void CenterCamOnTransform(Transform t) 
-    {
-        t.gameObject.SetActive(true);
-        CamSwitcher.I.FollowTransform = t;
-        LightObject.transform.SetParent(t);
     }
 
     protected void Init()
@@ -95,12 +86,12 @@ public class PlayerDeployment : Deployment
         Stamina = StamMax;
         Mana = ManaMax;
         ForwardZone = ZoneSword;
-        Destination = transform.position;
+        Agent.destination = transform.position;
     }
 
     protected override void Update()
     {
-        if (!CamSwitcher.I.battle_cam.isActiveAndEnabled)
+        if (!CamSwitcher.I.BattleCam.isActiveAndEnabled)
             return;
 
         base.Update();
@@ -109,45 +100,27 @@ public class PlayerDeployment : Deployment
     
     protected override void FixedUpdate()
     {
-        if (!CamSwitcher.I.battle_cam.isActiveAndEnabled)
+        if (!CamSwitcher.I.BattleCam.isActiveAndEnabled)
             return;
 
         base.FixedUpdate();
-    }
-
-    // Click to move/rotate, enemy lock on
-    private void FixedUpdateControlScheme()
-    {
-        if (CanMove && Destination != Vector3.zero)
-        {
-            MoveToDestination(Destination, VelMax, PhysicsBody.MoveForce);
-            //RotateTowardsTarget(Destination);
-        }
     }
 
     private void PollControlScheme() 
     {
         if (Controller.I.Move.triggered)
         {
-            Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.battle_cam, GroundMask);
+            Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.BattleCamCaster, GroundMask);
             if (p != Vector3.zero)
             {
-                Destination = p;
-                Agent.SetDestination(Destination);
-                transform.rotation = Quaternion.LookRotation(Statics.CalcDirection(transform.position, Destination));
-                if (OnNewDestination != null)
-                    OnNewDestination(Destination);
+                SetAgentDestination(p);
             }
         } else if (Controller.I.LeftClickHeld.phase == InputActionPhase.Performed)
         {
-            Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.battle_cam, GroundMask);
+            Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.BattleCamCaster, GroundMask);
             if (p != Vector3.zero)
             {
-                Destination = p;
-                Agent.SetDestination(Destination);
-                transform.rotation = Statics.CalcRotationToPoint(transform, Destination);
-                if (OnNewDestination != null)
-                    OnNewDestination(Destination);
+                SetAgentDestination(p);
             }
         }
 
@@ -162,7 +135,8 @@ public class PlayerDeployment : Deployment
         {
             Block(true);
         }
-        else if (Controller.I.Block.phase == InputActionPhase.Canceled) {
+        else if (Controller.I.Block.phase == InputActionPhase.Canceled) 
+        {
             Block(false);
         }
         else if (Controller.I.FireArrow.triggered)
@@ -171,7 +145,7 @@ public class PlayerDeployment : Deployment
         }
         if (Controller.I.FireArrow.triggered)
         {
-            Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.battle_cam, GroundMask);
+            Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.BattleCamCaster, GroundMask);
             if (p != Vector3.zero)
                 RangeAttack(ZoneRange, p);
         }
@@ -189,6 +163,12 @@ public class PlayerDeployment : Deployment
             ForwardZone = g;
             MoveFormations(g[0].Parent);
         }
+    }
+
+    private void SetAgentDestination(Vector3 point) 
+    {
+        Agent.SetDestination(point);
+        transform.rotation = Statics.CalcRotationToPoint(transform, point);
     }
 
     private GameObject FindNearestEnemyInSight()
@@ -315,8 +295,7 @@ public class PlayerDeployment : Deployment
             {
                 if (g.Slots[i].HasUnit)
                 {
-                    Unit u = g.Slots[i].GetUnit();
-                    u.Blocking = active;
+                    g.Slots[i].GetUnit().Blocking = active;
                 }
             }
         }
@@ -355,5 +334,12 @@ public class PlayerDeployment : Deployment
         float vel = Rigidbody.velocity.magnitude;
         // Double regeneration when not moving.
         return vel < VelRun ? StamRegenAmount * 2 : StamRegenAmount;
+    }
+
+    private void CenterCamOnTransform(Transform t) 
+    {
+        t.gameObject.SetActive(true);
+        CamSwitcher.I.FollowTransform = t;
+        LightObject.transform.SetParent(t);
     }
 }

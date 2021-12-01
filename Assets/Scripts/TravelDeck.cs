@@ -19,12 +19,13 @@ public class TravelDeck : MonoBehaviour
     public const int LOCATION1_1 = 24, LOCATION1_2 = 25, LOCATION1_3 = 26;
     public const int LOCATION2_1 = 107;
 
+    //
     int[] tier1_cards = new int[] {
         ATT1_1, ATT1_2, ATT1_3, ATT1_3, ATT1_5, ATT1_6,
         CHANCE1_1, CHANCE1_2, CHANCE1_3,
         //BLESSING1_1,
         CAVE1_1, CAVE1_2,
-        EVENT1_1, EVENT1_2, EVENT1_3, EVENT1_4, EVENT1_5,
+        EVENT1_1, EVENT1_2, EVENT1_4, EVENT1_5,
         RUINS1_1, RUINS1_2, RUINS1_3, RUINS1_4,
         LOCATION1_2, LOCATION1_3};
 
@@ -46,13 +47,13 @@ public class TravelDeck : MonoBehaviour
         RUINS1_1, RUINS1_2, RUINS1_3, RUINS1_4,
         LOCATION2_1
     };
-    int[][] cards;
+    int[][] Cards;
 
     // Inclusion dictionary limiting which card types are allowed
     // in which biomes. <MapCell.ID, List<TravelCard.type>>
     // Uses these mappings to aggregate relevant cards to draw from. 
     // For each list entry, join onto a new list the cards of that type.
-    private Dictionary<int, List<int>> allowed_cards = new Dictionary<int, List<int>>() {
+    private Dictionary<int, List<int>> AllowedCards = new Dictionary<int, List<int>>() {
         {MapCell.IDPlains, new List<int>() },
         {MapCell.IDForest, new List<int>() },
         {MapCell.IDRuins, new List<int>() },
@@ -81,96 +82,96 @@ public class TravelDeck : MonoBehaviour
 
     void Start()
     {
-        cards = new int[][] { tier1_cards, tier2_cards, tier3_cards };
+        Cards = new int[][] { tier1_cards, tier2_cards, tier3_cards };
 
         // Which card types can be found in which biomes?
-        allowed_cards[MapCell.IDPlains].AddRange(new int[] {
+        AllowedCards[MapCell.IDPlains].AddRange(new int[] {
             TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE,
             TravelCard.EVENT, TravelCard.LOCATION});
-        allowed_cards[MapCell.IDForest].AddRange(new int[] {
+        AllowedCards[MapCell.IDForest].AddRange(new int[] {
             TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE,
             TravelCard.EVENT, TravelCard.LOCATION});
-        allowed_cards[MapCell.IDCliff].AddRange(new int[] {
+        AllowedCards[MapCell.IDCliff].AddRange(new int[] {
             TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE,
             TravelCard.EVENT, TravelCard.LOCATION});
-        allowed_cards[MapCell.IDMountain].AddRange(new int[] {
+        AllowedCards[MapCell.IDMountain].AddRange(new int[] {
             TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE,
             TravelCard.EVENT, TravelCard.LOCATION});
 
-        allowed_cards[MapCell.IDTitrum].AddRange(new int[] {
+        AllowedCards[MapCell.IDTitrum].AddRange(new int[] {
             TravelCard.COMBAT, TravelCard.CHANCE,
             TravelCard.EVENT, TravelCard.LOCATION});
         //allowed_cards[MapCell.MIRE_ID].AddRange(new int[] {
         //TravelCard.BLESSING, TravelCard.EVENT } );
-        allowed_cards[MapCell.IDCave].Add(TravelCard.CAVE);
-        allowed_cards[MapCell.IDRuins].Add(TravelCard.RUINS);
+        AllowedCards[MapCell.IDCave].Add(TravelCard.CAVE);
+        AllowedCards[MapCell.IDRuins].Add(TravelCard.RUINS);
         // no cards for star, lush. Settlement = quest card?
     }
 
     public Button combat_cards_onlyB; // DEV ONLY
-    public bool combat_cards_only { get; set; } = false;
+    public bool CombatCardsOnly { get; set; } = false;
 
     // Cards are drawn without replacement. Cards that are allowed
     // in the map cell biome are pulled from the deck then chosen from randomly.
-    public TravelCard draw_card(int tier, int biome_ID)
+    public TravelCard DrawCard(int tier, int biomeID)
     {
         // Negate or bypass random draw.
-        if (biome_ID == MapCell.IDLushLand || biome_ID == MapCell.IDStar)
+        if (biomeID == MapCell.IDLushLand || biomeID == MapCell.IDStar)
         {
             return null;
         }
-        else if (biome_ID == MapCell.IDRuneGate)
+        else if (biomeID == MapCell.IDRuneGate)
         {
-            return make_card(LOCATION1_1);
+            return MakeCard(LOCATION1_1);
         }
-        else if (biome_ID == MapCell.IDGuardianPass)
+        else if (biomeID == MapCell.IDGuardianPass)
         {
             if (tier == 1)
             {
-                return make_card(EVENT1_6);
+                return MakeCard(EVENT1_6);
             }
             else if (tier == 2)
             {
-                return make_card(EVENT2_6);
+                return MakeCard(EVENT2_6);
             }
             else if (tier == 3)
             {
-                return make_card(EVENT3_1);
+                return MakeCard(EVENT3_1);
             }
         }
-        else if (combat_cards_only)
+        else if (CombatCardsOnly)
         {
-            return make_card(ATT1_1); // debug only
+            return MakeCard(ATT1_1); // debug only
         }
 
-        List<int> drawable_cards = aggregate_drawable_cards(tier, biome_ID);
-        int rand_index = Random.Range(0, drawable_cards.Count);
-        return make_card(drawable_cards[rand_index]);
+        List<int> drawableCards = AggregateDrawableCards(tier, biomeID);
+        int randIndex = Random.Range(0, drawableCards.Count);
+        return MakeCard(drawableCards[randIndex]);
     }
 
 
     // Returns cards that can be drawn at the current tile biome.
-    private List<int> aggregate_drawable_cards(int tier, int biome_ID)
+    private List<int> AggregateDrawableCards(int tier, int biomeID)
     {
-        List<int> valid_card_ids = new List<int>();
-        foreach (int card_id in cards[tier - 1])
+        List<int> validCardIds = new List<int>();
+        foreach (int cardID in Cards[tier - 1])
         {
-            if (check_if_card_in_biome(biome_ID, card_id))
+            if (CheckIfCardInBiome(biomeID, cardID))
             {
-                valid_card_ids.Add(card_id);
+                validCardIds.Add(cardID);
             }
         }
-        return valid_card_ids;
+        return validCardIds;
     }
 
-    private bool check_if_card_in_biome(int biome_ID, int card_ID)
+    private bool CheckIfCardInBiome(int biomeID, int cardID)
     {
-        if (!allowed_cards.ContainsKey(biome_ID))
+        if (!AllowedCards.ContainsKey(biomeID))
             return false;
-        return allowed_cards[biome_ID].Contains(make_card(card_ID).type);
+        return AllowedCards[biomeID].Contains(MakeCard(cardID).type);
     }
 
-    public TravelCard make_card(int ID)
+    public TravelCard MakeCard(int ID)
     {
         if (ID == ATT1_1) return new Att1_1();
         if (ID == ATT1_2) return new Att1_2();

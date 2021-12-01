@@ -174,13 +174,12 @@ public abstract class Unit
         Gizmos.DrawWireSphere(Slot.MeleeAttZone.transform.position, AttackRange);
     }
 
-    public void RangeAttack(LayerMask mask, Vector3 target_pos)
+    public void RangeAttack(LayerMask mask, Vector3 targetPos)
     {
         if (GetSlot() == null)
             return;
 
-
-        GetSlot().RangeAttack(mask, target_pos);
+        GetSlot().ShootArrow(mask, targetPos, GetAttackDmg());
     }
 
     public virtual int TakeDamage(int dmg)

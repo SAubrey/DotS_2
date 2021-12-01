@@ -458,11 +458,11 @@ public class MapUI : MonoBehaviour
             TurnPhaser.I.ActiveDisc.Cell == open_cell_UI_script.cell;
         bool interactable = !tc.complete && activeDisc_at_selected_cell;
         SetActiveTravelcardContinueB(interactable);
-        SetActiveTravelcardRollB(interactable && tc.die_num_sides > 0 && !tc.rolled);
+        SetActiveTravelcardRollB(interactable && tc.DieNumSides > 0 && !tc.Rolled);
         SetActiveTravelcardExitB(!interactable);
         SetActiveNextStageB(false);
 
-        tc.on_open(TravelCardManager.I);
+        tc.OnOpen(TravelCardManager.I);
 
         // Update text
         travelcard_typeT.text = tc.type_text;

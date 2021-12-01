@@ -9,11 +9,11 @@ public class DropdownItemOnHover : MonoBehaviour, IPointerEnterHandler, IPointer
     public void OnPointerEnter(PointerEventData data)
     {
         GameObject go = data.pointerEnter;
-        EquipmentUI.I.load_equipment_description(go.GetComponent<TMP_Text>().text);
+        EquipmentUI.I.LoadEquipmentDescription(go.GetComponent<TMP_Text>().text);
     }
 
     public void OnPointerExit(PointerEventData data)
     {
-        EquipmentUI.I.hide_equipment_descriptionP();
+        EquipmentUI.I.HideEquipmentDescription();
     }
 }

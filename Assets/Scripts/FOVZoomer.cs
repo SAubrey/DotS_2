@@ -8,28 +8,27 @@ public class FOVZoomer : MonoBehaviour
     [SerializeField] private const float ButtonZoomIncrement = 1f;
     [SerializeField] private int MaxFov = 30;
     [SerializeField] private int MinFov = 10;
-    public Camera BattleCam;
+    public Cinemachine.CinemachineVirtualCamera BattleCam;
     void Start()
     {
-        BattleCam = CamSwitcher.I.battle_cam;
+        BattleCam = CamSwitcher.I.BattleCam;
     }
 
     void Update()
     {
         if (CamSwitcher.I.current_cam == CamSwitcher.BATTLE)
         {
-            if (VerifyInput(BattleCam.fieldOfView + (Controller.I.mouse.scroll.ReadValue().y * -ScrollFactor)))
-                BattleCam.fieldOfView += Controller.I.mouse.scroll.ReadValue().y * -ScrollFactor;
-
+            if (VerifyInput(BattleCam.m_Lens.FieldOfView + (Controller.I.mouse.scroll.ReadValue().y * -ScrollFactor)))
+                BattleCam.m_Lens.FieldOfView = Controller.I.mouse.scroll.ReadValue().y * -ScrollFactor;
             if (Controller.I.Plus.triggered)
             {
-                if (VerifyInput(BattleCam.fieldOfView + ButtonZoomIncrement))
-                    BattleCam.fieldOfView += ButtonZoomIncrement;
+                if (VerifyInput(BattleCam.m_Lens.FieldOfView + ButtonZoomIncrement))
+                    BattleCam.m_Lens.FieldOfView += ButtonZoomIncrement;
             }
             else if (Controller.I.Minus.triggered)
             {
-                if (VerifyInput(BattleCam.fieldOfView - ButtonZoomIncrement))
-                    BattleCam.fieldOfView -= ButtonZoomIncrement;
+                if (VerifyInput(BattleCam.m_Lens.FieldOfView - ButtonZoomIncrement))
+                    BattleCam.m_Lens.FieldOfView -= ButtonZoomIncrement;
             }
         }
     }

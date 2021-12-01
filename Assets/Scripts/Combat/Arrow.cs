@@ -5,22 +5,15 @@ using UnityEngine.UI;
 
 public class Arrow : MonoBehaviour
 {
-    public LineRenderer lr;
-    public LayerMask target_mask;
-    private float gravity = 800f;
-    private float velocity = 500f;
-    private float vertical_velocity;
-    private float duration;
-    private Vector3 direction;
-    private Vector3 shadow_pos;
-    private bool in_flight = false;
-    public SpriteRenderer shadow;
-    public SpriteRenderer arrow;
+    [SerializeField] private Rigidbody Rigidbody;
+    [SerializeField] public LineRenderer LineRenderer;
+    public string TargetTag = "Enemy";
+    private float Damage = 10f;
+    private bool Flying = false;
+    Timer TimerNewLine = new Timer(0.08f);
+    Timer TimerDespawn = new Timer(15f);
 
-    Timer t = new Timer(0.02f);
-    public int p = 0;
-    private float duration_counter = 0;
-
+/*
     public void init(LayerMask mask, Vector3 launch_pos, Vector3 target_pos)
     {
         target_mask = mask;
@@ -34,52 +27,104 @@ public class Arrow : MonoBehaviour
         shadow_pos = launch_pos;
         in_flight = true;
         arrow.transform.up = direction;
-        GetComponent<SpriteRenderer>().transform.LookAt(CamSwitcher.I.battle_cam.transform);
+        GetComponent<SpriteRenderer>().transform.LookAt(CamSwitcher.I.BattleCam.transform);
 
         t.Increase(0.09f);
+    }*/
+    void FixedUpdate()
+    {
+        Rigidbody.rotation = Statics.CalcRotationWithVelocity(Rigidbody.velocity);
+        if (TimerNewLine.Increase(Time.fixedDeltaTime))
+        {
+            UpdateTrail();
+        }
+        if (TimerDespawn.Increase(Time.fixedDeltaTime))
+        {
+            Despawn();
+        }
     }
 
-    void FixedUpdate() {
-        if (!in_flight)
+    public void SetTargetMask(string tag) 
+    {   
+        TargetTag = tag;
+    }
+
+    public void Fly(Vector3 startPoint, Vector3 targetPoint, float damage) 
+    {   
+        transform.SetParent(null);
+        LineRenderer.positionCount = 10;
+
+        Vector3 direction = Statics.CalcDirection(startPoint, targetPoint);
+        //Rigidbody.velocity = Statics.CalcLaunchVelocity(startPoint, targetPoint, Physics.gravity.magnitude, 15f);
+        float angle0, angle1 = 0;
+        bool inRange = Statics.CalcLaunchAngle(50f, startPoint, targetPoint, Physics.gravity.magnitude, out angle0, out angle1);
+        if (!inRange)
             return;
-        calc_shadow();
-
-        if (t.Increase(Time.fixedDeltaTime))
-        {
-            update_arc();
-        }
-        duration_counter += Time.fixedDeltaTime;
-        if (duration_counter > duration)
-        {
-            // Check hit
-            die();
-        }
+        var rot = Quaternion.AngleAxis(angle0, Vector3.right);
+        //var dir = rot * direction;
+        var dir = Statics.CalcLaunchVelocity(startPoint, targetPoint, Physics.gravity.magnitude, angle0).normalized;
+        Rigidbody.velocity = 50f * dir;
+        Damage = damage;
+        Flying = true;
     }
 
-    private void update_arc()
+    void OnTriggerEnter(Collider collider) 
     {
-        lr.positionCount = p + 1;
-        lr.SetPosition(p, gameObject.transform.position);
-        p++;
+        if (!Flying || ColliderIsLayer(collider, "Player") || ColliderIsLayer(collider, "Slot")) 
+            return;
+
+        Flying = false;
+        if (ColliderIsLayer(collider, "Enemy"))
+        {
+            Debug.Log("Hit: " + collider.gameObject.layer);
+            Slot slot = collider.GetComponent<Slot>();
+            if (slot == null)
+                return;
+
+            if (slot.HasUnit)
+            {
+                slot.GetUnit().TakeDamage((int)Damage);
+            }
+        }
+        Stick(collider.transform);
     }
 
-    float y;
-    public void calc_shadow()
+    private void Stick(Transform transform)
     {
-        // https://stackoverflow.com/questions/38692488/how-to-calculate-initial-velocity-of-projectile-motion-by-a-given-distance-and-a
-        // Use direction and distance to send linear 'shadow' to target. Projectile takes shadow's x and adjusts y by physics.
-        //shadow_pos = Vector2.MoveTowards(shadow_pos, target_pos, velocity * Time.deltaTime);
-        Vector3 movement = direction * velocity * Time.fixedDeltaTime;
-        shadow_pos = shadow_pos + movement;
-        shadow.transform.position = shadow_pos;
-
-        y += vertical_velocity * Time.fixedDeltaTime;
-        gameObject.transform.position = new Vector3(shadow_pos.x, shadow_pos.y + y, shadow_pos.z);
-        vertical_velocity -= gravity * Time.fixedDeltaTime;
+        Debug.Log("stuck: " + transform.gameObject.name);
+        Rigidbody.velocity = Vector3.zero;
+        //Rigidbody.angularVelocity = Vector3.zero;
+        Rigidbody.isKinematic = true;
+        ///LineRenderer.positionCount = 0;
+        transform.SetParent(transform);
     }
 
-    private void die()
+    private void Despawn()
     {
         GameObject.Destroy(gameObject);
+    }
+
+    private void AddLineToTrail()
+    {
+        LineRenderer.positionCount = LineRenderer.positionCount + 1;
+        LineRenderer.SetPosition(LineRenderer.positionCount - 1, transform.position);
+    }
+
+    private void UpdateTrail() 
+    {
+        // Move all positions up to the next position, then update the last position to the current position.
+        Vector3[] linePoints = new [] { new Vector3(), new Vector3(), new Vector3(), new Vector3(), new Vector3(), 
+            new Vector3(), new Vector3(), new Vector3(), new Vector3(), new Vector3() };
+        LineRenderer.GetPositions(linePoints);
+        for (int i = 0; i < LineRenderer.positionCount - 1; i++) 
+        {
+            LineRenderer.SetPosition(i, linePoints[i + 1]);
+        }
+        LineRenderer.SetPosition(LineRenderer.positionCount - 1, transform.position);
+    }
+
+    private bool ColliderIsLayer(Collider collider, string layer)
+    {
+        return collider.gameObject.layer == LayerMask.NameToLayer(layer);
     }
 }

@@ -109,7 +109,7 @@ public class EnemyLoader : MonoBehaviour
             int enemyID = -1;
             if (cell.ID == MapCell.IDRuins)
             {
-                enemyID = PickEnemy(cell.Travelcard.enemy_biome_ID, cell.Tier, rarity);
+                enemyID = PickEnemy(cell.Travelcard.EnemyBiomeID, cell.Tier, rarity);
             }
             else
             {
@@ -138,7 +138,7 @@ public class EnemyLoader : MonoBehaviour
     {
         if (enemies.Count <= 0 || numGroups <= 0)
         {
-            Debug.Log("ERROR: CANNOT TAKE 0 AS INPUT");
+            //Debug.Log("ERROR: CANNOT TAKE 0 AS INPUT");
             return;
         }
         if (numGroups == 1)
@@ -158,7 +158,7 @@ public class EnemyLoader : MonoBehaviour
             // Other half takes 1/4 of enemies. 
             num_some_groups = numGroups - num_some_groups;
             enemies = SpawnDeployments(enemies, enemies.Count, num_some_groups);
-            Debug.Log("Should equal zero: " + enemies.Count);
+            //Debug.Log("Should equal zero: " + enemies.Count);
         }
     }
 

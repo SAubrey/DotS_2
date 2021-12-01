@@ -42,7 +42,7 @@ public class TravelCardManager : MonoBehaviour
         if (show_warning &&
             ((cell.ID == MapCell.IDCave ||
             cell.ID == MapCell.IDRuins) &&
-            cell.Travelcard.rules.enter_combat))
+            cell.Travelcard.Rules.enter_combat))
         {
             MapUI.I.SetActiveAskToEnterP(true);
             return;
@@ -62,12 +62,12 @@ public class TravelCardManager : MonoBehaviour
             throw new System.ArgumentException("Cell must have a travelcard");
         }
 
-        cell.Travelcard.on_continue(TravelCardManager.I);
-        if (cell.Travelcard.rules.enter_combat)
+        cell.Travelcard.OnContinue(TravelCardManager.I);
+        if (cell.Travelcard.Rules.enter_combat)
         { // If a combat travel card was pulled.
             BattlePhaser.I.BeginNewBattle(cell);
         }
-        else if (cell.Travelcard.rules.affect_resources && !cell.Locked)
+        else if (cell.Travelcard.Rules.affect_resources && !cell.Locked)
         {
             TurnPhaser.I.ActiveDisc.ReceiveTravelcardConsequence();
         }
@@ -78,14 +78,14 @@ public class TravelCardManager : MonoBehaviour
     public void roll()
     {
         Die.roll(NumSides);
-        Travelcard.rolled = true;
+        Travelcard.Rolled = true;
     }
 
     public void finish_roll(int result)
     {
         MapUI.I.SetActiveTravelcardContinueB(true);
         MapUI.I.travelcard_rollB.interactable = false;
-        Travelcard.use_roll_result(result);
+        Travelcard.UseRollResult(result);
         Travelcard = null;
     }
 

@@ -14,13 +14,13 @@ public abstract class EnemyDeployment : Deployment
     // Enemy returns to safe distance after attack, block, or stun
     
     public Vector3 PlayerPos;
-    protected float _player_distance;
+    protected float _playerDistance;
     public float PlayerDistance
     {
-        get { return _player_distance; }
+        get { return _playerDistance; }
         set
         {
-            _player_distance = Mathf.Max(0, value - PlayerDistanceOffset);
+            _playerDistance = Mathf.Max(0, value - PlayerDistanceOffset);
         }
     }
     public float ComfortablePlayerDistanceMax { get => PlayerDistanceOffset + ComfortableDistanceMax; }
@@ -46,9 +46,9 @@ public abstract class EnemyDeployment : Deployment
         var roam = new Roam(this);
         var chase = new Chase(this);
         var comfortable = new Comfortable(this);
-        var move_to_attack = new MoveToAttack(this);
+        var moveToAttack = new MoveToAttack(this);
         var attack = new Attack(this);
-        var backing_up = new BackingUp(this);
+        var backingUp = new BackingUp(this);
 
 
         // Add transitions from state, to state, if condition.
@@ -59,11 +59,11 @@ public abstract class EnemyDeployment : Deployment
         At(comfortable, chase, in_chase_range());
 
         
-        At(comfortable, move_to_attack, moving_to_attack());
-        At(move_to_attack, attack, time_to_attack());
+        At(comfortable, moveToAttack, moving_to_attack());
+        At(moveToAttack, attack, time_to_attack());
 
-        At(attack, backing_up, done_attacking());
-        At(backing_up, comfortable, in_comfy_range());
+        At(attack, backingUp, done_attacking());
+        At(backingUp, comfortable, in_comfy_range());
 
 
         Func<bool> in_roam_range() => () => GetBehaviorZone() == BehaviorZone.Roam;
@@ -71,7 +71,7 @@ public abstract class EnemyDeployment : Deployment
         Func<bool> in_comfy_range() => () => GetBehaviorZone() == BehaviorZone.Comfortable;
         //Func<bool> in_act_range() => () => get_behavior_zone() == BehaviorZone.act;
         Func<bool> moving_to_attack() => () => comfortable.MoveToAttack;
-        Func<bool> time_to_attack() => () => move_to_attack.begin_attack;
+        Func<bool> time_to_attack() => () => moveToAttack.begin_attack;
         Func<bool> done_attacking() => () => attack.DoneAttacking;
         //Func<bool> time_to_attack() => () => move_to_attack.begin_attack;
 
@@ -88,7 +88,6 @@ public abstract class EnemyDeployment : Deployment
         StateMachine.Tick();
     }
 
-    
     protected override void FixedUpdate()
     {
         base.FixedUpdate();

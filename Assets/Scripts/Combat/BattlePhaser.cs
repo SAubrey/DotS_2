@@ -80,7 +80,7 @@ public class BattlePhaser : MonoBehaviour
         if (!cell.HasSeenCombat)
         {
             Debug.Log("generating enemies");
-            EnemyLoader.I.GenerateNewEnemies(cell, cell.Travelcard.enemy_count);
+            EnemyLoader.I.GenerateNewEnemies(cell, cell.Travelcard.EnemyCount);
         }
         MapUI.I.CloseCellUI();
         SetupParticipantUI(cell);

@@ -188,7 +188,7 @@ public class Discipline : Storeable, ISaveLoad
         if (GetTravelcard() == null)
             return;
         ShowAdjustments(Cell.get_travelcard_consequence());
-        if (GetTravelcard().equipment_reward_amount > 0)
+        if (GetTravelcard().EquipmentRewardAmount > 0)
         {
             string name = equipment_inventory.add_random_equipment(Cell.Tier);
             RisingInfo.create_rising_info_map(
@@ -269,7 +269,7 @@ public class Discipline : Storeable, ISaveLoad
         Resources[MRELICS] = data.sresources.mrelics;
 
         Position = new Vector3(data.col, data.row);
-        Cell.Travelcard = TravelDeck.I.make_card(data.redrawn_travel_card_ID);
+        Cell.Travelcard = TravelDeck.I.MakeCard(data.redrawn_travel_card_ID);
         RestartBattleFromDrawnCard = Cell.Travelcard != null;
 
         // Create healthy units.

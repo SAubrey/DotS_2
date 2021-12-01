@@ -21,7 +21,87 @@ public class Statics
 
     public static float CalcAngleBetweenTwoPoints(Vector3 a, Vector3 b) {
          return Mathf.Atan2(a.y - b.y, a.x - b.x) * Mathf.Rad2Deg;
-     }
+    }
+
+    public static Vector3 CalcLaunchVelocity(Vector3 startPoint, Vector3 targetPoint, float gravity, float initialAngle) 
+    {
+        float angle = initialAngle * Mathf.Deg2Rad;
+ 
+        // Positions of this object and the target on the same plane
+        Vector3 planarTarget = new Vector3(targetPoint.x, 0, targetPoint.z);
+        Vector3 planarPostion = new Vector3(startPoint.x, 0, startPoint.z);
+ 
+        // Planar distance between objects
+        float distance = Vector3.Distance(planarTarget, planarPostion);
+        // Distance along the y axis between objects
+        float yOffset = startPoint.y - targetPoint.y;
+ 
+        float initialVelocity = (1f / Mathf.Cos(angle)) * Mathf.Sqrt((0.5f * gravity * Mathf.Pow(distance, 2f)) / (distance * Mathf.Tan(angle) + yOffset));
+ 
+        Vector3 velocity = new Vector3(0f, initialVelocity * Mathf.Sin(angle), initialVelocity * Mathf.Cos(angle));
+ 
+        // Rotate our velocity to match the direction between the two objects
+        float angleBetweenObjects = Vector3.Angle(Vector3.forward, planarTarget - planarPostion) * (targetPoint.x > startPoint.x ? 1 : -1);
+        Vector3 finalVelocity = Quaternion.AngleAxis(angleBetweenObjects, Vector3.up) * velocity;
+ 
+        return finalVelocity;
+    }
+
+    public static bool CalcLaunchAngle(float speed, float distance, float yOffset, float gravity, out float angle0, out float angle1)
+    {
+        angle0 = angle1 = 0;
+ 
+        float speedSquared = speed * speed;
+ 
+        float operandA = Mathf.Pow(speed, 4);
+        float operandB = gravity * (gravity * (distance * distance) + (2 * yOffset * speedSquared));
+ 
+        // Target is not in range
+        if (operandB > operandA)
+            return false;
+ 
+        float root = Mathf.Sqrt(operandA - operandB);
+ 
+        angle0 = Mathf.Atan((speedSquared + root) / (gravity * distance));
+        angle1 = Mathf.Atan((speedSquared - root) / (gravity * distance));
+ 
+        return true;
+    }
+
+    public static Quaternion CalcRotationWithVelocity(Vector3 velocity) 
+    {
+        return Quaternion.LookRotation(velocity.normalized);
+    }
+
+    
+    public static bool CalcLaunchAngle(float speed, Vector3 startPoint, Vector3 targetPoint, float gravity, out float angle0, out float angle1)
+    {
+        angle0 = angle1 = 0;
+
+        // Positions of this object and the target on the same plane
+        Vector3 planarTarget = new Vector3(targetPoint.x, 0, targetPoint.z);
+        Vector3 planarPostion = new Vector3(startPoint.x, 0, startPoint.z);
+ 
+        // Planar distance between objects
+        float distance = Vector3.Distance(planarTarget, planarPostion);
+        float yOffset = startPoint.y - targetPoint.y;
+ 
+        float speedSquared = speed * speed;
+ 
+        float operandA = Mathf.Pow(speed, 4);
+        float operandB = gravity * (gravity * (distance * distance) + (2 * yOffset * speedSquared));
+ 
+        // Target is not in range
+        if (operandB > operandA)
+            return false;
+ 
+        float root = Mathf.Sqrt(operandA - operandB);
+ 
+        angle0 = Mathf.Atan((speedSquared + root) / (gravity * distance));
+        angle1 = Mathf.Atan((speedSquared - root) / (gravity * distance));
+ 
+        return true;
+    }
 
     public static float CalcAdjustedIncrease(float current, float amount, float max)
     {
@@ -32,8 +112,9 @@ public class Statics
 
     public static Vector3 GetMouseWorldPos(Camera cam, LayerMask mask, float maxDistance=2048f) {
         Ray ray = cam.ScreenPointToRay(Controller.I.MousePosition.ReadValue<Vector2>());
-        if (Physics.Raycast(ray, out RaycastHit raycastHit, maxDistance, mask)) {
-            return raycastHit.point;
+        if (Physics.Raycast(ray, out RaycastHit hit, maxDistance, mask)) {
+            return hit.point;
+        //if (Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, maxDistance, mask)) {
         }
         return Vector3.zero;
     }

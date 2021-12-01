@@ -13,7 +13,9 @@ public class BackingUp : IState
 
     public void Tick()
     {
-        d.MoveAgentToLocation(Statics.CalcPositionInDirection(d.transform.position, d.GetDirectionToPlayer(), d.ComfortablePlayerDistanceMin));
+        // Move some distance along a line opposite the direction to the player.
+        Vector3 v = Statics.CalcPositionInDirection(d.transform.position, d.GetDirectionToPlayer(), d.ComfortablePlayerDistanceMin);
+        d.MoveAgentToLocation(v);
     }
 
     public void OnEnter()

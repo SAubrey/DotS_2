@@ -27,7 +27,7 @@ public class Roam : IState
     {
         // Set random target, update when target entered
         TargetPos = GetRandomTargetPos();
-        Debug.Log("Roam: " + TargetPos);
+        Debug.Log("Roam: " + TargetPos + " Time: " + Time.time);
     }
 
     public void OnExit()

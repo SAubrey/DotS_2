@@ -83,7 +83,7 @@ public class PhysicsBody : MonoBehaviour
     protected void RotateToMouse(LayerMask raycastMask)
     {
         Vector3 mousePos;
-        mousePos = Statics.GetMouseWorldPos(CamSwitcher.I.battle_cam, raycastMask);
+        mousePos = Statics.GetMouseWorldPos(CamSwitcher.I.BattleCamCaster, raycastMask);
         if (mousePos == Vector3.zero)
             return;
         //float angle = Mathf.Atan2((mouse_pos.z - transform.position.z),

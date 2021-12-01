@@ -80,15 +80,6 @@ public class Group : MonoBehaviour
         }
     }
 
-    public void RotateSprites(int direction)
-    {
-        foreach (Slot s in Slots)
-        {
-            s.RotateToDirection(direction);
-        }
-        //reorder_slots_visually(direction);
-    }
-
     public int CountSameUnits(int unitID)
     {
         int numGrouped = 0;

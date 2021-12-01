@@ -51,7 +51,7 @@ public class EquipmentInventory
             Equipment.Add(name, new List<Equipment>());
         Equipment[name].Add(e);
         disc.ShowAdjustment(name, amount);
-        EquipmentUI.I.fill_dropdowns(this);
+        EquipmentUI.I.FillDropdowns(this);
         return e == null ? "" : e.name;
     }
 

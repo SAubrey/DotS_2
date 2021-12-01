@@ -7,6 +7,7 @@ TagManager:
   - Cell Window
   - Group
   - MapWindow
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -28,7 +29,7 @@ TagManager:
   - Slot
   - Ground
   - Trees
-  - 
+  - Arrow
   - 
   - 
   - 

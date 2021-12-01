@@ -1,8 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using TMPro;
 
 public class EquipmentUI : MonoBehaviour
@@ -11,7 +9,7 @@ public class EquipmentUI : MonoBehaviour
     public TMP_Dropdown dd0, dd1, dd2, dd3;
     public GameObject descriptionP;
     public TMP_Text descriptionT;
-    public Dictionary<TMP_Dropdown, int> dropdowns = new Dictionary<TMP_Dropdown, int>();
+    public Dictionary<TMP_Dropdown, int> Dropdowns = new Dictionary<TMP_Dropdown, int>();
     //public Dictionary<TMP_Dropdown, string> selected_equipment = new Dictionary<TMP_Dropdown, string>();
 
     void Awake()
@@ -28,41 +26,39 @@ public class EquipmentUI : MonoBehaviour
 
     void Start()
     {
-        dropdowns.Add(dd0, 0);
-        dropdowns.Add(dd1, 1);
-        dropdowns.Add(dd2, 2);
-        dropdowns.Add(dd3, 3);
-        foreach (TMP_Dropdown d in dropdowns.Keys)
+        Dropdowns.Add(dd0, 0);
+        Dropdowns.Add(dd1, 1);
+        Dropdowns.Add(dd2, 2);
+        Dropdowns.Add(dd3, 3);
+        foreach (TMP_Dropdown d in Dropdowns.Keys)
         {
-            d.onValueChanged.AddListener(delegate { equipment_selected(d); });
+            d.onValueChanged.AddListener(delegate { EquipmentSelected(d); });
             //d.OnPointerEnter();//AddListener(delegate {load_equipment_description(d);} );
-
-
         }
-        TurnPhaser.I.OnDiscChange += load_discipline;
+        TurnPhaser.I.OnDiscChange += LoadDiscipline;
         foreach (Discipline d in TurnPhaser.I.Discs.Values)
         {
-            d.OnResourceChange += register_resource_change;
+            d.OnResourceChange += RegisterResourceChange;
         }
     }
 
-    public void init(Discipline d)
+    public void Init(Discipline d)
     {
-        load_discipline(d);
+        LoadDiscipline(d);
     }
 
-    public void register_resource_change(int ID, string field, int amount, int c, int cap)
+    public void RegisterResourceChange(int ID, string field, int amount, int c, int cap)
     {
         if (ID != TurnPhaser.I.ActiveDiscID)
             return;
         if (field == Discipline.Experience)
         {
-            unlock_slots(TurnPhaser.I.GetDisc(ID).equipment_inventory);
+            UnlockSlots(TurnPhaser.I.GetDisc(ID).equipment_inventory);
         }
     }
 
     public bool selecting = false;
-    public void equipment_selected(TMP_Dropdown d)
+    public void EquipmentSelected(TMP_Dropdown d)
     {
         selecting = true;
         string e = d.captionText.text;
@@ -72,9 +68,9 @@ public class EquipmentUI : MonoBehaviour
         // and only one of a type can be worn at once.
         if (ei.has_equipped(e) || ei.get_equipment_amount(e) > 1)
         {
-            if (ei.EquipmentSlots[dropdowns[d]].full)
+            if (ei.EquipmentSlots[Dropdowns[d]].full)
             {
-                string name = ei.EquipmentSlots[dropdowns[d]].equipment.name;
+                string name = ei.EquipmentSlots[Dropdowns[d]].equipment.name;
                 d.value = d.options.FindIndex(option => option.text == name);
             }
             else
@@ -84,45 +80,46 @@ public class EquipmentUI : MonoBehaviour
             return;
         }
         // Unequip existing worn item.
-        if (ei.EquipmentSlots[dropdowns[d]].full)
+        if (ei.EquipmentSlots[Dropdowns[d]].full)
         {
-            ei.unequip(dropdowns[d]);
+            ei.unequip(Dropdowns[d]);
         }
-        hide_equipment_descriptionP();
-        ei.equip(e, dropdowns[d]);
+        HideEquipmentDescription();
+        ei.equip(e, Dropdowns[d]);
     }
 
-    public void load_discipline(Discipline disc)
+    public void LoadDiscipline(Discipline disc)
     {
         EquipmentInventory ei = disc.equipment_inventory;
-        unlock_slots(ei);
-        fill_dropdowns(ei);
+        UnlockSlots(ei);
+        FillDropdowns(ei);
     }
 
-    public void unlock_slots(EquipmentInventory ei)
+    public void UnlockSlots(EquipmentInventory ei)
     {
         if (ei == null)
             return;
         int highest_unlocked_slot = ei.get_highest_unlocked_slot();
 
-        foreach (TMP_Dropdown d in dropdowns.Keys)
+        foreach (TMP_Dropdown d in Dropdowns.Keys)
         {
-            activate_equipment_slot(d, dropdowns[d] <= highest_unlocked_slot);
+            ActivateEquipmentSlot(d, Dropdowns[d] <= highest_unlocked_slot);
         }
     }
 
-    public void fill_dropdowns(EquipmentInventory ei)
+    public void FillDropdowns(EquipmentInventory ei)
     {
-        foreach (TMP_Dropdown d in dropdowns.Keys)
+        foreach (TMP_Dropdown d in Dropdowns.Keys)
         {
-            fill_dropdown(d, ei);
-            select_equipped(ei);
+            FillDropdown(d, ei);
+            SelectEquipped(ei);
         }
     }
 
-    private void fill_dropdown(TMP_Dropdown dropdown, EquipmentInventory ei)
+    // Clear and rebuild dropdown options on addition of an equipment option.
+    private void FillDropdown(TMP_Dropdown dropdown, EquipmentInventory ei)
     {
-        clear_dropdown_options(dropdown);
+        ClearDropdownOptions(dropdown);
         List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
         foreach (string e in ei.Equipment.Keys)
         {
@@ -132,30 +129,34 @@ public class EquipmentUI : MonoBehaviour
             }
             else
             {
+                Debug.Log(options);
+                Debug.Log(ei.Equipment[e]);
+                Debug.Log(ei.Equipment[e][0]);
+                Debug.Log(ei.Equipment[e][0].name);
                 options.Add(new TMP_Dropdown.OptionData(ei.Equipment[e][0].name));
             }
         }
         dropdown.AddOptions(options);
     }
 
-    private void select_equipped(EquipmentInventory ei)
+    private void SelectEquipped(EquipmentInventory ei)
     {
-        foreach (TMP_Dropdown d in dropdowns.Keys)
+        foreach (TMP_Dropdown d in Dropdowns.Keys)
         {
-            EquipmentSlot es = ei.EquipmentSlots[dropdowns[d]];
+            EquipmentSlot es = ei.EquipmentSlots[Dropdowns[d]];
             if (!es.full)
                 continue;
             d.captionText.text = es.equipment.name;
         }
     }
 
-    private void clear_dropdown_options(TMP_Dropdown dropdown)
+    private void ClearDropdownOptions(TMP_Dropdown dropdown)
     {
         dropdown.ClearOptions();
         dropdown.AddOptions(new List<TMP_Dropdown.OptionData>() { new TMP_Dropdown.OptionData("Empty") });
     }
 
-    public void load_equipment_description(EquipmentInventory ei, string e)
+    public void LoadEquipmentDescription(EquipmentInventory ei, string e)
     {
         if (!ei.has_equipped(e))
             return;
@@ -163,7 +164,7 @@ public class EquipmentUI : MonoBehaviour
         descriptionT.text = ei.Equipment[e][0].description;
     }
 
-    public void load_equipment_description(string e)
+    public void LoadEquipmentDescription(string e)
     {
         if (e == "Empty")
             return;
@@ -174,12 +175,12 @@ public class EquipmentUI : MonoBehaviour
         descriptionT.text = ei.Equipment[e][0].description;
     }
 
-    public void hide_equipment_descriptionP()
+    public void HideEquipmentDescription()
     {
         descriptionP.SetActive(false);
     }
 
-    private void activate_equipment_slot(TMP_Dropdown d, bool state)
+    private void ActivateEquipmentSlot(TMP_Dropdown d, bool state)
     {
         d.interactable = state;
     }

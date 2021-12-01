@@ -9,7 +9,7 @@ public class SlotUI : Slot
     protected override void Awake()
     {
         Cam = GameObject.Find("MapCamera").GetComponent<Camera>();
-        FaceCam();
+        FaceUIToCam();
     }
 
     protected override void Start() {
@@ -45,7 +45,7 @@ public class SlotUI : Slot
         transform.position = Vector2.Lerp(transform.position, desired_pos, .025f);
     }
 
-    public override void FaceCam()
+    public override void FaceUIToCam()
     { 
         //image.transform.LookAt(cam.transform);
         Frame.transform.LookAt(Cam.transform);
