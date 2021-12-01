@@ -96,6 +96,7 @@ public class Slot : PhysicsBody
         if (Animator != null) {
             Animator.SetFloat("VelocityX", normalVelX.x, .1f, Time.fixedDeltaTime);
             Animator.SetFloat("VelocityZ", normalVelY.x, .1f, Time.fixedDeltaTime);
+            Animator.SetFloat("Velocity", Velocity.magnitude, .1f, Time.fixedDeltaTime);
         }
 
         if (Agent.hasPath) // & arrived
