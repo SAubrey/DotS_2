@@ -68,7 +68,7 @@ public class BatLoader : MonoBehaviour
     public Sprite GetUnitImg(Unit unit, int direction)
     {
         if (unit != null)
-            return GetUnitDirectionImg(unit.IsPlayer, unit.GetID(), direction);
+            return GetUnitDirectionImg(unit.IsPlayer, unit.ID, direction);
         return null;
     }
 

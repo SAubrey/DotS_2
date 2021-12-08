@@ -13,16 +13,13 @@ public class Chase : IState
 
     public void Tick()
     {
-        // Move and rotate towards target
-        //d.MoveToDestination(d.PlayerPos, d.VelRun, PhysicsBody.MoveForce, 3f);
-        //d.RotateTowardsTarget(d.PlayerPos);
-
-        d.MoveAgentToLocation(d.PlayerPos); 
+        d.SetAgentDestination(d.PlayerPos); 
     }
 
     public void OnEnter()
     {
         Debug.Log("chase w/ PD: " + d.PlayerDistance);
+        
     }
 
     public void OnExit()

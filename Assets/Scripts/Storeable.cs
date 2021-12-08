@@ -91,7 +91,7 @@ public class Storeable : MonoBehaviour, ISaveLoad
             {
                 RisingInfo.create_rising_info_map(
                     RisingInfo.build_resource_text(a.resource, a.amount),
-                    Statics.disc_colors[ID],
+                    Statics.DisciplineColors[ID],
                     origin_of_rise_obj.transform,
                     rising_info_prefab);
             }
@@ -217,7 +217,7 @@ public class Storeable : MonoBehaviour, ISaveLoad
         {
             RisingInfo.create_rising_info_map(
                 RisingInfo.build_resource_text(var, val),
-                Statics.disc_colors[ID],
+                Statics.DisciplineColors[ID],
                 origin_of_rise_obj.transform,
                 rising_info_prefab);
         }

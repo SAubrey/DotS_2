@@ -1,36 +1,32 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MoveToAttack : IState
 {
-    private EnemyDeployment d;
-    public bool begin_attack = false;
+    private EnemyDeployment D;
+    public bool BeginAttack = false;
 
     public MoveToAttack(EnemyDeployment d)
     {
-        this.d = d;
+        this.D = d;
     }
 
     public void Tick()
     {
         // Move into attack range
-        //d.MoveToDestination(d.PlayerPos, d.VelSprint, PhysicsBody.MoveForce, 3f);
-        d.MoveAgentToLocation(d.PlayerPos);
+        D.SetAgentDestination(D.PlayerPos);
 
-        if (d.PlayerDistance <= d.AttackDistance) {
-            begin_attack = true;
+        if (D.PlayerDistance <= D.AttackDistance) {
+            BeginAttack = true;
         }
-        //d.rotate_towards_target(d.player_pos);
     }
 
     public void OnEnter()
     {
-        Debug.Log("Move to attack w/ PD: " + d.PlayerDistance);
+        Debug.Log("Move to attack w/ PD: " + D.PlayerDistance);
     }
 
     public void OnExit()
     {
-
+        BeginAttack = false;
     }
 }

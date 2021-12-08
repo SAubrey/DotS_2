@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /*
 Fields and methods not particular to a class and do not need to be instantiated more than once.
@@ -12,12 +10,7 @@ public class Statics
     public static readonly Color ASTRA_COLOR = new Color(.6f, .6f, 1, 1);
     public static readonly Color ENDURA_COLOR = new Color(1, 1, .6f, 1);
     public static readonly Color MARTIAL_COLOR = new Color(1, .6f, .6f, 1);
-    public static readonly Color[] disc_colors = { ASTRA_COLOR, ENDURA_COLOR, MARTIAL_COLOR, Color.white };
-    public static Color BLUE = new Color(.1f, .1f, 1, 1);
-    public static Color RED = new Color(1, .1f, .1f, 1);
-    public static Color ORANGE = new Color(1, .6f, 0, 1);
-
-    public static readonly Vector3 CITY_POS = new Vector3(10.5f, 10.5f, 0);
+    public static readonly Color[] DisciplineColors = { ASTRA_COLOR, ENDURA_COLOR, MARTIAL_COLOR, Color.white };
 
     public static float CalcAngleBetweenTwoPoints(Vector3 a, Vector3 b) {
          return Mathf.Atan2(a.y - b.y, a.x - b.x) * Mathf.Rad2Deg;
@@ -142,14 +135,9 @@ public class Statics
         return (target - v).normalized;
     }
 
-    public static Quaternion CalcRotationToPoint(Transform t, Vector3 point)
-    {   
-        return Quaternion.LookRotation(Statics.CalcDirection(t.position, point));
-    }
-
-    public static Vector3 CalcSmoothedNextPosition(Vector3 pos, Vector3 end_pos, float smooth_speed)
+    public static Vector3 CalcSmoothedNextPosition(Vector3 pos, Vector3 endPos, float smoothSpeed)
     {
-        return Vector2.Lerp(pos, end_pos, smooth_speed);
+        return Vector2.Lerp(pos, endPos, smoothSpeed);
     }
     
     public static int CalcMapDistance(Pos pos1, Pos pos2)
@@ -170,6 +158,24 @@ public class Statics
 
     public static Vector3 CalcPositionInDirection(Vector3 startPoint, Vector3 direction, float length)
     {
-        return startPoint + (direction.normalized * length);
+        return startPoint + (-direction.normalized * length);
+    }
+
+    public static void RotateWithVelocity(Transform transform, Vector3 velocity) 
+    {
+        if (velocity == Vector3.zero)
+            return;
+        transform.rotation = Quaternion.LookRotation(velocity.normalized);
+    }
+    
+    public static void RotateToPoint(Transform t, Vector3 point)
+    {   
+        t.rotation = Quaternion.LookRotation(Statics.CalcDirection(t.position, point));
+    }
+
+    public static void RotateToTargetOnY(Transform transform, Vector3 target)
+    {
+        transform.LookAt(target);
+        transform.rotation = Quaternion.Euler(0f, transform.rotation.eulerAngles.y, 0f);
     }
 }

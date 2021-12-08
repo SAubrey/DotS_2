@@ -1,27 +1,15 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 using UnityEngine.UI;
-using UnityEngine.AI;
 
-public abstract class Deployment : PhysicsBody
+public abstract class Deployment : AgentBody
 {
     public bool IsPlayer { get; protected set; } = false;
     public bool IsEnemy { get; protected set; } = false;
-
-    protected NavMeshAgent Agent;
-    public float VelRun = 30f;
-    [HideInInspector] public float VelWalk = 10f;
-    [HideInInspector] public float VelSprint = 50f;
-    public float VelMax = 25f;
-    public float VelMaxDynamic = 25f;
-
-    protected bool Invulnerable;
+    protected GameObject LockedOnTarget;
 
     // Stamina
     public Slider staminabar;
-
     public float StamMax = 100f;
     private float _Stamina = 100f;
     public float Stamina
@@ -44,13 +32,12 @@ public abstract class Deployment : PhysicsBody
         get { return _Blocking; }
         set {
             _Blocking = value;
-            VelMaxDynamic = Blocking ? VelMax * .5f : VelMax;
+            //Agent.ve = Blocking ? MaxSpeed * .5f : MaxSpeed;
         }
     }
 
     public bool CanMove { get { return !Attacking && !Stunned && !Blocking; } }
 
-    public float UnitImgDir = Group.Up;
     protected float StamRegenAmount = .1f;
     protected float StamAttackCost = 20f;
     protected float StamRangeCost = 25f;
@@ -61,20 +48,23 @@ public abstract class Deployment : PhysicsBody
 
     private Timer StamRegenTimer = new Timer(.0005f);
     public abstract Group[] GetAttackingZone(bool melee);
-
     public abstract void PlaceUnit(Unit unit);
-
     protected virtual void AnimateSlotAttack(bool melee) { }
 
     protected override void Awake() 
     {
         base.Awake();
-        Agent = GetComponent<NavMeshAgent>();
+        Agent.updateRotation = false;
     }
 
-    protected virtual void Update()
+    protected override void Update()
     {
+        base.Update();
         UpdateSlotTimers(Time.deltaTime);
+        if (LockedOnTarget != null)
+        {
+            Statics.RotateToPoint(transform, LockedOnTarget.transform.position);
+        }
     }
 
     protected virtual void FixedUpdate()
@@ -89,27 +79,6 @@ public abstract class Deployment : PhysicsBody
         }
     }
 
-    public void MoveAgentToLocation(Vector3 pos) 
-    {
-        Agent.SetDestination(pos);
-    }
-
-    protected Quaternion TargetRotation;
-    public void RotateTowardsTarget(Vector3 Target)
-    {
-        //TargetRotation = Quaternion.Euler(new Vector3(0, 0, Mathf.Atan2((pos.z - transform.position.z),
-         //   (pos.x - transform.position.x)) * Mathf.Rad2Deg - 90f));
-
-        // Lerp smooths and thus limits rotation speed.
-        //float str = Mathf.Min(5f * Time.deltaTime, 1f);
-        //transform.rotation = Quaternion.Lerp(transform.rotation, TargetRotation, str);
-        //Rigidbody.rotation = Quaternion.Lerp(transform.rotation, TargetRotation, str);
-        transform.LookAt(Target);
-        transform.rotation = Quaternion.Euler(0f, transform.rotation.eulerAngles.y, 0f);
-        //RotateRigidbodyToTarget(Rigidbody, Target);
-        FaceSlotsToCamera();
-    }
-
     public void UpdateSlotTimers(float dt)
     {
         foreach (Group[] gs in Zones)
@@ -119,7 +88,7 @@ public abstract class Deployment : PhysicsBody
                 foreach (Slot s in g.Slots)
                 {
                     if (s.HasUnit)
-                        s.GetUnit().UpdateTimers(dt);
+                        s.Unit.UpdateTimers(dt);
                 }
             }
         }
@@ -137,7 +106,7 @@ public abstract class Deployment : PhysicsBody
             {
                 if (g.Slots[i].HasUnit)
                 {
-                    g.Slots[i].GetUnit().MeleeAttack(target_layer_mask);
+                    g.Slots[i].Unit.MeleeAttack(target_layer_mask);
                 }
             }
         }
@@ -156,7 +125,7 @@ public abstract class Deployment : PhysicsBody
             {
                 if (g.Slots[i].HasUnit)
                 {
-                    Unit u = g.Slots[i].GetUnit();
+                    Unit u = g.Slots[i].Unit;
                     u.RangeAttack(target_layer_mask, targetPos);
                 }
             }
@@ -187,9 +156,6 @@ public abstract class Deployment : PhysicsBody
     {
         slider.maxValue = maxValue;
         slider.value = value;
-
-        //float green = ((float)stamina / (float)MAX_STAMINA);
-        //staminabar.fillRect.GetComponent<Image>().color = new Color(.1f, .65f, .1f, green);
     }
 
     public int CollectiveHealth
@@ -205,20 +171,6 @@ public abstract class Deployment : PhysicsBody
                 }
             }
             return sum;
-        }
-    }
-
-    protected void FaceSlotsToCamera()
-    {
-        foreach (Group[] zone in Zones)
-        {
-            foreach (Group g in zone)
-            {
-                foreach (Slot s in g.Slots)
-                {
-                    s.FaceUIToCam();
-                }
-            }
         }
     }
 

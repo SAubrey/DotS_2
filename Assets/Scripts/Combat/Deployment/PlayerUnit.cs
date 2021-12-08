@@ -119,7 +119,7 @@ public class PlayerUnit : Unit
 
 public class Warrior : PlayerUnit
 {
-    public Warrior() : base("Warrior", WARRIOR, 1, 1, 100, Unit.Style.Sword)
+    public Warrior() : base("Warrior", WARRIOR, 20, 1, 100, Unit.Style.Sword)
     {
         AttributeRequiresAction = true;
         BlockRating = .9f;
@@ -128,7 +128,7 @@ public class Warrior : PlayerUnit
 
 public class Spearman : PlayerUnit
 {
-    public Spearman() : base("Spearman", SPEARMAN, 1, 2, 70, Style.Polearm, Attributes.Piercing, Attributes.CounterCharge)
+    public Spearman() : base("Spearman", SPEARMAN, 15, 2, 70, Style.Polearm, Attributes.Piercing, Attributes.CounterCharge)
     {
         PassiveAttribute = true;
     }
@@ -136,7 +136,7 @@ public class Spearman : PlayerUnit
 
 public class Archer : PlayerUnit
 {
-    public Archer() : base("Archer", ARCHER, 2, 0, 60, Style.Range)
+    public Archer() : base("Archer", ARCHER, 15, 0, 60, Style.Range)
     {
         PassiveAttribute = true;
     }
@@ -144,7 +144,7 @@ public class Archer : PlayerUnit
 
 public class Miner : PlayerUnit
 {
-    public Miner() : base("Miner", MINER, 1, 0, 50, Style.Mage, Attributes.Harvest)
+    public Miner() : base("Miner", MINER, 10, 0, 50, Style.Mage, Attributes.Harvest)
     {
         PassiveAttribute = true;
     }
@@ -152,7 +152,7 @@ public class Miner : PlayerUnit
 
 public class Inspirator : PlayerUnit
 {
-    public Inspirator() : base("Inspirator", INSPIRATOR, 0, 0, 45, Style.Mage, Attributes.Inspire) { }
+    public Inspirator() : base("Inspirator", INSPIRATOR, 5, 0, 45, Style.Mage, Attributes.Inspire) { }
 
     public override bool SetAttributeActive(bool state)
     {
@@ -177,7 +177,7 @@ public class Inspirator : PlayerUnit
 
 public class Seeker : PlayerUnit
 {
-    public Seeker() : base("Seeker", SEEKER, 1, 1, 40, Style.Mage)
+    public Seeker() : base("Seeker", SEEKER, 5, 1, 40, Style.Mage)
     {
         PassiveAttribute = true;
     }
@@ -185,7 +185,7 @@ public class Seeker : PlayerUnit
 
 public class Guardian : PlayerUnit
 {
-    public Guardian() : base("Guardian", GUARDIAN, 2, 3, 120, Style.Sword)
+    public Guardian() : base("Guardian", GUARDIAN, 20, 3, 120, Style.Sword)
     {
         BlockRating = .9f;
     }
@@ -193,7 +193,7 @@ public class Guardian : PlayerUnit
 
 public class Arbalest : PlayerUnit
 {
-    public Arbalest() : base("Arbalest", ARBALEST, 3, 0, 75, Style.Range, Attributes.Piercing)
+    public Arbalest() : base("Arbalest", ARBALEST, 30, 0, 75, Style.Range, Attributes.Piercing)
     {
         PassiveAttribute = true;
     }
@@ -201,7 +201,7 @@ public class Arbalest : PlayerUnit
 
 public class Mender : PlayerUnit
 {
-    public Mender() : base("Mender", MENDER, 0, 3, 40, Style.Mage, Attributes.Heal)
+    public Mender() : base("Mender", MENDER, 5, 3, 40, Style.Mage, Attributes.Heal)
     {
     }
 
@@ -219,7 +219,7 @@ public class Mender : PlayerUnit
 
 public class Skirmisher : PlayerUnit
 {
-    public Skirmisher() : base("Skirmisher", SKIRMISHER, 2, 2, 100, Style.Range, Attributes.Stun)
+    public Skirmisher() : base("Skirmisher", SKIRMISHER, 20, 2, 100, Style.Range, Attributes.Stun)
     {
         AttributeRequiresAction = true;
     }
@@ -227,7 +227,7 @@ public class Skirmisher : PlayerUnit
 
 public class Scout : PlayerUnit
 {
-    public Scout() : base("Scout", SCOUT, 3, 0, 70, Style.Range, Attributes.Piercing)
+    public Scout() : base("Scout", SCOUT, 30, 0, 70, Style.Range, Attributes.Piercing)
     {
         PassiveAttribute = true;
     }
@@ -235,7 +235,7 @@ public class Scout : PlayerUnit
 
 public class Carter : PlayerUnit
 {
-    public Carter() : base("Carter", CARTER, 2, 2, 110, Style.Sword)
+    public Carter() : base("Carter", CARTER, 20, 2, 110, Style.Sword)
     {
         PassiveAttribute = true;
         // inv increase by 6
@@ -244,12 +244,12 @@ public class Carter : PlayerUnit
 
 public class Dragoon : PlayerUnit
 {
-    public Dragoon() : base("Dragoon", DRAGOON, 4, 1, 150, Style.Polearm, Attributes.Piercing) { }
+    public Dragoon() : base("Dragoon", DRAGOON, 40, 1, 150, Style.Polearm, Attributes.Piercing) { }
 }
 
 public class Paladin : PlayerUnit
 {
-    public Paladin() : base("Paladin", PALADIN, 2, 2, 160, Style.Sword)
+    public Paladin() : base("Paladin", PALADIN, 20, 2, 160, Style.Sword)
     {
         AttributeRequiresAction = true;
     }
@@ -257,7 +257,7 @@ public class Paladin : PlayerUnit
 
 public class Drummer : PlayerUnit
 {
-    public Drummer() : base("Drummer", DRUMMER, 1, 1, 50, Style.Mage) { }
+    public Drummer() : base("Drummer", DRUMMER, 10, 1, 50, Style.Mage) { }
 
     public override bool SetAttributeActive(bool state)
     {
@@ -278,7 +278,7 @@ public class Drummer : PlayerUnit
 
 public class ShieldMaiden : PlayerUnit
 {
-    public ShieldMaiden() : base("Shield Maiden", SHIELD_MAIDEN, 3, 4, 180, Style.Sword)
+    public ShieldMaiden() : base("Shield Maiden", SHIELD_MAIDEN, 30, 4, 180, Style.Sword)
     {
         AttributeRequiresAction = true;
         BlockRating = 1f;
@@ -287,7 +287,7 @@ public class ShieldMaiden : PlayerUnit
 
 public class Pikeman : PlayerUnit
 {
-    public Pikeman() : base("Pikeman", PIKEMAN, 3, 1, 120, Style.Polearm, Attributes.Piercing, Attributes.CounterCharge)
+    public Pikeman() : base("Pikeman", PIKEMAN, 30, 1, 120, Style.Polearm, Attributes.Piercing, Attributes.CounterCharge)
     {
         PassiveAttribute = true;
     }

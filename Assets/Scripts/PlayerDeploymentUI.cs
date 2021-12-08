@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class PlayerDeploymentUI : MonoBehaviour
 {
-    [SerializeField] private Group[] ZoneSword = new Group[3];
-    [SerializeField] private Group[] ZonePolearm = new Group[3];
+    [SerializeField] private Group[] ZoneSword = new Group[1];
+    [SerializeField] private Group[] ZonePolearm = new Group[1];
     [SerializeField] private Group[] ZoneCenter = new Group[1];
-    [SerializeField] private Group[] ZoneRange = new Group[2];
+    [SerializeField] private Group[] ZoneRange = new Group[1];
     [SerializeField] private Group[] ZoneMage = new Group[1];
     protected List<Group[]> Groups = new List<Group[]>();
 

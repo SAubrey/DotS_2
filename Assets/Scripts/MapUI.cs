@@ -137,7 +137,7 @@ public class MapUI : MonoBehaviour
         {
             d.OnResourceChange += UpdateStatText;
             d.OnCapacityChange += RegisterCapacityChange;
-            d.on_unit_count_change += LoadBattalionCount;
+            d.OnUnitCountChange += LoadBattalionCount;
         }
         Game.I.city.OnResourceChange += UpdateStatText;
     }
@@ -422,7 +422,7 @@ public class MapUI : MonoBehaviour
         txt.text = t;
         if (img != null)
             img.sprite = s;
-        txt.color = Statics.disc_colors[disc_ID];
+        txt.color = Statics.DisciplineColors[disc_ID];
     }
 
     public void ToggleCityPanel()

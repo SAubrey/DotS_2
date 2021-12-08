@@ -33,7 +33,7 @@ public class SpriteBobber : MonoBehaviour
     }
 
     private float GetBobFrequency(float v) {
-        float vm = v / Deployment.VelMax;
+        float vm = v / Deployment.MaxSpeed;
         if (vm > .6f) 
         {
             return FreqRun;

@@ -41,7 +41,7 @@ public abstract class Unit
     protected float BlockRating {
         get 
         {
-            return Mathf.Max(0f, 1f - (BlockRatingBase - BlockRatingAdditional));
+            return Mathf.Max(0f, 1f - (BlockRatingBase + BlockRatingAdditional));
         }
         set { return; }
     }
@@ -70,11 +70,11 @@ public abstract class Unit
 
     public bool IsPlayer { get; protected set; }
     public bool IsEnemy { get { return !IsPlayer; } }
-    protected int ID; // Code for the particular unit type. (not unique to unit)
+    public int ID { get; protected set; }// Code for the particular unit type. (not unique to unit)
     public int OwnerID { get; protected set; }
 
     protected string Name;
-    protected Slot Slot = null;
+    public Slot Slot { get; protected set; }= null;
     protected bool Dead = false;
 
     public virtual int CalcHpRemaining(int dmg) { return Mathf.Max(Health - dmg, 0); }
@@ -152,7 +152,7 @@ public abstract class Unit
         if (Slot.MeleeAttZone == null)
             return;
 
-        AnimateAttackEffect();
+        //AnimateAttackEffect();
         Slot.Animator.SetTrigger("Attack");
         Collider2D[] hits =
             Physics2D.OverlapCircleAll(Slot.MeleeAttZone.transform.position, AttackRange, layerMask);
@@ -162,7 +162,7 @@ public abstract class Unit
             Slot s = h.GetComponent<Slot>();
             if (s == null)
                 continue;
-            Unit u = s.GetUnit();
+            Unit u = s.Unit;
             if (u == null)
                 continue;
             u.TakeDamage(GetAttackDmg() * 10);
@@ -184,11 +184,17 @@ public abstract class Unit
 
     public virtual int TakeDamage(int dmg)
     {
-        int final_dmg = CalcDmgTaken(dmg, HasAttribute(Unit.Attributes.Piercing));
-        int state = GetPostDmgState(final_dmg);
-        Health = (int)CalcHpRemaining(final_dmg);
+        int finalDmg = CalcDmgTaken(dmg, HasAttribute(Unit.Attributes.Piercing));
+        int state = GetPostDmgState(finalDmg);
+        Health = (int)CalcHpRemaining(finalDmg);
         Slot.UpdateHealthbar();
-        Slot.Animator.SetTrigger("TakeDamage");
+
+        // Don't trigger an out of synch animation.
+        if (!Slot.Animator.GetCurrentAnimatorStateInfo(0).IsName("TakeDamage"))
+        {
+            Slot.Animator.SetTrigger("TakeDamage");
+        }
+        Debug.Log(Name + " took " + finalDmg + " from " + dmg + " with " + Health + " hp remaining.");
 
         if (state == DEAD)
         {
@@ -199,7 +205,6 @@ public abstract class Unit
 
     protected virtual int CalcDmgTaken(int dmg, bool piercing = false)
     {
-        dmg -= GetDefense();
         if (Blocking && !piercing)
         {
             dmg = (int)(dmg * BlockRating);
@@ -237,7 +242,7 @@ public abstract class Unit
         if (!IsPlayer)
             return 0;
         Discipline d = TurnPhaser.I.GetDisc(OwnerID).Bat.Disc;
-        return d.equipment_inventory.get_stat_boost_amount(ID, stat_ID);
+        return d.EquipmentInventory.get_stat_boost_amount(ID, stat_ID);
     }
 
     public int active_boost_type = -1;
@@ -302,11 +307,6 @@ public abstract class Unit
     public string GetName()
     {
         return Name;
-    }
-
-    public int GetID()
-    {
-        return ID;
     }
 
     public Slot GetSlot()

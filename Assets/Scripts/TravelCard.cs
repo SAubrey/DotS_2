@@ -159,7 +159,7 @@ public class Chance : TravelCard
 
     public override void OnOpen(TravelCardManager tcm)
     {
-        tcm.set_up_roll(this, DieNumSides);
+        tcm.SetUpRoll(this, DieNumSides);
     }
 }
 

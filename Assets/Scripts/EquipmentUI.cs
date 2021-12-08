@@ -53,7 +53,7 @@ public class EquipmentUI : MonoBehaviour
             return;
         if (field == Discipline.Experience)
         {
-            UnlockSlots(TurnPhaser.I.GetDisc(ID).equipment_inventory);
+            UnlockSlots(TurnPhaser.I.GetDisc(ID).EquipmentInventory);
         }
     }
 
@@ -63,10 +63,10 @@ public class EquipmentUI : MonoBehaviour
         selecting = true;
         string e = d.captionText.text;
 
-        EquipmentInventory ei = TurnPhaser.I.ActiveDisc.equipment_inventory;
+        EquipmentInventory ei = TurnPhaser.I.ActiveDisc.EquipmentInventory;
         // Undo the selection, the same equipment cannot be worn more than once,
         // and only one of a type can be worn at once.
-        if (ei.has_equipped(e) || ei.get_equipment_amount(e) > 1)
+        if (ei.HasEquipped(e) || ei.GetEquipmentAmount(e) > 1)
         {
             if (ei.EquipmentSlots[Dropdowns[d]].full)
             {
@@ -90,7 +90,7 @@ public class EquipmentUI : MonoBehaviour
 
     public void LoadDiscipline(Discipline disc)
     {
-        EquipmentInventory ei = disc.equipment_inventory;
+        EquipmentInventory ei = disc.EquipmentInventory;
         UnlockSlots(ei);
         FillDropdowns(ei);
     }
@@ -99,7 +99,7 @@ public class EquipmentUI : MonoBehaviour
     {
         if (ei == null)
             return;
-        int highest_unlocked_slot = ei.get_highest_unlocked_slot();
+        int highest_unlocked_slot = ei.GetHighestUnlockedSlot();
 
         foreach (TMP_Dropdown d in Dropdowns.Keys)
         {
@@ -121,19 +121,19 @@ public class EquipmentUI : MonoBehaviour
     {
         ClearDropdownOptions(dropdown);
         List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
-        foreach (string e in ei.Equipment.Keys)
+        foreach (string e in ei.Inventory.Keys)
         {
-            if (ei.Equipment[e].Count > 1)
+            if (ei.Inventory[e].Count > 1)
             {
-                options.Add(new TMP_Dropdown.OptionData(ei.Equipment[e].Count.ToString() + " " + ei.Equipment[e][0].name));
+                options.Add(new TMP_Dropdown.OptionData(ei.Inventory[e].Count.ToString() + " " + ei.Inventory[e][0].name));
             }
             else
             {
                 Debug.Log(options);
-                Debug.Log(ei.Equipment[e]);
-                Debug.Log(ei.Equipment[e][0]);
-                Debug.Log(ei.Equipment[e][0].name);
-                options.Add(new TMP_Dropdown.OptionData(ei.Equipment[e][0].name));
+                Debug.Log(ei.Inventory[e]);
+                Debug.Log(ei.Inventory[e][0]);
+                Debug.Log(ei.Inventory[e][0].name);
+                options.Add(new TMP_Dropdown.OptionData(ei.Inventory[e][0].name));
             }
         }
         dropdown.AddOptions(options);
@@ -158,21 +158,21 @@ public class EquipmentUI : MonoBehaviour
 
     public void LoadEquipmentDescription(EquipmentInventory ei, string e)
     {
-        if (!ei.has_equipped(e))
+        if (!ei.HasEquipped(e))
             return;
         descriptionP.SetActive(true);
-        descriptionT.text = ei.Equipment[e][0].description;
+        descriptionT.text = ei.Inventory[e][0].description;
     }
 
     public void LoadEquipmentDescription(string e)
     {
         if (e == "Empty")
             return;
-        EquipmentInventory ei = TurnPhaser.I.ActiveDisc.equipment_inventory;
-        if (!ei.has(e))
+        EquipmentInventory ei = TurnPhaser.I.ActiveDisc.EquipmentInventory;
+        if (!ei.Has(e))
             return;
         descriptionP.SetActive(true);
-        descriptionT.text = ei.Equipment[e][0].description;
+        descriptionT.text = ei.Inventory[e][0].description;
     }
 
     public void HideEquipmentDescription()

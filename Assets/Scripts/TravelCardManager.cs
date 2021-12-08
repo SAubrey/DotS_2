@@ -20,6 +20,29 @@ public class TravelCardManager : MonoBehaviour
         }
     }
 
+    // Called by the roll button of the travel card. 
+    public void roll()
+    {
+        Die.roll(NumSides);
+        Travelcard.Rolled = true;
+    }
+
+    public void FinishRoll(int result)
+    {
+        MapUI.I.SetActiveTravelcardContinueB(true);
+        MapUI.I.travelcard_rollB.interactable = false;
+        Travelcard.UseRollResult(result);
+        Travelcard = null;
+    }
+
+    public void SetUpRoll(TravelCard tc, int num_sides)
+    {
+        this.Travelcard = tc;
+        this.NumSides = num_sides;
+        MapUI.I.SetActiveTravelcardContinueB(false);
+        MapUI.I.SetActiveTravelcardRollB(true);
+    }
+
     // Don't pull a travel card on a discovered cell.
     public void RestartBattleFromDrawnCard(MapCell cell)
     {
@@ -73,27 +96,4 @@ public class TravelCardManager : MonoBehaviour
         }
     }
 
-
-    // Called by the roll button of the travel card. 
-    public void roll()
-    {
-        Die.roll(NumSides);
-        Travelcard.Rolled = true;
-    }
-
-    public void finish_roll(int result)
-    {
-        MapUI.I.SetActiveTravelcardContinueB(true);
-        MapUI.I.travelcard_rollB.interactable = false;
-        Travelcard.UseRollResult(result);
-        Travelcard = null;
-    }
-
-    public void set_up_roll(TravelCard tc, int num_sides)
-    {
-        this.Travelcard = tc;
-        this.NumSides = num_sides;
-        MapUI.I.SetActiveTravelcardContinueB(false);
-        MapUI.I.SetActiveTravelcardRollB(true);
-    }
 }

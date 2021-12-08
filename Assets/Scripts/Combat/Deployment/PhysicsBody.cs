@@ -46,15 +46,8 @@ public class PhysicsBody : MonoBehaviour
 
         Vector3 direction = Statics.CalcDirection(Rigidbody.position, dest);
         MoveInDirection(direction, maxVel, force);
-        RotateWithDirection(Rigidbody.velocity);
+        Statics.RotateWithVelocity(transform, Rigidbody.velocity);
         return;
-    }
-
-    public void RotateWithDirection(Vector3 velocity) 
-    {
-        if (velocity == Vector3.zero)
-            return;
-        transform.rotation = Quaternion.LookRotation(velocity.normalized);
     }
 
     protected virtual void MoveInDirection(Vector3 direction, float maxVel, float force) {

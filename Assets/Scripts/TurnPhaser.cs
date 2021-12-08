@@ -1,12 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Tilemaps;
 using System;
 
-// Manages intra-turn progression. Stages are within phases which are within a game turn.
-// There are 3 stages for each phase, and a phase for each player.
+
 public class TurnPhaser : MonoBehaviour, ISaveLoad
 {
     public static TurnPhaser I { get; private set; }
@@ -16,9 +12,8 @@ public class TurnPhaser : MonoBehaviour, ISaveLoad
     public int Turn { get; private set; }
     public Discipline Astra, Martial, Endura;
 
-    public IDictionary<int, Discipline> Discs = new Dictionary<int, Discipline>();
-
     // <arbitrary turn order index, Discipline>
+    public IDictionary<int, Discipline> Discs = new Dictionary<int, Discipline>();
     public Discipline[] DiscsInPlay;
     public int NumPlayers { get; private set; } = 1;
 
@@ -36,7 +31,7 @@ public class TurnPhaser : MonoBehaviour, ISaveLoad
         }
     } // disciplines are like sub factions.
     public Discipline ActiveDisc { get; private set; }
-
+    
     void Awake()
     {
         if (I == null)

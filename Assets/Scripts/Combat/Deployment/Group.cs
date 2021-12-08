@@ -87,7 +87,7 @@ public class Group : MonoBehaviour
         {
             if (!s.HasUnit)
                 continue;
-            if (s.GetUnit().GetID() == unitID)
+            if (s.Unit.ID == unitID)
                 numGrouped++;
         }
         return numGrouped;
@@ -109,7 +109,7 @@ public class Group : MonoBehaviour
         {
             if (s.HasUnit)
             {
-                sum += s.GetUnit().Health;
+                sum += s.Unit.Health;
             }
         }
         return sum;

@@ -3,9 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
-using UnityEngine.AI;
 
-public class Slot : PhysicsBody
+public class Slot : AgentBody
 {
     private static readonly Color ColorHealthbar = new Color(.8f, .1f, .1f, .45f);
     private static readonly Color ColorStatbarBg = new Color(.4f, .4f, .4f, .3f);
@@ -18,10 +17,9 @@ public class Slot : PhysicsBody
     public Image HealthbarBg, HealthbarFill;
     public GameObject HealthbarObj;
 
-    public TextMeshProUGUI TName;
-    public TextMeshProUGUI THp;
+    public TextMeshProUGUI TName, THp;
 
-    protected Unit Unit;
+    public Unit Unit { get; protected set; }
     public Group Group;
     public AnimationPlayer AnimationPlayer;
     public ParticleSystem PSDust;
@@ -34,9 +32,7 @@ public class Slot : PhysicsBody
     public Animator Animator;
     private GameObject CharacterModel;
     [SerializeField] private GameObject SwordsmanPrefab, PolearmPrefab, RangerPrefab, MagePrefab, CenterCharPrefab;
-    private NavMeshAgent Agent;
-    private float MaxVel = 20f;
-    private float MaxAcceleration = 20f;
+    
 
     protected override void Awake()
     {
@@ -52,16 +48,14 @@ public class Slot : PhysicsBody
         HealthbarBg.color = ColorStatbarBg;
         OnVelocityChange += ToggleDustPs;
         PSDust.Pause();
-        Agent = GetComponent<NavMeshAgent>();
 
         Agent.updatePosition = false;
         Agent.updateRotation = false;
-        MaxVel = Agent.speed;
-        MaxAcceleration = Agent.acceleration;
     }
 
     Vector2 SmoothDeltaPosition = Vector2.zero;
     Vector2 Velocity = Vector2.zero;
+    Vector3 worldDeltaPosition;
     protected virtual void FixedUpdate() {
         OnVelocityChange(Agent.velocity);
         Move();
@@ -71,7 +65,7 @@ public class Slot : PhysicsBody
 
     private void Move() 
     {
-        Vector3 worldDeltaPosition = Agent.nextPosition - transform.position;
+        worldDeltaPosition = Agent.nextPosition - transform.position;
 
         if (Vector3.Distance(SlotPointTransform.position, transform.position) > 1f)
         {
@@ -91,8 +85,9 @@ public class Slot : PhysicsBody
         if (Time.deltaTime > 1e-5f)
             Velocity = SmoothDeltaPosition / Time.deltaTime;
 
-        Vector2 normalVelX = new Vector2(Velocity.x, MaxVel).normalized;
-        Vector2 normalVelY = new Vector2(Velocity.y, MaxVel).normalized;
+        // Send animator speed from 0-1 relative to max speed
+        Vector2 normalVelX = new Vector2(Velocity.x, MaxSpeed).normalized;
+        Vector2 normalVelY = new Vector2(Velocity.y, MaxSpeed).normalized;
         if (Animator != null) {
             Animator.SetFloat("VelocityX", normalVelX.x, .1f, Time.fixedDeltaTime);
             Animator.SetFloat("VelocityZ", normalVelY.x, .1f, Time.fixedDeltaTime);
@@ -112,7 +107,7 @@ public class Slot : PhysicsBody
             //transform.rotation = Deployment.transform.rotation;
             transform.rotation = Quaternion.Lerp(transform.rotation, Deployment.transform.rotation, .15f);
         } else {
-            RotateWithDirection(Agent.velocity);
+            Statics.RotateWithVelocity(transform, Agent.velocity);
         }
     }
 
@@ -128,6 +123,7 @@ public class Slot : PhysicsBody
         if (u.IsPlayer)
         {
             gameObject.layer = LayerMask.NameToLayer("Player");
+            MaxSpeed *= 1.2f;
         } else 
         {
             gameObject.layer = LayerMask.NameToLayer("Enemy");
@@ -171,26 +167,21 @@ public class Slot : PhysicsBody
         Unit.SetSlot(this);
     }
 
-    public Unit GetUnit()
-    {
-        return Unit;
-    }
-
     private GameObject DetermineCharacterModel(Unit unit)
     {   
-        if (unit.CombatStyle == Unit.Style.Sword)
+        if (unit.CombatStyle == global::Unit.Style.Sword)
         {
             return SwordsmanPrefab;
         } 
-        else if (unit.CombatStyle == Unit.Style.Polearm)
+        else if (unit.CombatStyle == global::Unit.Style.Polearm)
         {
             return PolearmPrefab;
         }
-        else if (unit.CombatStyle == Unit.Style.Mage)
+        else if (unit.CombatStyle == global::Unit.Style.Mage)
         {
             return MagePrefab;
         }
-        else if (unit.CombatStyle == Unit.Style.Range)
+        else if (unit.CombatStyle == global::Unit.Style.Range)
         {
             return RangerPrefab;
         }
@@ -208,7 +199,7 @@ public class Slot : PhysicsBody
         //a.transform.position = ArrowOriginTransform.position;
         a.transform.localPosition = Vector3.zero;
         Arrow arrowScript = a.GetComponent<Arrow>();
-        arrowScript.Fly(ArrowOriginTransform.position, targetPos, attackDmg);
+        arrowScript.Fly(ArrowOriginTransform.position, targetPos, attackDmg, 60f);
 
         if (Animator != null)
             Animator.SetTrigger("Attack");
@@ -246,20 +237,20 @@ public class Slot : PhysicsBody
 
     public void UpdateHealthbar()
     {
-        Healthbar.maxValue = GetUnit().GetDynamicMaxHealth();
-        Healthbar.value = GetUnit().Health;
-        THp.text = BuildHealthString(GetUnit().Health, 0);
+        Healthbar.maxValue = Unit.GetDynamicMaxHealth();
+        Healthbar.value = Unit.Health;
+        THp.text = BuildHealthString(Unit.Health, 0);
         if (Animator != null)
-            Animator.SetFloat("Health", GetUnit().Health);
+            Animator.SetFloat("Health", Unit.Health);
     }
 
     public string BuildHealthString(float hp, float previewDamage)
     {
         //float hp = GetUnit().health; // This will already include the boost but not the bonus.
-        float hp_boost = GetUnit().get_stat_buff(Unit.HEALTH)
-            + GetUnit().GetBonusHealth();
+        float hp_boost = Unit.get_stat_buff(global::Unit.HEALTH)
+            + Unit.GetBonusHealth();
 
-        string str = (hp + GetUnit().get_bonus_from_equipment(Unit.HEALTH)).ToString();
+        string str = (hp + Unit.get_bonus_from_equipment(global::Unit.HEALTH)).ToString();
         if (previewDamage > 0)
             str += " (-" + previewDamage.ToString() + ")";
         if (hp_boost > 0)
@@ -282,8 +273,8 @@ public class Slot : PhysicsBody
         if (Unit.IsEnemy)
             return;
 
-        EquipmentInventory ei = TurnPhaser.I.GetDisc(GetPunit().OwnerID).equipment_inventory;
-        THp.color = ei.get_stat_boost_amount(Unit.GetID(), Unit.HEALTH) > 0 ?
+        EquipmentInventory ei = TurnPhaser.I.GetDisc(GetPunit().OwnerID).EquipmentInventory;
+        THp.color = ei.get_stat_boost_amount(Unit.ID, Unit.HEALTH) > 0 ?
             ColorEquipmentText : Color.white;
     }
 

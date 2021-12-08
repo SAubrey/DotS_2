@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 // Idle, relatively safe distance from player where the enemy decides what and when to do.
@@ -24,7 +22,8 @@ public class Comfortable : IState
 
     public void OnEnter()
     {
-        PendingAttackTimer = new Timer(Random.Range(0.5f, 1.5f));
+        PendingAttackTimer = new Timer(Random.Range(0.6f, 2f));
+        D.SetAgentDestination(D.transform.position);
         Debug.Log("comfortable w/ PD: " + D.PlayerDistance);
     }
 

@@ -5,7 +5,7 @@ using UnityEngine;
 public class Roam : IState
 {
     private EnemyDeployment D;
-    private Vector2 TargetPos;
+    private Vector3 TargetPos;
     Timer T = new Timer(5f, false, 3f, 6f);
 
     public Roam(EnemyDeployment d)
@@ -15,11 +15,10 @@ public class Roam : IState
 
     public void Tick()
     {
-        //d.MoveToDestination(target_pos, d.VelWalk, PhysicsBody.MoveForce, 3f);
-        D.MoveAgentToLocation(TargetPos);
         if (T.Increase(Time.deltaTime))
         {
             TargetPos = GetRandomTargetPos();
+            D.SetAgentDestination(TargetPos);
         }
     }
 
@@ -36,11 +35,11 @@ public class Roam : IState
         T.Reset();
     }
 
-    private Vector2 GetRandomTargetPos()
+    private Vector3 GetRandomTargetPos()
     {
-        Vector2 v = D.gameObject.transform.position;
+        Vector3 v = D.gameObject.transform.position;
         v.x += UnityEngine.Random.Range(-50f, 50f);
-        v.y += UnityEngine.Random.Range(-50f, 50f);
+        v.z += UnityEngine.Random.Range(-50f, 50f);
         return v;
     }
 }

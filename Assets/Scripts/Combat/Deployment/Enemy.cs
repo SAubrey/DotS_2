@@ -86,13 +86,13 @@ public class Enemy : Unit
         return e;
     }
 
-    public bool CanTarget(Slot punit)
+    public bool CanTarget(Slot slot)
     {
-        if (!punit.HasPunit)
+        if (!slot.HasPunit)
             return false;
 
         bool meleeVsFlying = IsMelee &&
-                    punit.GetUnit().HasAttribute(Unit.Attributes.Flying);
+                    slot.Unit.HasAttribute(Unit.Attributes.Flying);
         return !meleeVsFlying;
     }
 

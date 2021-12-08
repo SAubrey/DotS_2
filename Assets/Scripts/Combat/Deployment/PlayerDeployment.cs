@@ -1,21 +1,17 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System;
-using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 public class PlayerDeployment : Deployment
 {
     public static PlayerDeployment I { get; private set; }
-    private GameObject LockedOnEnemy;
 
     [SerializeField] private LayerMask GroundMask;
-    [SerializeField] protected Group[] ZoneSword = new Group[3];
-    [SerializeField] protected Group[] ZonePolearm = new Group[3];
+    [SerializeField] protected Group[] ZoneSword = new Group[2];
+    [SerializeField] protected Group[] ZonePolearm = new Group[2];
     [SerializeField] protected Group[] ZoneCenter = new Group[1];
-    [SerializeField] protected Group[] ZoneRange = new Group[2];
+    [SerializeField] protected Group[] ZoneRange = new Group[1];
     [SerializeField] protected Group[] ZoneMage = new Group[1];
 
     [SerializeField] private GameObject ZoneSwordParent;
@@ -45,7 +41,6 @@ public class PlayerDeployment : Deployment
         }
     }
     [SerializeField] private GameObject LightObject;
-    [SerializeField] private GameObject FollowSlotObject;
     
     protected override void Awake()
     {
@@ -74,9 +69,7 @@ public class PlayerDeployment : Deployment
         Zones.Add(ZoneRange);
         Stamina = StamMax;
         IsPlayer = true;
-        VelRun = VelRun + 50f;
 
-        //CenterCamOnTransform(FollowSlotObject.transform);
         Init();
     }
 
@@ -151,10 +144,10 @@ public class PlayerDeployment : Deployment
         }
         else if (Controller.I.LockOn.triggered)
         {
-            if (LockedOnEnemy == null) {
-                LockedOnEnemy = FindNearestEnemyInSight();
+            if (LockedOnTarget == null) {
+                LockedOnTarget = FindNearestEnemyInSight();
             } else {
-                LockedOnEnemy = null;
+                LockedOnTarget = null;
             }
         }
         Group[] g = CheckFormationInput();
@@ -163,12 +156,6 @@ public class PlayerDeployment : Deployment
             ForwardZone = g;
             MoveFormations(g[0].Parent);
         }
-    }
-
-    private void SetAgentDestination(Vector3 point) 
-    {
-        Agent.SetDestination(point);
-        transform.rotation = Statics.CalcRotationToPoint(transform, point);
     }
 
     private GameObject FindNearestEnemyInSight()
@@ -235,13 +222,6 @@ public class PlayerDeployment : Deployment
         return null;
     }
 
-    private Vector3 GetMovementInput()
-    {
-        Vector3 vec = Vector3.zero;
-        
-        return vec;
-    }
-
     public override void PlaceUnit(Unit unit)
     {
         Group[] zone = null;
@@ -270,9 +250,9 @@ public class PlayerDeployment : Deployment
 
     public void PlaceUnits(Battalion b)
     {
-        foreach (List<PlayerUnit> pu in b.Units.Values)
+        foreach (List<PlayerUnit> unitType in b.Units.Values)
         {
-            foreach (Unit u in pu)
+            foreach (Unit u in unitType)
             {
                 PlaceUnit(u);
             }
@@ -295,7 +275,7 @@ public class PlayerDeployment : Deployment
             {
                 if (g.Slots[i].HasUnit)
                 {
-                    g.Slots[i].GetUnit().Blocking = active;
+                    g.Slots[i].Unit.Blocking = active;
                 }
             }
         }
@@ -306,21 +286,6 @@ public class PlayerDeployment : Deployment
         return melee ? ForwardZone : ZoneRange;
     }
 
-    /*private GameObject find_nearest_enemy_in_sight()
-    {
-        int mask = 1 << 9;
-        // Scan for enemies with enemy layer mask.
-        Collider2D[] enemiesInRange = Physics2D.OverlapCircleAll(
-            new Vector2(transform.position.x, transform.position.y), light2d.pointLightOuterRadius, mask);
-
-        Collider2D closestEnemy = Statics.DetermineClosestCollider(enemiesInRange,
-            new Vector2(transform.position.x, transform.position.y));
-        if (closestEnemy == null)
-            return null;
-
-        return closestEnemy.gameObject;
-    }*/
-
     private void ValidateAllPunits()
     {
         foreach (Group g in ZoneSword)
@@ -329,17 +294,31 @@ public class PlayerDeployment : Deployment
         }
     }
 
-    public float GetStamRegenAmount()
-    {
-        float vel = Rigidbody.velocity.magnitude;
-        // Double regeneration when not moving.
-        return vel < VelRun ? StamRegenAmount * 2 : StamRegenAmount;
-    }
-
     private void CenterCamOnTransform(Transform t) 
     {
         t.gameObject.SetActive(true);
         CamSwitcher.I.FollowTransform = t;
         LightObject.transform.SetParent(t);
+    }
+
+    public Slot GetNearestUnit(Vector3 pos)
+    {
+        // Given some location, return the closest slot's unit for enemy targeting.
+        Slot nearestSlot = null;
+        float nearestSlotDistance = Mathf.Infinity;
+        foreach (Group[] zone in Zones)
+        {
+            foreach (Group g in zone)
+            {
+                foreach (Slot slot in g.GetFullSlots())
+                {
+                    if (Vector3.Distance(slot.transform.position, pos) < nearestSlotDistance)
+                    {
+                        nearestSlot = slot;
+                    }
+                }
+            }
+        }
+        return nearestSlot;
     }
 }

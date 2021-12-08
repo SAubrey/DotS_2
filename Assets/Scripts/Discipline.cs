@@ -46,12 +46,12 @@ public class Discipline : Storeable, ISaveLoad
         }
     }
 
-    public EquipmentInventory equipment_inventory;
-    public event Action on_unit_count_change;
+    public EquipmentInventory EquipmentInventory;
+    public event Action OnUnitCountChange;
     public void TriggerUnitCountChange() 
     { 
-        if (on_unit_count_change != null)
-            on_unit_count_change(); 
+        if (OnUnitCountChange != null)
+            OnUnitCountChange(); 
     }
 
     protected override void Start()
@@ -66,7 +66,7 @@ public class Discipline : Storeable, ISaveLoad
         base.Init(from_save);
         Initialized = true;
         Bat = new Battalion(this);
-        equipment_inventory = new EquipmentInventory(this);
+        EquipmentInventory = new EquipmentInventory(this);
 
         Resources[LIGHT] = 4;
         Resources[UNITY] = 5;
@@ -190,10 +190,10 @@ public class Discipline : Storeable, ISaveLoad
         ShowAdjustments(Cell.get_travelcard_consequence());
         if (GetTravelcard().EquipmentRewardAmount > 0)
         {
-            string name = equipment_inventory.add_random_equipment(Cell.Tier);
+            string name = EquipmentInventory.AddRandomEquipment(Cell.Tier);
             RisingInfo.create_rising_info_map(
                 RisingInfo.build_resource_text(name, 1),
-                Statics.disc_colors[ID],
+                Statics.DisciplineColors[ID],
                 origin_of_rise_obj.transform,
                 rising_info_prefab);
         }
@@ -212,7 +212,7 @@ public class Discipline : Storeable, ISaveLoad
         yield return new WaitForSeconds(1f);
         RisingInfo.create_rising_info_battle(
             RisingInfo.build_resource_text("XP", xp),
-            Statics.disc_colors[ID],
+            Statics.DisciplineColors[ID],
             enemy.GetSlot().transform,
             rising_info_prefab);
     }

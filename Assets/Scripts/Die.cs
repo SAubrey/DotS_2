@@ -78,6 +78,6 @@ public class Die : MonoBehaviour
         side_change_time = 0;
         current_num_side_changes = 0;
         current_max_side_change_time = MAX_SIDE_CHANGE_TIME;
-        tcm.finish_roll(current_side);
+        tcm.FinishRoll(current_side);
     }
 }

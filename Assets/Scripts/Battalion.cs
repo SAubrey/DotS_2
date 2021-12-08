@@ -131,7 +131,7 @@ public class Battalion
 
     public void RemoveDeadUnit(PlayerUnit du)
     {
-        Units[du.GetID()].Remove(du);
+        Units[du.ID].Remove(du);
     }
 
     public void PostBattle()

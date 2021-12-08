@@ -18,26 +18,26 @@ public class EnemyLoader : MonoBehaviour
     public const int T2 = 2;
     public const int T3 = 3;
 
-    public System.Random Rand;
-    public Dictionary<int, List<List<List<int>>>> Biomes =
-        new Dictionary<int, List<List<List<int>>>>();
-
-
-    // Assign possible enemy spawns (by ID) per biome, per enemy tier, per spawn rate.
-    //biomes[PLAINS][1][Enemy.UNCOMMON]
-    public List<List<List<int>>> PlainsTiers = new List<List<List<int>>>();
-    public List<List<List<int>>> ForestTiers = new List<List<List<int>>>();
-    public List<List<List<int>>> TitrumTiers = new List<List<List<int>>>();
-    public List<List<List<int>>> CliffTiers = new List<List<List<int>>>();
-    public List<List<List<int>>> MountainTiers = new List<List<List<int>>>();
-    public List<List<List<int>>> CaveTiers = new List<List<List<int>>>();
-    public List<List<List<int>>> MeldTiers = new List<List<List<int>>>();
-
     public SpawnZone SpawnZone;
     public List<EnemyDeployment> EnemyDeployments = new List<EnemyDeployment>();
     public GameObject SmallEnemyDeploymentPrefab;
     public GameObject DeploymentParent;
     public List<Enemy> Enemies = new List<Enemy>();
+
+    private System.Random Rand;
+    private Dictionary<int, List<List<List<int>>>> Biomes =
+        new Dictionary<int, List<List<List<int>>>>();
+
+
+    // Assign possible enemy spawns (by ID) per biome, per enemy tier, per spawn rate.
+    //biomes[PLAINS][1][Enemy.UNCOMMON]
+    private List<List<List<int>>> PlainsTiers = new List<List<List<int>>>();
+    private List<List<List<int>>> ForestTiers = new List<List<List<int>>>();
+    private List<List<List<int>>> TitrumTiers = new List<List<List<int>>>();
+    private List<List<List<int>>> CliffTiers = new List<List<List<int>>>();
+    private List<List<List<int>>> MountainTiers = new List<List<List<int>>>();
+    private List<List<List<int>>> CaveTiers = new List<List<List<int>>>();
+    private List<List<List<int>>> MeldTiers = new List<List<List<int>>>();
 
     void Awake()
     {
