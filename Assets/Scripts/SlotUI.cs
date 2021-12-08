@@ -17,7 +17,7 @@ public class SlotUI : Slot
         //healthbar_bg.color = statbar_bg_color;
     }
 
-    void Update() {
+    protected override void Update() {
         Move();
     }
 

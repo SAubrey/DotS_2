@@ -188,6 +188,22 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
+                },
+                {
+                    "name": "QualityPlus",
+                    "type": "Button",
+                    "id": "bfc427d7-cc0a-412a-b590-44f2a2981daf",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "QualityMinus",
+                    "type": "Button",
+                    "id": "331f59a3-44b6-4cf6-9df4-be4f539a4878",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
                 }
             ],
             "bindings": [
@@ -441,6 +457,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "RightClickHeld",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "94975bf7-14a3-4556-a9b3-4482db212231",
+                    "path": "<Keyboard>/rightBracket",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "QualityPlus",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ca135be9-637b-4330-a2de-cda8ef04f115",
+                    "path": "<Keyboard>/leftBracket",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "QualityMinus",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

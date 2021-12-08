@@ -163,6 +163,10 @@ public class MapCell
         this.Pos = pos;
         this.ID = ID;
         Locked = RequiresUnlock;
+        if (CreatesTravelcard)
+        {
+            Travelcard = TravelDeck.I.DrawCard(Tier, ID);
+        }
     }
 
     public void Enter()
@@ -196,7 +200,8 @@ public class MapCell
             return;
         Discovered = true;
         Map.I.Tilemap.SetTile(new Vector3Int((int)Pos.x, (int)Pos.y, 0), Tile);
-        MapUI.I.PlaceCellLight(this);
+        //MapUI.I.PlaceCellLight(this);
+        Tile.color = Color.white;
         GameObject.Destroy(Fog);
         if (ID == IDStar)
         {
@@ -276,7 +281,7 @@ public class MapCell
     // and a group has not already been formed on this cell.
     public bool CanSetupGroupBattle()
     {
-        return HasEnemies && Map.CheckAdjacentCells(TurnPhaser.I.ActiveDisc.Position, Pos.to_vec3);
+        return HasEnemies && Map.CheckAdjacentCells(TurnPhaser.I.ActiveDisc.Position, Pos.toVec3);
     }
 
     public void AddEnemy(Enemy e)

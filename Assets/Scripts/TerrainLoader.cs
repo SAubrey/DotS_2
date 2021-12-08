@@ -38,13 +38,14 @@ public class TerrainLoader : MonoBehaviour
         Plains.SetActive(true);
         return;
         //Terrains[TerrainID].enabled = true;
+        /*
         if (Terrains.ContainsKey(TerrainID))
         {
             Terrains[TerrainID].SetActive(true);
         } else
         {
             Plains.SetActive(true);
-        }
+        }*/
 
     }
 }

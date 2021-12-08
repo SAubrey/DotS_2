@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Tilemaps;
 
 public class Map : MonoBehaviour, ISaveLoad
@@ -18,20 +16,18 @@ public class Map : MonoBehaviour, ISaveLoad
     public Tile Titrum1, Titrum2;
     public Tile LushLand2;
     public Tile Mountain2;
-
     public Tile Settlement;
     public Tile RuneGate;
-
     public Tile City, Shadow;
     public CityCell CityCell;
 
-    //public Dictionary<int, Tile> tiles = new Dictionary<int, Tile>();
+    // <MapCell Cell ID, List of Tile image per tier>
     public Dictionary<int, List<Tile>> Tiles = new Dictionary<int, List<Tile>>();
-    public Dictionary<Tile, int> TileToTileID = new Dictionary<Tile, int>();
 
-    // Filled and then removed from as cells are drawn.
+    // <Tier, List<Cell ID>> Filled and then removed from as cells are drawn.
     public Dictionary<int, List<int>> Bags = new Dictionary<int, List<int>>();
-    private static readonly Dictionary<int, Dictionary<int, int>> BagCounters
+    // <Tier, Dictionary<Cell ID, Count>
+    private readonly Dictionary<int, Dictionary<int, int>> BagCounters
      = new Dictionary<int, Dictionary<int, int>>();
     private readonly Dictionary<int, int> T1BagCount = new Dictionary<int, int>() {
         {MapCell.IDPlains, 6},
@@ -71,9 +67,10 @@ public class Map : MonoBehaviour, ISaveLoad
 
     public Dictionary<Pos, MapCell> MapCells = new Dictionary<Pos, MapCell>();
     public bool Scouting { get; set; } = false;
-
     public List<MapCell> OscillatingCells = new List<MapCell>();
     private System.Random Rand;
+    private Color HalfOpacityWhite = new Color(1f, 1f, 1f, .85f);
+
     void Awake()
     {
         if (I == null)
@@ -94,10 +91,11 @@ public class Map : MonoBehaviour, ISaveLoad
         Bags.Add(1, new List<int>());
         Bags.Add(2, new List<int>());
         Bags.Add(3, new List<int>());
+
         BagCounters.Add(1, T1BagCount);
         BagCounters.Add(2, T2BagCount);
         BagCounters.Add(3, T3BagCount);
-        // Tier 1
+
         Tiles.Add(MapCell.IDCity, new List<Tile> { City, City, City });
         Tiles.Add(MapCell.IDPlains, new List<Tile> { Plains1, Plains2, Plains2 });
         Tiles.Add(MapCell.IDForest, new List<Tile> { Forest1, Forest2, Forest2 });
@@ -115,9 +113,9 @@ public class Map : MonoBehaviour, ISaveLoad
         CreateCity();
     }
 
-    public void Init(bool from_save)
+    public void Init(bool fromSave)
     {
-        if (!from_save)
+        if (!fromSave)
         {
             NewGame();
         }
@@ -127,7 +125,8 @@ public class Map : MonoBehaviour, ISaveLoad
     {
         ClearData();
         Scouting = false;
-        PopulateDecks();
+        FillBags();
+
         // Recreate city only if game has loaded the first time.
         if (Game.I.GameHasBegun)
         {
@@ -142,45 +141,61 @@ public class Map : MonoBehaviour, ISaveLoad
         GenerateT3(Tilemap);
     }
 
-    private void PopulateDecks()
+    private void FillBags()
     {
         for (int tier = 1; tier <= 3; tier++)
-        { // For each tier
-            foreach (int cell_ID in BagCounters[tier].Keys)
+        {
+            foreach (int cellID in BagCounters[tier].Keys)
             {
-                for (int i = 0; i < BagCounters[tier][cell_ID]; i++)
+                for (int i = 0; i < BagCounters[tier][cellID]; i++)
                 {
-                    Bags[tier].Add(cell_ID);
+                    Bags[tier].Add(cellID);
                 }
             }
         }
     }
 
-    private void CreateCity()
+    /*
+    Pick a random cell type from the grab bag if one is not provided, 
+    generate and display it.
+    */
+    private void CreateCell(int tier, int x, int y, int cellID = -1)
     {
-        CityCell = (CityCell)MapCell.CreateCell(MapCell.IDCity, 1, City, new Pos(12, 12));
-        CityCell.Discover();
-        MapCells.Add(CityCell.Pos, CityCell);
+        Pos pos = new Pos(x, y);
+        if (cellID == -1)
+        {
+            cellID = GrabCell(tier);
+        }
+        Tile tile = Tiles[cellID][tier - 1];
+        MapCell cell = MapCell.CreateCell(cellID, tier, tile, pos);
+        MapCells.Add(pos, cell);
+        
+        DisplayCell(cell);
     }
 
-    public void Teleport() 
-    {   
-        TurnPhaser.I.ActiveDisc.Teleport();
+    // Randomly pick tiles from grab bags. 
+    private int GrabCell(int tier)
+    {
+        if (Bags[tier].Count <= 0)
+            throw new System.Exception("Out of cells to draw for this tier.");
+
+        int index = Rand.Next(Bags[tier].Count);
+        int cellID = Bags[tier][index];
+
+        Bags[tier].RemoveAt(index);
+        return cellID;
+    }
+
+    private void DisplayCell(MapCell cell)
+    {
+        PlaceTile(Shadow, cell.Pos.x, cell.Pos.y);
+        cell.Fog = MapUI.I.PlaceFogPS(cell);
+        cell.Tile.color = HalfOpacityWhite;
     }   
-
-    private void ClearData()
-    {
-        Bags[1].Clear();
-        Bags[2].Clear();
-        Bags[3].Clear();
-        MapCells.Clear();
-        MapUI.I.CloseCellUI();
-        MapUI.I.CloseTravelcardP();
-    }
 
     public bool CanMove(Vector3 destination)
     {
-        Vector3 current_pos = GetCurrentCell().Pos.to_vec3;
+        Vector3 current_pos = GetCurrentCell().Pos.toVec3;
         return CheckAdjacentCells(destination, current_pos) &&
             !TurnPhaser.I.ActiveDisc.HasActedInTurn &&
             !GetCell(destination).HasBattle &&
@@ -227,41 +242,7 @@ public class Map : MonoBehaviour, ISaveLoad
         return dx + dy == 1;
     }
 
-    // Randomly pick tiles from grab bags. 
-    private int GrabCell(int tier)
-    {
-        if (Bags[tier].Count <= 0)
-            throw new System.Exception("Out of cells to draw for this tier.");
 
-        int index = Rand.Next(Bags[tier].Count);
-        int cell_ID = Bags[tier][index];
-
-        Bags[tier].RemoveAt(index);
-        return cell_ID;
-    }
-
-    public void CreateCell(int tier, int x, int y, int ID = -1)
-    {
-        Pos pos = new Pos(x, y);
-        if (ID == -1)
-        {
-            ID = GrabCell(tier);
-        }
-        Tile tile = Tiles[ID][tier - 1];
-        MapCell cell = MapCell.CreateCell(
-            ID, tier, tile, pos);
-
-        MapCells.Add(pos, cell);
-        PlaceTile(Shadow, pos.x, pos.y);
-        cell.Fog = MapUI.I.PlaceFogPS(cell);
-        tile.color = Color.white;
-
-        if (cell.CreatesTravelcard)
-        {
-            cell.Travelcard = TravelDeck.I.DrawCard(cell.Tier, cell.ID);
-        }
-        //get_cell(pos.to_vec3).discover(); // debug
-    }
 
     public Tile GetTile(float x, float y)
     {
@@ -272,7 +253,6 @@ public class Map : MonoBehaviour, ISaveLoad
 
     public MapCell GetCurrentCell(Discipline disc = null)
     {
-        //return disc == null ? get_cell(TurnPhaser.I.activeDisc.pos) : get_cell(disc.pos);
         return disc == null ? TurnPhaser.I.ActiveDisc.Cell : disc.Cell;
     }
 
@@ -285,44 +265,6 @@ public class Map : MonoBehaviour, ISaveLoad
     public bool IsAtCity(Discipline disc)
     {
         return disc.Cell == CityCell;
-    }
-
-    public GameData Save()
-    {
-        return new MapData(this, Game.MAP);
-    }
-
-    public void Load(GameData generic)
-    {
-        MapData data = generic as MapData;
-        ClearData();
-
-        foreach (int num in data.t1_bag)
-            Bags[1].Add(num);
-        foreach (int num in data.t2_bag)
-            Bags[2].Add(num);
-        foreach (int num in data.t3_bag)
-            Bags[3].Add(num);
-
-        // Recreate map.
-        foreach (SMapCell mcs in data.cells)
-        {
-            Pos pos = new Pos(mcs.x, mcs.y);
-            MapCell cell = MapCell.CreateCell(
-                mcs.ID, mcs.tier, Tiles[mcs.ID][mcs.tier], pos);
-            cell.Minerals = mcs.minerals;
-            cell.StarCrystals = mcs.star_crystals;
-
-            if (mcs.discovered)
-            {
-                cell.Discover();
-            }
-            else
-            {
-                PlaceTile(Shadow, pos.x, pos.y);
-            }
-            MapCells.Add(pos, cell);
-        }
     }
 
     public void AddOscillatingCell(MapCell cell)
@@ -362,11 +304,22 @@ public class Map : MonoBehaviour, ISaveLoad
         TurnPhaser.I.ActiveDisc.MoveToPreviousCell();
     }
 
-    public void build_rune_gate(Pos pos)
+    public void BuildRuneGate(Pos pos)
     {
         MapCells[pos].RestoredRuneGate = true;
     }
+    
+    public void Teleport() 
+    {   
+        TurnPhaser.I.ActiveDisc.Teleport();
+    }   
 
+    private void CreateCity()
+    {
+        CityCell = (CityCell)MapCell.CreateCell(MapCell.IDCity, 1, City, new Pos(12, 12));
+        CityCell.Discover();
+        MapCells.Add(CityCell.Pos, CityCell);
+    }
 
     void GenerateT1(Tilemap tm)
     {
@@ -460,5 +413,53 @@ public class Map : MonoBehaviour, ISaveLoad
     public void ToggleScouting()
     {
         Scouting = !Scouting;
+    }
+
+    public GameData Save()
+    {
+        return new MapData(this, Game.MAP);
+    }
+
+    public void Load(GameData generic)
+    {
+        MapData data = generic as MapData;
+        ClearData();
+
+        foreach (int num in data.t1_bag)
+            Bags[1].Add(num);
+        foreach (int num in data.t2_bag)
+            Bags[2].Add(num);
+        foreach (int num in data.t3_bag)
+            Bags[3].Add(num);
+
+        // Recreate map.
+        foreach (SMapCell mcs in data.cells)
+        {
+            Pos pos = new Pos(mcs.x, mcs.y);
+            MapCell cell = MapCell.CreateCell(
+                mcs.ID, mcs.tier, Tiles[mcs.ID][mcs.tier], pos);
+            cell.Minerals = mcs.minerals;
+            cell.StarCrystals = mcs.star_crystals;
+
+            if (mcs.discovered)
+            {
+                cell.Discover();
+            }
+            else
+            {
+                PlaceTile(Shadow, pos.x, pos.y);
+            }
+            MapCells.Add(pos, cell);
+        }
+    }
+
+    private void ClearData()
+    {
+        Bags[1].Clear();
+        Bags[2].Clear();
+        Bags[3].Clear();
+        MapCells.Clear();
+        MapUI.I.CloseCellUI();
+        MapUI.I.CloseTravelcardP();
     }
 }

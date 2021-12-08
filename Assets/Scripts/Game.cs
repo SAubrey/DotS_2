@@ -216,5 +216,5 @@ public struct Pos
         this.y = y;
     }
 
-    public Vector3 to_vec3 { get { return new Vector3(x, y, 0); } }
+    public Vector3 toVec3 { get { return new Vector3(x, y, 0); } }
 }

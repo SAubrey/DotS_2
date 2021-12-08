@@ -56,7 +56,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2699312001082186180}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0, z: -18.26}
+  m_LocalPosition: {x: 0, y: -0, z: -23}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 7344646675483881354}
@@ -87,12 +87,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3705872811329403496}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -9.6}
+  m_LocalPosition: {x: 0, y: 0, z: -14.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2487693904672966036}
   m_Father: {fileID: 8459634161094422041}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6544707068627112813
 GameObject:
@@ -158,8 +158,8 @@ Transform:
   m_Children:
   - {fileID: 6411099879302511353}
   - {fileID: 9208336078485751629}
-  - {fileID: 2809378698052987998}
   - {fileID: 5365920562041869559}
+  - {fileID: 2809378698052987998}
   - {fileID: 7368263080962029588}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -208,7 +208,6 @@ MonoBehaviour:
   Manabar: {fileID: 0}
   ManaMax: 100
   LightObject: {fileID: 8036456870952213256}
-  FollowSlotObject: {fileID: 0}
 --- !u!195 &1030836698820175402
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -255,12 +254,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7531648353587274528}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -13.9}
+  m_LocalPosition: {x: 0, y: 0, z: -17.6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 5124848629144796503}
   m_Father: {fileID: 8459634161094422041}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8036456870952213256
 GameObject:

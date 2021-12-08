@@ -26,6 +26,7 @@ public class Controller : MonoBehaviour
     public Mouse mouse;
     public InputAction LeftClickHeld, RightClickHeld;
     public InputAction MouseDelta;
+    public InputAction QualityPlus, QualityMinus;
     
     private void Awake()
     {
@@ -61,6 +62,9 @@ public class Controller : MonoBehaviour
         AnyKey = Input.actions["AnyKey"];
         LeftClickHeld = Input.actions["LeftClickHeld"];
         RightClickHeld = Input.actions["RightClickHeld"];
+
+        QualityPlus = Input.actions["QualityPlus"];
+        QualityMinus = Input.actions["QualityMinus"];
     }
 
 

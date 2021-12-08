@@ -31,7 +31,7 @@ public class Discipline : Storeable, ISaveLoad
                 return;
             PreviousCell = Cell;
             _cell = value;
-            Position = Cell.Pos.to_vec3;
+            Position = Cell.Pos.toVec3;
         }
     }
     public MapCell PreviousCell { get; private set; }

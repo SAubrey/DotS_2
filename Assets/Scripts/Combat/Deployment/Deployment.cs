@@ -40,7 +40,7 @@ public abstract class Deployment : AgentBody
 
     protected float StamRegenAmount = .1f;
     protected float StamAttackCost = 20f;
-    protected float StamRangeCost = 25f;
+    protected float StamRangeCost = 10f;
     protected float StamBlockCost = 20f;
 
     protected List<Group[]> Zones = new List<Group[]>();

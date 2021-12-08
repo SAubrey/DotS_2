@@ -21,7 +21,6 @@ public class MapUI : MonoBehaviour
 
     // Battalion Resource UI
     public GameObject InvP;
-    private bool InvPanelActive = true;
     public TextMeshProUGUI b_light, b_unity, b_experience, b_star_crystals,
          b_minerals, b_arelics, b_mrelics, b_erelics, b_equimares;
 
@@ -242,7 +241,7 @@ public class MapUI : MonoBehaviour
             return;
         GameObject light = Instantiate(map_cell_light_prefab);
         light.transform.SetParent(map_canvas.transform);
-        Vector3 p = cell.Pos.to_vec3;
+        Vector3 p = cell.Pos.toVec3;
         light.transform.position = new Vector3(p.x + 0.5f, p.y + 0.5f, 0);
         light.GetComponent<MapCellLight>().Init(cell);
     }
@@ -253,7 +252,7 @@ public class MapUI : MonoBehaviour
             return;
         GameObject ps = Instantiate(map_cell_sparkles_prefab);
         ps.transform.SetParent(map_canvas.transform);
-        Vector3 p = cell.Pos.to_vec3;
+        Vector3 p = cell.Pos.toVec3;
         ps.transform.position = new Vector3(p.x + 0.5f, p.y + 0.5f, 0);
     }
 
@@ -263,7 +262,7 @@ public class MapUI : MonoBehaviour
             return null;
         GameObject fog = Instantiate(map_cell_fog_prefab);
         fog.transform.SetParent(map_canvas.transform);
-        Vector3 p = cell.Pos.to_vec3;
+        Vector3 p = cell.Pos.toVec3;
         fog.transform.position = new Vector3(p.x + 0.5f, p.y + 0.5f, 0);
         return fog;
     }
@@ -440,8 +439,7 @@ public class MapUI : MonoBehaviour
 
     public void ToggleInvPanel()
     {
-        InvPanelActive = !InvPanelActive;
-        InvP.SetActive(InvPanelActive);
+        InvP.SetActive(!InvP.activeSelf);
     }
 
     public void UpdateCellText(string tile_name)

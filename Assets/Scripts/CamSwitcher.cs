@@ -44,9 +44,8 @@ public class CamSwitcher : MonoBehaviour
         pause_panel.SetActive(false);
         battle_pause_panel.SetActive(false);
         SetActive(MENU, true);
-        //FollowTransform = Game.I.get_deployment().gameObject.transform; 
-        //MoveBattleCamera(FollowTransform.position);
-        //BattleCam.transform.LookAt(FollowTransform);
+
+        QualitySettings.SetQualityLevel(2, true); // REMOVE
     }
 
     void Update()
@@ -59,14 +58,18 @@ public class CamSwitcher : MonoBehaviour
         {
             Cycle(); // Debug
         }
-        //MoveBattleCamera(FollowTransform.position);
-        //if (Game.I.DebugMode)
-            //BattleCam.transform.LookAt(FollowTransform);
+        if (Controller.I.QualityMinus.triggered)
+        {
+            QualitySettings.SetQualityLevel(0, true); // REMOVE
+        }
+        if (Controller.I.QualityPlus.triggered)
+        {
+            QualitySettings.SetQualityLevel(2, true); // REMOVE
+        }
     }
 
     private void MoveBattleCamera(Vector3 pos)
     {
-        //Vector3 p = battle_cam.transform.position;
         BattleCam.transform.position = new Vector3(pos.x, initial_y, pos.z - FollowDistance);
     }
 
@@ -88,10 +91,12 @@ public class CamSwitcher : MonoBehaviour
         if (current_cam == MAP)
         {
             pause_panel.SetActive(paused);
+            Time.timeScale = paused ? 0f : 1f;
         }
         else if (current_cam == BATTLE)
         {
             battle_pause_panel.SetActive(paused);
+            Time.timeScale = paused ? 0f : 1f;
         }
     }
 
