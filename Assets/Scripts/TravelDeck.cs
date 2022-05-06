@@ -47,7 +47,7 @@ public class TravelDeck : MonoBehaviour
         RUINS1_1, RUINS1_2, RUINS1_3, RUINS1_4,
         LOCATION2_1
     };
-    int[][] Cards;
+    private int[][] Cards;
 
     // Inclusion dictionary limiting which card types are allowed
     // in which biomes. <MapCell.ID, List<TravelCard.type>>
@@ -78,12 +78,8 @@ public class TravelDeck : MonoBehaviour
         {
             Destroy(gameObject);
         }
-    }
 
-    void Start()
-    {
         Cards = new int[][] { tier1_cards, tier2_cards, tier3_cards };
-
         // Which card types can be found in which biomes?
         AllowedCards[MapCell.IDPlains].AddRange(new int[] {
             TravelCard.COMBAT, TravelCard.BLESSING, TravelCard.CHANCE,
@@ -106,6 +102,10 @@ public class TravelDeck : MonoBehaviour
         AllowedCards[MapCell.IDCave].Add(TravelCard.CAVE);
         AllowedCards[MapCell.IDRuins].Add(TravelCard.RUINS);
         // no cards for star, lush. Settlement = quest card?
+    }
+
+    void Start()
+    {
     }
 
     public Button combat_cards_onlyB; // DEV ONLY
@@ -145,7 +145,9 @@ public class TravelDeck : MonoBehaviour
         }
 
         List<int> drawableCards = AggregateDrawableCards(tier, biomeID);
-        int randIndex = Random.Range(0, drawableCards.Count);
+        if (drawableCards.Count == 0)
+            return null;
+        int randIndex = Random.Range(0, drawableCards.Count - 1);
         return MakeCard(drawableCards[randIndex]);
     }
 

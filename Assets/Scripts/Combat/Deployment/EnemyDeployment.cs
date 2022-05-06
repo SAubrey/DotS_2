@@ -29,7 +29,7 @@ public abstract class EnemyDeployment : Deployment
     protected float ComfortableDistanceMax = 40f;
     protected float ComfortableDistanceMin = 20f;
     protected float ChaseDistance = 200f;
-    public float AttackDistance = 7f;
+    public float AttackDistance = 5f;
     protected bool LockedOn = false;
     protected StateMachine StateMachine = new StateMachine();
 

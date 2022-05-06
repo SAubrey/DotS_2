@@ -195,8 +195,8 @@ public class Map : MonoBehaviour, ISaveLoad
 
     public bool CanMove(Vector3 destination)
     {
-        Vector3 current_pos = GetCurrentCell().Pos.toVec3;
-        return CheckAdjacentCells(destination, current_pos) &&
+        Vector3 currentPos = GetCurrentCell().Pos.toVec3;
+        return CheckAdjacentCells(destination, currentPos) &&
             !TurnPhaser.I.ActiveDisc.HasActedInTurn &&
             !GetCell(destination).HasBattle &&
             !GetCell(destination).HasGroupPending;
@@ -241,8 +241,6 @@ public class Map : MonoBehaviour, ISaveLoad
         int dy = Mathf.Abs((int)pos1.y - (int)pos2.y);
         return dx + dy == 1;
     }
-
-
 
     public Tile GetTile(float x, float y)
     {

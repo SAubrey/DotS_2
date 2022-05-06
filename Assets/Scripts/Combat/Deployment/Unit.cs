@@ -159,6 +159,7 @@ public abstract class Unit
         //
         foreach (Collider2D h in hits)
         {
+            Debug.Log("hit: " + h.gameObject);
             Slot s = h.GetComponent<Slot>();
             if (s == null)
                 continue;

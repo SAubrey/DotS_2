@@ -28,10 +28,12 @@ public class Slot : AgentBody
     public Deployment Deployment;
     [SerializeField] public GameObject MeleeAttZone;
     [SerializeField] public GameObject PrefabArrow;
-    public event Action<Vector2> OnVelocityChange;
     public Animator Animator;
     private GameObject CharacterModel;
     [SerializeField] private GameObject SwordsmanPrefab, PolearmPrefab, RangerPrefab, MagePrefab, CenterCharPrefab;
+    public event Action<Vector2> OnVelocityChange;
+    private PlayerDeployment PlayerDeployment;
+    private Slot LockedOnTarget;
     
 
     protected override void Awake()
@@ -40,6 +42,8 @@ public class Slot : AgentBody
         Cam = GameObject.Find("BattleCamera").GetComponent<Camera>();
         FaceUIToCam();
         gameObject.SetActive(false);
+        PlayerDeployment = GameObject.Find("PlayerSPDeployment").GetComponent<PlayerDeployment>();
+        PlayerDeployment.OnLockOn += LockOn;
     }
 
     protected virtual void Start()
@@ -106,6 +110,12 @@ public class Slot : AgentBody
         {
             //transform.rotation = Deployment.transform.rotation;
             transform.rotation = Quaternion.Lerp(transform.rotation, Deployment.transform.rotation, .15f);
+            return;
+        }
+
+        if (LockedOnTarget != null)
+        {
+            Statics.RotateToPoint(transform, LockedOnTarget.transform.position);
         } else {
             Statics.RotateWithVelocity(transform, Agent.velocity);
         }
@@ -165,6 +175,11 @@ public class Slot : AgentBody
             Unit = u as Enemy;
         }
         Unit.SetSlot(this);
+    }
+
+    private void LockOn(Slot slot) 
+    {
+        LockedOnTarget = slot;
     }
 
     private GameObject DetermineCharacterModel(Unit unit)

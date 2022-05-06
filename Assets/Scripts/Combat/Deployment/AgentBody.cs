@@ -49,4 +49,10 @@ public class AgentBody : MonoBehaviour
         if (Agent.updateRotation == false)
             Statics.RotateToPoint(transform, pos);
     }
+
+    public virtual void SetAgentDestinationAndRotation(Vector3 movePos, Vector3 lookPos)
+    {
+        Agent.SetDestination(movePos);
+        Statics.RotateToPoint(transform, lookPos);
+    }
 }

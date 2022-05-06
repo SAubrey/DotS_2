@@ -6,7 +6,7 @@ public abstract class Deployment : AgentBody
 {
     public bool IsPlayer { get; protected set; } = false;
     public bool IsEnemy { get; protected set; } = false;
-    protected GameObject LockedOnTarget;
+    protected Slot LockedOnTarget;
 
     // Stamina
     public Slider staminabar;

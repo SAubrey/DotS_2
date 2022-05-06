@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using System;
 
 public class PlayerDeployment : Deployment
 {
@@ -41,6 +42,7 @@ public class PlayerDeployment : Deployment
         }
     }
     [SerializeField] private GameObject LightObject;
+    public event Action<Slot> OnLockOn;
     
     protected override void Awake()
     {
@@ -103,11 +105,13 @@ public class PlayerDeployment : Deployment
     {
         if (Controller.I.Move.triggered)
         {
+            /*
             Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.BattleCamCaster, GroundMask);
             if (p != Vector3.zero)
             {
                 SetAgentDestination(p);
             }
+            */
         } else if (Controller.I.LeftClickHeld.phase == InputActionPhase.Performed)
         {
             Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.BattleCamCaster, GroundMask);
@@ -116,7 +120,6 @@ public class PlayerDeployment : Deployment
                 SetAgentDestination(p);
             }
         }
-
         AttackDelayTimer.Increase(Time.deltaTime);
         if (Controller.I.Attack.triggered && AttackDelayTimer.Finished)
         {
@@ -144,11 +147,7 @@ public class PlayerDeployment : Deployment
         }
         else if (Controller.I.LockOn.triggered)
         {
-            if (LockedOnTarget == null) {
-                LockedOnTarget = FindNearestEnemyInSight();
-            } else {
-                LockedOnTarget = null;
-            }
+            ToggleLockOn();
         }
         Group[] g = CheckFormationInput();
         if (g != null)
@@ -158,18 +157,26 @@ public class PlayerDeployment : Deployment
         }
     }
 
-    private GameObject FindNearestEnemyInSight()
+    private void ToggleLockOn()
     {
-        GameObject[] gos = GameObject.FindGameObjectsWithTag("Enemy");
-        GameObject nearest = null;
+        LockedOnTarget = LockedOnTarget == null ? FindNearestEnemyInSight() : null;
+        OnLockOn(LockedOnTarget);
+    }
+
+    private Slot FindNearestEnemyInSight()
+    {
+        Slot[] slots = GameObject.FindObjectsOfType<Slot>();
+        Slot nearest = null;
         float nearestDistance = Mathf.Infinity;
         float distance = 0;
-        foreach (GameObject go in gos)
+        foreach (Slot s in slots)
         {
-            distance = Vector3.Distance(transform.position, go.transform.position);
+            if (!s.HasEnemy)
+                continue;
+            distance = Vector3.Distance(transform.position, s.transform.position);
             if (distance < nearestDistance)
             {
-                nearest = go;
+                nearest = s;
                 nearestDistance = distance;
             }
         }
