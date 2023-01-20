@@ -24,7 +24,7 @@ public class UIPlayer : AudioPlayer {
         clips.Add(INV_OUT, inv_out);
     }
 
-    public void play(int type) {
-        base.play(clips[type], 0.5f);
+    public void Play(int type) {
+        base.Play(clips[type], null, 0.5f);
     }
 }

@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sc.vegetationspawner.runtime", "sc.vegetationspawner.runtime.csproj", "{70f5b051-4beb-9761-8315-2c994f6442fd}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-Editor", "Assembly-CSharp-Editor.csproj", "{6345fe37-cd12-c0d8-e835-194eefd84b45}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sc.vegetationspawner.editor", "sc.vegetationspawner.editor.csproj", "{dba15e61-51c1-70c5-dd50-34ff8770c30a}"
 EndProject
 Global
@@ -16,6 +18,8 @@ Global
 		{0fded1f3-ee6e-f812-cd72-0c0cd7c68174}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70f5b051-4beb-9761-8315-2c994f6442fd}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{70f5b051-4beb-9761-8315-2c994f6442fd}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6345fe37-cd12-c0d8-e835-194eefd84b45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6345fe37-cd12-c0d8-e835-194eefd84b45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{dba15e61-51c1-70c5-dd50-34ff8770c30a}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{dba15e61-51c1-70c5-dd50-34ff8770c30a}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection

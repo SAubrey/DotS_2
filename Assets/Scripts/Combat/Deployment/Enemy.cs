@@ -96,18 +96,6 @@ public class Enemy : Unit
         return !meleeVsFlying;
     }
 
-    protected override string GetAttackAnimationID()
-    {
-        if (CombatStyle == Style.Range)
-        {
-            return AnimationPlayer.ARROW_FIRE;
-        }
-        else
-        {
-            return AnimationPlayer.SLASH;
-        }
-    }
-
     public override void Die()
     {
         Map.I.GetCurrentCell().KillEnemy(this);

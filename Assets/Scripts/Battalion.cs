@@ -22,7 +22,7 @@ public class Battalion
         AddDefaultTroops();
         if (disc.ID == 0)
         {
-            AddUnits(PlayerUnit.SEEKER, 1, true);
+            //AddUnits(PlayerUnit.SEEKER, 1, true);
         }
         // Units for testing
         //add_units(PlayerUnit.MENDER, 1);
@@ -31,15 +31,15 @@ public class Battalion
 
     public void AddDefaultTroops()
     {
-        AddUnits(PlayerUnit.ARCHER, 2);
+        AddUnits(PlayerUnit.ARCHER, 1);
         AddUnits(PlayerUnit.WARRIOR, 3);
-        AddUnits(PlayerUnit.SPEARMAN, 2);
-        AddUnits(PlayerUnit.MENDER, 1);
+        //AddUnits(PlayerUnit.SPEARMAN, 2);
+        //AddUnits(PlayerUnit.MENDER, 1);
         //AddUnits(PlayerUnit.INSPIRATOR, 1);
         //AddUnits(PlayerUnit.MINER, 1);
     }
 
-    public void AddUnits(int type, int count, bool show = false)
+    public void AddUnits(int type, int count, bool showUI = false)
     {
         for (int i = 0; i < count; i++)
         {
@@ -52,7 +52,7 @@ public class Battalion
         {
             Disc.TriggerUnitCountChange();
         }
-        if (show)
+        if (showUI)
         {
             Disc.ShowAdjustment(PlayerUnit.CreatePunit(type, -1).GetName(), count);
         }

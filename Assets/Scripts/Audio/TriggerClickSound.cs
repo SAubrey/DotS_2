@@ -5,6 +5,6 @@ using UnityEngine.EventSystems;
 
 public class TriggerClickSound : MonoBehaviour, IPointerDownHandler {
     public void OnPointerDown(PointerEventData data) {
-        SoundManager.I.UI_player.play(UIPlayer.CLICK);
+        SoundManager.I.UI_player.Play(UIPlayer.CLICK);
     }
 }

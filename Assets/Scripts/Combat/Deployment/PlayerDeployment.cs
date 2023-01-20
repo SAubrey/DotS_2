@@ -24,6 +24,8 @@ public class PlayerDeployment : Deployment
     [SerializeField] private GameObject ZoneMageParent;
     [SerializeField] private Vector3 ZoneMageParentPos;
 
+    
+
     public Group[] ForwardZone;
     private Timer AttackDelayTimer = new Timer(.05f, true);
     public Slider Manabar;
@@ -41,8 +43,10 @@ public class PlayerDeployment : Deployment
             }
         }
     }
+    
     [SerializeField] private GameObject LightObject;
     public event Action<Slot> OnLockOn;
+    private float previousMouseX;
     
     protected override void Awake()
     {
@@ -66,8 +70,8 @@ public class PlayerDeployment : Deployment
     void Start()
     {
         Zones.Add(ZoneSword);
-        Zones.Add(ZonePolearm);
-        Zones.Add(ZoneCenter);
+       // Zones.Add(ZonePolearm);
+        //Zones.Add(ZoneCenter);
         Zones.Add(ZoneRange);
         Stamina = StamMax;
         IsPlayer = true;
@@ -81,7 +85,7 @@ public class PlayerDeployment : Deployment
         Stamina = StamMax;
         Mana = ManaMax;
         ForwardZone = ZoneSword;
-        Agent.destination = transform.position;
+        //Agent.destination = transform.position;
     }
 
     protected override void Update()
@@ -103,23 +107,6 @@ public class PlayerDeployment : Deployment
 
     private void PollControlScheme() 
     {
-        if (Controller.I.Move.triggered)
-        {
-            /*
-            Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.BattleCamCaster, GroundMask);
-            if (p != Vector3.zero)
-            {
-                SetAgentDestination(p);
-            }
-            */
-        } else if (Controller.I.LeftClickHeld.phase == InputActionPhase.Performed)
-        {
-            Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.BattleCamCaster, GroundMask);
-            if (p != Vector3.zero)
-            {
-                SetAgentDestination(p);
-            }
-        }
         AttackDelayTimer.Increase(Time.deltaTime);
         if (Controller.I.Attack.triggered && AttackDelayTimer.Finished)
         {
@@ -135,25 +122,16 @@ public class PlayerDeployment : Deployment
         {
             Block(false);
         }
-        else if (Controller.I.FireArrow.triggered)
-        {
-            // show range_attack landing zone
-        }
-        if (Controller.I.FireArrow.triggered)
+
+        /*if (Controller.I.FireArrow.triggered)
         {
             Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.BattleCamCaster, GroundMask);
             if (p != Vector3.zero)
                 RangeAttack(ZoneRange, p);
-        }
-        else if (Controller.I.LockOn.triggered)
+        }*/
+        if (Controller.I.LockOn.triggered)
         {
             ToggleLockOn();
-        }
-        Group[] g = CheckFormationInput();
-        if (g != null)
-        {
-            ForwardZone = g;
-            MoveFormations(g[0].Parent);
         }
     }
 
@@ -212,23 +190,6 @@ public class PlayerDeployment : Deployment
         }
     }
 
-    private Group[] CheckFormationInput() {
-        if (Controller.I.MoveForwardSwordsmen.triggered) 
-        {
-            return ZoneSword;
-        } else if (Controller.I.MoveForwardPolearm.triggered) 
-        {
-            return ZonePolearm;
-        } else if (Controller.I.MoveForwardRanger.triggered) 
-        {
-            return ZoneRange;
-        } else if (Controller.I.MoveForwardMage.triggered) 
-        {
-            return ZoneMage;
-        }
-        return null;
-    }
-
     public override void PlaceUnit(Unit unit)
     {
         Group[] zone = null;
@@ -261,7 +222,8 @@ public class PlayerDeployment : Deployment
         {
             foreach (Unit u in unitType)
             {
-                PlaceUnit(u);
+                if (u.ID == PlayerUnit.WARRIOR || u.ID == PlayerUnit.ARCHER)
+                    PlaceUnit(u);
             }
         }
         MapUI.I.UpdateDeployment(b);

@@ -121,7 +121,7 @@ public abstract class Deployment : AgentBody
         Stamina -= StamRangeCost;
         foreach (Group g in zone)
         {
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < g.Slots.Count; i++)
             {
                 if (g.Slots[i].HasUnit)
                 {
@@ -156,22 +156,6 @@ public abstract class Deployment : AgentBody
     {
         slider.maxValue = maxValue;
         slider.value = value;
-    }
-
-    public int CollectiveHealth
-    {
-        get
-        {
-            int sum = 0;
-            foreach (Group[] zone in Zones)
-            {
-                foreach (Group g in zone)
-                {
-                    sum += g.SumUnitHealth();
-                }
-            }
-            return sum;
-        }
     }
 
     public virtual void Delete()

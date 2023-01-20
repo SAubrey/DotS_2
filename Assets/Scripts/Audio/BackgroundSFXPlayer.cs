@@ -32,28 +32,27 @@ public class BackgroundSFXPlayer : AudioPlayer {
         
         delay_counter += Time.deltaTime;
         if (delay_counter >= delay) {
-            delay_source.clip = get_random_map_sfx();
-            delay_source.Play();
-            delay = get_random_delay(delay_counter_min, delay_counter_max);
+            Play(delay_source, GetRandomMapSFX());
+            delay = GetRandomDelay(delay_counter_min, delay_counter_max);
             delay_counter = 0;
         }
     }
 
     public void activate_screen(int screen) {
         if (screen == CamSwitcher.MENU) {
-            play(loop_source, menu);
+            Play(loop_source, menu);
             //source.clip = menu;
             delaying = false;
         } else if (screen == CamSwitcher.MAP) {
-            play(loop_source, map_wind);
+            Play(loop_source, map_wind);
             delaying = true;
         } else if (screen == CamSwitcher.BATTLE) {
-            play(loop_source, battle_wind);
+            Play(loop_source, battle_wind);
             delaying = false;
         }
     }
     
-    public AudioClip get_random_map_sfx() {
+    public AudioClip GetRandomMapSFX() {
         return Random.Range(0, 2) == 0 ? map_rumble1 : map_rumble2;
     }
 }

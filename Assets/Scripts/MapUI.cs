@@ -55,7 +55,7 @@ public class MapUI : MonoBehaviour
     public GameObject map_cell_light_prefab, map_cell_sparkles_prefab,
         map_cell_fog_prefab;
     private int max_discovered_tile_distance = 0;
-    public UnityEngine.Experimental.Rendering.Universal.Light2D city_light;
+    public UnityEngine.Rendering.Universal.Light2D city_light;
     public Color star_light_color, titrum_light_color, rune_gate_light_color,
         forest_light_color, lush_land_color, cave_color, mountain_color, plains_color,
         ruins_color;
@@ -156,14 +156,14 @@ public class MapUI : MonoBehaviour
           //  return;
 
         // Process left mouse click
-        if (Controller.I.Move.triggered)
+        if (Controller.I.LeftClick.triggered)
         {
             HandleLeftClick();
             return;
         }
 
         // Decide whether to advance or close windows.
-        bool advance = Controller.I.FireArrow.triggered;
+        bool advance = Controller.I.LeftClick.triggered;
         bool exit = Controller.I.Escape.triggered;
         bool UIopen = CityUI.I.cityP.activeSelf || CellUIIsOpen ||
             game_overP.activeSelf || travel_cardP.activeSelf;

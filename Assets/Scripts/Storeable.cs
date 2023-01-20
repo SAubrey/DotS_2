@@ -95,7 +95,7 @@ public class Storeable : MonoBehaviour, ISaveLoad
                     origin_of_rise_obj.transform,
                     rising_info_prefab);
             }
-            UIPlayer.I.play(UIPlayer.INV_IN);
+            UIPlayer.I.Play(UIPlayer.INV_IN);
             // Allow next adjustment to happen instantly.
             if (Adjustments.Count == 0)
             {

@@ -48,7 +48,7 @@ public abstract class Unit
     public int Health;
     public int HealthMax { get; protected set; }
     public Style CombatStyle { get; protected set; }
-    protected float AttackRange = 10f;
+    private Vector3 MeleeAttackHalfSize = new Vector3(2.5f, 2.5f, 2.5f);
     protected bool _blocking = false;
     public bool Blocking {
         get { return _blocking; }
@@ -83,11 +83,6 @@ public abstract class Unit
     public virtual int GetHealth() { return Health; }
     public virtual void RemoveBoost() { }
     public abstract void Die();
-    public virtual void AnimateAttackEffect()
-    {
-        Slot.PlayAnimationEffect(GetAttackAnimationID());
-    }
-    protected abstract string GetAttackAnimationID();
 
     // Passed damage should have already accounted for possible defense reduction.
     public virtual int GetPostDmgState(int dmgAfterDef)
@@ -149,30 +144,23 @@ public abstract class Unit
     {
         if (GetSlot() == null)
             return;
-        if (Slot.MeleeAttZone == null)
+        if (Slot.MeleeAttackPoint == null)
             return;
 
         //AnimateAttackEffect();
         Slot.Animator.SetTrigger("Attack");
-        Collider2D[] hits =
-            Physics2D.OverlapCircleAll(Slot.MeleeAttZone.transform.position, AttackRange, layerMask);
-        //
-        foreach (Collider2D h in hits)
+        Collider[] hits = Physics.OverlapBox(Slot.MeleeAttackPoint.transform.position, MeleeAttackHalfSize, Quaternion.identity, layerMask);
+        
+        foreach (Collider h in hits)
         {
-            Debug.Log("hit: " + h.gameObject);
             Slot s = h.GetComponent<Slot>();
             if (s == null)
                 continue;
             Unit u = s.Unit;
             if (u == null)
                 continue;
-            u.TakeDamage(GetAttackDmg() * 10);
+            u.TakeDamage(GetAttackDmg());
         }
-    }
-
-    void OnDrawGizmos() {
-        //UnityEditor.Handles.DrawWireDisc(slot.melee_att_zone.transform.position, Vector2.up, attack_range);
-        Gizmos.DrawWireSphere(Slot.MeleeAttZone.transform.position, AttackRange);
     }
 
     public void RangeAttack(LayerMask mask, Vector3 targetPos)
@@ -190,7 +178,7 @@ public abstract class Unit
         Health = (int)CalcHpRemaining(finalDmg);
         Slot.UpdateHealthbar();
 
-        // Don't trigger an out of synch animation.
+        // Don't trigger an out of sync animation.
         if (!Slot.Animator.GetCurrentAnimatorStateInfo(0).IsName("TakeDamage"))
         {
             Slot.Animator.SetTrigger("TakeDamage");

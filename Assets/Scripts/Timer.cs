@@ -5,8 +5,8 @@ using UnityEngine;
 public class Timer
 {
     public bool Finished { get; protected set; } = false;
-    private float Time = 0;
-    private float Threshold = 0;
+    public float Time { get; protected set; } = 0;
+    public float Threshold { get; protected set; } = 0;
     private bool Randomize = false;
     private float RandMinThresh, RandMaxThresh;
     // Timers that yield after meeting their threshhold will have to be reset to continue counting.

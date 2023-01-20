@@ -1,10 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class MapCellLight : MonoBehaviour
 {
-    public UnityEngine.Experimental.Rendering.Universal.Light2D CellLight;
+    public Light2D CellLight;
     public LightFlicker LightFlicker;
     public LightGlow LightGlow;
 

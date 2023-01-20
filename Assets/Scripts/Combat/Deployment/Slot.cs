@@ -10,7 +10,6 @@ public class Slot : AgentBody
     private static readonly Color ColorStatbarBg = new Color(.4f, .4f, .4f, .3f);
     private static readonly Color ColorEquipmentText = new Color(1f, .67f, .32f, 1f);
     
-    public SpriteRenderer SpriteUnit;
     protected Camera Cam;
     public GameObject Frame;
     public Slider Healthbar;
@@ -21,12 +20,11 @@ public class Slot : AgentBody
 
     public Unit Unit { get; protected set; }
     public Group Group;
-    public AnimationPlayer AnimationPlayer;
     public ParticleSystem PSDust;
     public Transform SlotPointTransform;
     [SerializeField] private Transform ArrowOriginTransform;
     public Deployment Deployment;
-    [SerializeField] public GameObject MeleeAttZone;
+    [SerializeField] public GameObject MeleeAttackPoint;
     [SerializeField] public GameObject PrefabArrow;
     public Animator Animator;
     private GameObject CharacterModel;
@@ -276,11 +274,6 @@ public class Slot : AgentBody
     public void SetActiveUI(bool state)
     {
         HealthbarObj.SetActive(state);
-    }
-
-    public void PlayAnimationEffect(string anim)
-    {
-        AnimationPlayer.Play(anim);
     }
 
     private void ShowEquipmentBoosts()

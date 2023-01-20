@@ -65,23 +65,6 @@ public class PlayerUnit : Unit
         Slot.Empty();
     }
 
-    protected override string GetAttackAnimationID()
-    {
-        if (CombatStyle == Style.Range)
-        {
-            return AnimationPlayer.ARROW_FIRE;
-        }
-        else if (ID == SPEARMAN || ID == PIKEMAN || ID == CARTER
-          || ID == GUARDIAN || ID == SKIRMISHER)
-        {
-            return AnimationPlayer.SPEAR_THRUST;
-        }
-        else
-        {
-            return AnimationPlayer.SWORD_SLASH;
-        }
-    }
-
     public override int GetAttackDmg()
     {
         return AttackDmg + get_bonus_from_equipment(Unit.ATTACK);

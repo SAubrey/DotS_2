@@ -1,13 +1,17 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class LightFlicker : MonoBehaviour
 {
     /*
     Randomly walks light intensity proportionally to radius.
     */
-    public UnityEngine.Experimental.Rendering.Universal.Light2D light2d;
+    
+    public Light2D light2d;
+    
+    
     public float minIntensity, maxIntensity;
     public bool active = true;
     void Update()
@@ -31,4 +35,5 @@ public class LightFlicker : MonoBehaviour
     {
         return value < max && value > min;
     }
+    
 }

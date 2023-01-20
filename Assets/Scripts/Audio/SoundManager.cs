@@ -8,6 +8,8 @@ public class SoundManager : MonoBehaviour {
     public BackgroundSFXPlayer background_SFX_player;
     public ImpactPlayer impact_player;
     public UIPlayer UI_player;
+    public PlayerAudioPlayer playerAudioPlayer;
+    public float MasterVolume = 1f;
     
     void Awake() {
         if (I == null) {

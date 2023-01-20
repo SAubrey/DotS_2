@@ -15,14 +15,15 @@ public class ImpactPlayer : AudioPlayer {
         base.Start();
         impact_mediums = new AudioClip[2] {impact_medium_dry, impact_medium_dry1};
     }
-     public void play_hit_from_damage(int dmg, bool dead) {
+
+    public void PlayHitFromDamage(GameObject go, int dmg, bool dead) {
         
         if (dmg <= 0) {
-            play(blocked);
+            Play(blocked, go);
         } else if (dmg <= 2) {
-            play(choose_random_clip(impact_mediums));
+            Play(ChooseRandomClip(impact_mediums), go);
         } else {
-            play(impact_fat_wet);
+            Play(impact_fat_wet, go);
         } 
         
         if (dead) {

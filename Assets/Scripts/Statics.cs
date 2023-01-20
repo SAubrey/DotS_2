@@ -36,6 +36,7 @@ public class Statics
         // Rotate our velocity to match the direction between the two objects
         float angleBetweenObjects = Vector3.Angle(Vector3.forward, planarTarget - planarPostion) * (targetPoint.x > startPoint.x ? 1 : -1);
         Vector3 finalVelocity = Quaternion.AngleAxis(angleBetweenObjects, Vector3.up) * velocity;
+        Debug.Log("Velocity: " + finalVelocity);
  
         return finalVelocity;
     }
@@ -84,9 +85,9 @@ public class Statics
         float operandA = Mathf.Pow(speed, 4);
         float operandB = gravity * (gravity * (distance * distance) + (2 * yOffset * speedSquared));
  
-        // Target is not in range
+        // Target is not in range, fire at maximum range.
         if (operandB > operandA)
-            return false;
+            Debug.Log("Not in range");
  
         float root = Mathf.Sqrt(operandA - operandB);
  
@@ -107,9 +108,21 @@ public class Statics
         Ray ray = cam.ScreenPointToRay(Controller.I.MousePosition.ReadValue<Vector2>());
         if (Physics.Raycast(ray, out RaycastHit hit, maxDistance, mask)) {
             return hit.point;
-        //if (Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, maxDistance, mask)) {
         }
         return Vector3.zero;
+    }
+
+    public static Vector3 GetScreenCenterWorldPos(Camera cam, LayerMask mask, float maxDistance=2048f) {
+        Ray ray = cam.ScreenPointToRay(GetScreenCenter());
+        if (Physics.Raycast(ray, out RaycastHit hit, maxDistance, mask)) {
+            return hit.point;
+        }
+        return Vector3.zero;
+    }
+
+    public static Vector3 GetScreenCenter() 
+    {
+        return new Vector3(Screen.width / 2f, Screen.height / 2f, 0);
     }
 
     public static Collider2D FindClosestCollider(Collider2D[] colliders, Vector3 sourcePoint)

@@ -1,10 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class LightGlow : MonoBehaviour
 {
-    public UnityEngine.Experimental.Rendering.Universal.Light2D light2d;
+    public Light2D light2d;
     public float min_intensity, max_intensity;
     private float rand_phase_offset;
     public bool active = true;

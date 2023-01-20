@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.InputSystem;
 using Cinemachine;
 
 public class CamSwitcher : MonoBehaviour
@@ -17,14 +16,10 @@ public class CamSwitcher : MonoBehaviour
     public SoundManager sound_manager;
     public GameObject pause_panel, battle_pause_panel;
 
-    private bool paused = false;
+    public bool Paused {get; protected set;} = false;
     public int current_cam = MENU;
     public int previous_cam = MAP;
     [SerializeField] public Transform FollowTransform;
-    [SerializeField]
-    private float initial_y = 150f;
-    [SerializeField]
-    private float FollowDistance = 150f;
 
     void Awake()
     {
@@ -50,10 +45,7 @@ public class CamSwitcher : MonoBehaviour
 
     void Update()
     {
-        if (Controller.I.Escape.triggered)
-        {
-            TogglePaused();
-        }
+        
         if (Controller.I.B.triggered && Game.I.DebugMode)
         {
             Cycle(); // Debug
@@ -68,9 +60,12 @@ public class CamSwitcher : MonoBehaviour
         }
     }
 
-    private void MoveBattleCamera(Vector3 pos)
+    void FixedUpdate()
     {
-        BattleCam.transform.position = new Vector3(pos.x, initial_y, pos.z - FollowDistance);
+        if (Controller.I.Escape.triggered)
+        {
+            Pause();
+        }
     }
 
     void Cycle()
@@ -85,19 +80,40 @@ public class CamSwitcher : MonoBehaviour
         }
     }
 
-    public void TogglePaused()
+    // If pausing, lose focus and bring up menu. If unpausing, 
+    public void Togglepaused()
     {
-        paused = !paused;
+        Paused = !Paused;
+        if (Paused) Pause(); else Unpause();
+    }
+
+    public void Pause()
+    {
         if (current_cam == MAP)
         {
-            pause_panel.SetActive(paused);
-            Time.timeScale = paused ? 0f : 1f;
+            pause_panel.SetActive(true);
         }
         else if (current_cam == BATTLE)
         {
-            battle_pause_panel.SetActive(paused);
-            Time.timeScale = paused ? 0f : 1f;
+            battle_pause_panel.SetActive(true);
+            Cursor.lockState = CursorLockMode.None;
         }
+        Time.timeScale = 0f;
+    }
+
+    public void Unpause()
+    {
+        Debug.Log("Unpausing");
+        if (current_cam == MAP)
+        {
+            pause_panel.SetActive(false);
+        }
+        else if (current_cam == BATTLE)
+        {
+            battle_pause_panel.SetActive(false);
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+        Time.timeScale = 1f;
     }
 
     // Called by buttons
@@ -153,6 +169,7 @@ public class CamSwitcher : MonoBehaviour
                 SetActive(MAP, false);
                 SetActive(BATTLE, false);
                 Game.I.check_button_states();
+                Cursor.lockState = CursorLockMode.None;
             }
         }
         else if (screen == MAP)
@@ -167,6 +184,7 @@ public class CamSwitcher : MonoBehaviour
                 map_cam.transform.SetPositionAndRotation(p, Quaternion.identity);
                 SetActive(BATTLE, false);
                 SetActive(MENU, false);
+                Cursor.lockState = CursorLockMode.None;
             }
         }
         else if (screen == BATTLE)
@@ -179,11 +197,13 @@ public class CamSwitcher : MonoBehaviour
                 TerrainLoader.I.Load(Map.I.GetCurrentCell().ID);
                 SetActive(MAP, false);
                 SetActive(MENU, false);
+                Cursor.lockState = CursorLockMode.Locked;
+                Debug.Log("screen set to battle");
             }
         }
 
         if (active)
-        { // If not turning this screen off.
+        { // If not turning this camera off.
             previous_cam = current_cam;
             current_cam = screen;
             if (previous_cam != current_cam)

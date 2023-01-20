@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Arrow : MonoBehaviour
 {
@@ -11,7 +10,7 @@ public class Arrow : MonoBehaviour
     private float Damage = 10f;
     private bool Flying, Fired = false;
     Timer TimerNewLine = new Timer(0.02f);
-    Timer TimerDespawn = new Timer(15f);
+    Timer TimerDespawn = new Timer(60f);
 
     void Awake()
     {
@@ -47,15 +46,20 @@ public class Arrow : MonoBehaviour
         {
             LineRenderer.SetPosition(i, startPoint);
         }
-
-        Vector3 direction = Statics.CalcDirection(startPoint, targetPoint);
+        /*
+        // Determine angle to hit directly on target. 
         float angle0, angle1 = 0;
         bool inRange = Statics.CalcLaunchAngle(speed, startPoint, targetPoint, Physics.gravity.magnitude, out angle0, out angle1);
         if (!inRange)
             return;
         var rot = Quaternion.AngleAxis(angle0, Vector3.right);
         var dir = Statics.CalcLaunchVelocity(startPoint, targetPoint, Physics.gravity.magnitude, angle0).normalized;
-        Rigidbody.velocity = speed * dir;
+        //Rigidbody.velocity = speed * dir;
+        */
+        // Fire directly at the target but miss due to gravity. Faster = closer to target.
+        Vector3 direction = Statics.CalcDirection(startPoint, targetPoint);
+        Rigidbody.velocity = speed * direction;
+
         Damage = damage;
         Flying = true;
         Fired = true;
@@ -67,10 +71,10 @@ public class Arrow : MonoBehaviour
         if (!Flying || ColliderIsLayer(collider, "Player") || ColliderIsLayer(collider, "Slot")) 
             return;
 
+        SoundManager.I.playerAudioPlayer.ArrowHit(gameObject);
         Flying = false;
         if (ColliderIsLayer(collider, "Enemy"))
         {
-            Debug.Log("Hit: " + collider.gameObject.layer);
             Slot slot = collider.GetComponent<Slot>();
             if (slot == null)
                 return;
@@ -85,9 +89,9 @@ public class Arrow : MonoBehaviour
 
     private void Stick(Transform t)
     {
-        Debug.Log("stuck: " + transform.gameObject.name);
+        Debug.Log("STICKING!");
         Rigidbody.velocity = Vector3.zero;
-        //Rigidbody.angularVelocity = Vector3.zero;
+        Rigidbody.angularVelocity = Vector3.zero;
         Rigidbody.isKinematic = true;
         transform.SetParent(t);
     }
