@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class Roam : IState
 {
-    private EnemyDeployment D;
+    private AIBrain Brain;
     private Vector3 TargetPos;
     Timer T = new Timer(5f, false, 3f, 6f);
 
-    public Roam(EnemyDeployment d)
+    public Roam(AIBrain brain)
     {
-        this.D = d;
+        Brain = brain;
     }
 
     public void Tick()
@@ -18,7 +18,7 @@ public class Roam : IState
         if (T.Increase(Time.deltaTime))
         {
             TargetPos = GetRandomTargetPos();
-            D.SetAgentDestination(TargetPos);
+            Brain.Slot.SetAgentDestination(TargetPos);
         }
     }
 
@@ -31,13 +31,13 @@ public class Roam : IState
 
     public void OnExit()
     {
-        TargetPos = Vector2.zero;
+        TargetPos = Vector3.zero;
         T.Reset();
     }
 
     private Vector3 GetRandomTargetPos()
     {
-        Vector3 v = D.gameObject.transform.position;
+        Vector3 v = Brain.transform.position;
         v.x += UnityEngine.Random.Range(-50f, 50f);
         v.z += UnityEngine.Random.Range(-50f, 50f);
         return v;

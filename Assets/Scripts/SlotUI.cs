@@ -30,7 +30,6 @@ public class SlotUI : Slot
         SetUnit(u);
         InitUI(u);
         image.color = Color.white;
-        image.sprite = BatLoader.I.GetUnitImg(u, Group.Down);
         return true;
     }
 

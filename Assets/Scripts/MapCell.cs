@@ -359,7 +359,7 @@ public class MapCell
 
     public bool CanMine(Battalion b)
     {
-        return b.HasMiner && !b.Disc.HasMinedInTurn &&
+        return b.Disc.CountMiner > 0 && !b.Disc.HasMinedInTurn &&
             b.Disc.Cell == this &&
             (Minerals > 0 || StarCrystals > 0);
     }

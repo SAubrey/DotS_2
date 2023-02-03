@@ -222,7 +222,7 @@ public class Map : MonoBehaviour, ISaveLoad
     public bool CanScout(Vector3 pos)
     {
         return GetTile(pos.x, pos.y) != null && CheckAdjacentCells(pos, TurnPhaser.I.ActiveDisc.Position) &&
-            TurnPhaser.I.ActiveDisc.Bat.GetUnit(PlayerUnit.SCOUT) != null &&
+            TurnPhaser.I.ActiveDisc.CountScout > 0 &&
             GetCurrentCell() != GetCell(pos) && GetCell(pos) != CityCell &&
             !GetCell(pos).Discovered &&
             !TurnPhaser.I.ActiveDisc.HasActedInTurn;

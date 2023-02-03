@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 
+// A slot does not store any data about its unit, and is just a MonoBehaviour housing.
 public class Slot : AgentBody
 {
     private static readonly Color ColorHealthbar = new Color(.8f, .1f, .1f, .45f);
@@ -20,7 +21,7 @@ public class Slot : AgentBody
 
     public Unit Unit { get; protected set; }
     public Group Group;
-    public ParticleSystem PSDust;
+    public ParticleSystem PSDust, PSBlood;
     public Transform SlotPointTransform;
     [SerializeField] private Transform ArrowOriginTransform;
     public Deployment Deployment;
@@ -29,10 +30,12 @@ public class Slot : AgentBody
     public Animator Animator;
     private GameObject CharacterModel;
     [SerializeField] private GameObject SwordsmanPrefab, PolearmPrefab, RangerPrefab, MagePrefab, CenterCharPrefab;
+    [SerializeField] private GameObject EyelessPrefab;
     public event Action<Vector2> OnVelocityChange;
     private PlayerDeployment PlayerDeployment;
     private Slot LockedOnTarget;
-    
+    public AIBrain Brain;
+    protected float BlockSpeed = 5f;
 
     protected override void Awake()
     {
@@ -68,11 +71,12 @@ public class Slot : AgentBody
     private void Move() 
     {
         worldDeltaPosition = Agent.nextPosition - transform.position;
-
+        Agent.speed = Unit.Blocking ? BlockSpeed : MaxSpeed;
+/*
         if (Vector3.Distance(SlotPointTransform.position, transform.position) > 1f)
         {
             Agent.SetDestination(SlotPointTransform.position);
-        }
+        }*/
 
         // Map 'worldDeltaPosition' to local space
         float dx = Vector3.Dot(transform.right, worldDeltaPosition);
@@ -96,6 +100,8 @@ public class Slot : AgentBody
             Animator.SetFloat("Velocity", Velocity.magnitude, .1f, Time.fixedDeltaTime);
         }
 
+        GenerateMovementEffects(Velocity.magnitude);
+
         if (Agent.hasPath) // & arrived
             Agent.acceleration = (Agent.remainingDistance < 4f) ? 4 * MaxAcceleration : MaxAcceleration;
         transform.position = Agent.nextPosition;
@@ -107,7 +113,8 @@ public class Slot : AgentBody
         if (Agent.remainingDistance < Agent.stoppingDistance)
         {
             //transform.rotation = Deployment.transform.rotation;
-            transform.rotation = Quaternion.Lerp(transform.rotation, Deployment.transform.rotation, .15f);
+            if (Deployment != null)
+                transform.rotation = Quaternion.Lerp(transform.rotation, Deployment.transform.rotation, .15f);
             return;
         }
 
@@ -128,14 +135,19 @@ public class Slot : AgentBody
         InitUI(u);
         InstantiateCharacterModel(DetermineCharacterModel(u));
         Animator = CharacterModel.GetComponent<Animator>();
+        gameObject.layer = LayerMask.NameToLayer(Unit.MyMask);
+
         if (u.IsPlayer)
         {
-            gameObject.layer = LayerMask.NameToLayer("Player");
-            MaxSpeed *= 1.2f;
+            Brain = gameObject.AddComponent<AIBrainPlayer>();
+            //MaxSpeed *= 1.2f;
         } else 
         {
-            gameObject.layer = LayerMask.NameToLayer("Enemy");
+            Brain = gameObject.AddComponent<AIBrainEnemy>();
         }
+        Unit.Brain = Brain;
+        Brain.Slot = this;
+        Brain.enabled = true;
         return true;
     }
 
@@ -154,7 +166,7 @@ public class Slot : AgentBody
         SetNameT("");
         GameObject.Destroy(CharacterModel);
         Animator = null;
-        PSDust.Play();
+        PSDust.Stop();
         if (validate)
             Group.ValidateUnitOrder();
         return removedUnit;
@@ -180,6 +192,19 @@ public class Slot : AgentBody
         LockedOnTarget = slot;
     }
 
+    private void GenerateMovementEffects(float velocity)
+    {
+        if (velocity <= 1f)
+        {
+            PSDust.Stop();
+            // Footstep audio off
+        } else 
+        {
+            PSDust.Play();
+
+        }
+    }
+
     private GameObject DetermineCharacterModel(Unit unit)
     {   
         if (unit.CombatStyle == global::Unit.Style.Sword)
@@ -197,6 +222,10 @@ public class Slot : AgentBody
         else if (unit.CombatStyle == global::Unit.Style.Range)
         {
             return RangerPrefab;
+        } 
+        else if (unit.CombatStyle == global::Unit.Style.Claw)
+        {
+            return EyelessPrefab;
         }
         return CenterCharPrefab;
     }
@@ -297,8 +326,7 @@ public class Slot : AgentBody
         get
         {
             if (Unit == null) return false;
-            if (Unit.IsPlayer) return true;
-            return false;
+            return Unit.IsPlayer;
         }
     }
 
@@ -307,8 +335,7 @@ public class Slot : AgentBody
         get
         {
             if (Unit == null) return false;
-            if (Unit.IsEnemy) return true;
-            return false;
+            return Unit.IsEnemy;
         }
     }
 

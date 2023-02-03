@@ -109,20 +109,10 @@ public class MapUI : MonoBehaviour
         TextUnitCounts.Add(PlayerUnit.WARRIOR, CountWarrior);
         TextUnitCounts.Add(PlayerUnit.SPEARMAN, CountSpearman);
         TextUnitCounts.Add(PlayerUnit.ARCHER, CountArcher);
-        TextUnitCounts.Add(PlayerUnit.MINER, CountMiner);
-        TextUnitCounts.Add(PlayerUnit.INSPIRATOR, CountInspirator);
-        TextUnitCounts.Add(PlayerUnit.SEEKER, CountSeeker);
         TextUnitCounts.Add(PlayerUnit.GUARDIAN, CountGuardian);
         TextUnitCounts.Add(PlayerUnit.ARBALEST, CountArbalest);
-        TextUnitCounts.Add(PlayerUnit.SKIRMISHER, CountSkirmisher);
         TextUnitCounts.Add(PlayerUnit.PALADIN, CountPaladin);
         TextUnitCounts.Add(PlayerUnit.MENDER, CountMender);
-        TextUnitCounts.Add(PlayerUnit.CARTER, CountCarter);
-        TextUnitCounts.Add(PlayerUnit.DRAGOON, CountDragoon);
-        TextUnitCounts.Add(PlayerUnit.SCOUT, CountScout);
-        TextUnitCounts.Add(PlayerUnit.DRUMMER, CountDrummer);
-        TextUnitCounts.Add(PlayerUnit.SHIELD_MAIDEN, CountShieldMaiden);
-        TextUnitCounts.Add(PlayerUnit.PIKEMAN, CountPikeman);
     }
 
     void Start()

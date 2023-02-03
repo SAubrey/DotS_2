@@ -59,7 +59,7 @@ public class TravelCardUnlockable
 {
     public string ResourceType;
     public int ResourceCost;
-    public bool RequiresSeeker { get => RequiredUnitType == PlayerUnit.SEEKER; }
+    public bool RequiresSeeker = false;
     public int RequiredUnitType;
     public TravelCardUnlockable(string type, int cost)
     {
@@ -69,6 +69,9 @@ public class TravelCardUnlockable
     public TravelCardUnlockable(int required_unit_type)
     {
         this.RequiredUnitType = required_unit_type;
+    }
+    public TravelCardUnlockable()
+    {
     }
 }
 
@@ -314,7 +317,7 @@ public class Ruins1_1 : RuinsCard
 
     public override void OnContinue(TravelCardManager tcm)
     {
-        TurnPhaser.I.ActiveDisc.Bat.AddUnits(PlayerUnit.SEEKER, 1, true);
+        TurnPhaser.I.ActiveDisc.CountSeeker += 1;
     }
 }
 
@@ -410,7 +413,8 @@ public class Location1_3 : LocationCard
         Consequence[Storeable.ARELICS] = 1;
         Consequence[Storeable.ERELICS] = 1;
         Consequence[Storeable.MRELICS] = 1;
-        Unlockable = new TravelCardUnlockable(PlayerUnit.SEEKER);
+        Unlockable = new TravelCardUnlockable();
+        Unlockable.RequiresSeeker = true;
         description = "A large stone door built into the side of a stone mound bears the symbol " +
         "of refuge. How might it open?";
         subtext = "Requires Seeker";
@@ -428,7 +432,8 @@ public class Location2_1 : LocationCard
         Consequence[Storeable.STAR_CRYSTALS] = 6;
         Consequence[Storeable.ARELICS] = 1;
         Consequence[Storeable.MRELICS] = 1;
-        Unlockable = new TravelCardUnlockable(PlayerUnit.SEEKER);
+        Unlockable = new TravelCardUnlockable();
+        Unlockable.RequiresSeeker = true;
         description = "The land descends here into a stone altar. Down some steps a beautiful courtyard" +
         "was revealed, the power of Astra glowing along the ley lines of our ancestors, pulsing with life." +
         "Towards the back of the main area stands a deep emerald green obelisk from which all the ley lines converge.\n" +
@@ -567,7 +572,7 @@ public class Event2_3 : Event
     public override void OnContinue(TravelCardManager tcm)
     {
         // Kill 2 random units
-        if (!TurnPhaser.I.ActiveDisc.Bat.HasScout)
+        if (!TurnPhaser.I.ActiveDisc.HasScout)
         {
             TurnPhaser.I.ActiveDisc.Bat.LoseRandomUnit("Caught in a trap");
             TurnPhaser.I.ActiveDisc.Bat.LoseRandomUnit("Caught in a trap");

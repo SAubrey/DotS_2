@@ -2,27 +2,27 @@ using UnityEngine;
 
 public class MoveToAttack : IState
 {
-    private EnemyDeployment D;
+    private AIBrain Brain;
     public bool BeginAttack = false;
 
-    public MoveToAttack(EnemyDeployment d)
+    public MoveToAttack(AIBrain brain)
     {
-        this.D = d;
+        Brain = brain;
     }
 
     public void Tick()
     {
         // Move into attack range
-        D.SetAgentDestination(D.PlayerPos);
+        Brain.SetDestinationToTarget();
 
-        if (D.PlayerDistance <= D.AttackDistance) {
+        if (Brain.TargetDistance <= Brain.AttackDistance) {
             BeginAttack = true;
         }
     }
 
     public void OnEnter()
     {
-        Debug.Log("Move to attack w/ PD: " + D.PlayerDistance);
+        //Debug.Log("Move to attack w/ PD: " + Brain.TargetDistance);
     }
 
     public void OnExit()

@@ -2,30 +2,29 @@ using UnityEngine;
 
 public class Attack : IState
 {
-    private EnemyDeployment D;
+    private AIBrain Brain;
     private Timer Timer, AttackRecoveryTimer;
-    public bool Attacking = true;
     private bool RecoveringFromAttack = false;
 
-    public Attack(EnemyDeployment d)
+    public Attack(AIBrain brain)
     {
-        D = d;
+        Brain = brain;
     }
 
     public void Tick()
     {
-        // Check for hit some way through animation
         if (Timer.Increase(Time.deltaTime))
         {
-            D.MeleeAttack(D.GetAttackingZone(true));
+            Brain.Slot.Unit.MeleeAttack();
             RecoveringFromAttack = true;
         }
 
+        // Allow some delay before being able to take other action.
         if (RecoveringFromAttack)
         {
             if (AttackRecoveryTimer.Increase(Time.deltaTime)) 
             {
-                Attacking = false;
+                Brain.Attacking = false;
             }
         }
 
@@ -35,13 +34,13 @@ public class Attack : IState
     {
         Timer = new Timer(0.5f, true, .4f, .6f);
         AttackRecoveryTimer = new Timer(1f, true);
-        Debug.Log("attack w/ PD: " + D.PlayerDistance);
-        Attacking = true;
+        Debug.Log("attack w/ PD: " + Brain.TargetDistance);
+        Brain.Attacking = true;
     }
 
     public void OnExit()
     {
         RecoveringFromAttack = false;
-        Attacking = true;
+        Brain.Attacking = true;
     }
 }

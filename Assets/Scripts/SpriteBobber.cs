@@ -10,7 +10,6 @@ public class SpriteBobber : MonoBehaviour
     public float BobPower = 0.1f;
     public float RandomOffset = 1f;
     public Slot Slot;
-    private Deployment Deployment;
     private Vector2 DefaultPos;
     private float Velocity;
 
@@ -18,7 +17,6 @@ public class SpriteBobber : MonoBehaviour
     {
         DefaultPos = transform.localPosition;
         RandomOffset = UnityEngine.Random.Range(0, 100);
-        Deployment = Slot.Deployment;
         Slot.OnVelocityChange += SetVelocity;
     }
 
@@ -33,7 +31,7 @@ public class SpriteBobber : MonoBehaviour
     }
 
     private float GetBobFrequency(float v) {
-        float vm = v / Deployment.MaxSpeed;
+        float vm = v / Slot.MaxSpeed;
         if (vm > .6f) 
         {
             return FreqRun;

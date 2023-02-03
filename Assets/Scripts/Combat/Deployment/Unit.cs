@@ -15,7 +15,7 @@ public abstract class Unit
     }
 
     public bool IsAttributeActive { get { return attribute_active; } }
-    public bool IsMelee { get { return CombatStyle == Style.Sword || CombatStyle == Style.Polearm; } }
+    public bool IsMelee { get { return CombatStyle == Style.Sword || CombatStyle == Style.Polearm || CombatStyle == Style.Claw; } }
     public bool IsRange { get { return CombatStyle == Style.Range; } }
     public bool IsMage { get { return CombatStyle == Style.Mage; } }
     public bool IsDead { get { return Dead; } }
@@ -30,9 +30,8 @@ public abstract class Unit
     // Combat fields
     public enum Style 
     {
-        Sword, Polearm, Range, Mage, WeakMelee
+        Sword, Polearm, Range, Mage, Claw
     }
-    public const int Melee = 1, Range = 2, Mage = 3, WeakMelee = 4;
     protected int AttackDmg;
     protected int Defense;
     protected float BlockRatingBase = .25f;
@@ -61,8 +60,6 @@ public abstract class Unit
             }
         }
     }
-    protected float BlockTime = 1f;
-    protected Timer BlockTimer;
     protected float RangeTime = 1f;
     protected Timer RangeTimer;
     protected bool CanFire = true;
@@ -72,9 +69,12 @@ public abstract class Unit
     public bool IsEnemy { get { return !IsPlayer; } }
     public int ID { get; protected set; }// Code for the particular unit type. (not unique to unit)
     public int OwnerID { get; protected set; }
+    public string TargetMask;
+    public string MyMask;
 
     protected string Name;
-    public Slot Slot { get; protected set; }= null;
+    public Slot Slot { get; protected set; } = null;
+    public AIBrain Brain;
     protected bool Dead = false;
 
     public virtual int CalcHpRemaining(int dmg) { return Mathf.Max(Health - dmg, 0); }
@@ -82,7 +82,13 @@ public abstract class Unit
     public virtual int GetDefense() { return Defense; }
     public virtual int GetHealth() { return Health; }
     public virtual void RemoveBoost() { }
-    public abstract void Die();
+    public virtual void Die()
+    {
+        Slot.Animator.SetFloat("Health", 0f);
+        Slot.Empty();
+        GameObject.Destroy(Slot);
+        Slot = null;
+    }
 
     // Passed damage should have already accounted for possible defense reduction.
     public virtual int GetPostDmgState(int dmgAfterDef)
@@ -114,7 +120,6 @@ public abstract class Unit
         Attribute2 = atr2;
         Attribute3 = atr3;
 
-        BlockTimer = new Timer(BlockTime);
         RangeTimer = new Timer(RangeTime);
         SmoothSpeed = Random.Range(.1f, .15f);
     }
@@ -130,36 +135,41 @@ public abstract class Unit
     {
         if (GetSlot() == null)
             return;
-        if (BlockTimer.Increase(dt))
-        {
-            Blocking = false;
-        }
+
         if (RangeTimer.Increase(dt))
         {
             CanFire = true;
         }
     }
 
-    public void MeleeAttack(LayerMask layerMask)
+    public void MeleeAttack()
     {
         if (GetSlot() == null)
             return;
         if (Slot.MeleeAttackPoint == null)
             return;
 
-        //AnimateAttackEffect();
         Slot.Animator.SetTrigger("Attack");
-        Collider[] hits = Physics.OverlapBox(Slot.MeleeAttackPoint.transform.position, MeleeAttackHalfSize, Quaternion.identity, layerMask);
+        Collider[] hits = Physics.OverlapBox(Slot.MeleeAttackPoint.transform.position, MeleeAttackHalfSize, Quaternion.identity, LayerMask.GetMask(TargetMask));
         
         foreach (Collider h in hits)
         {
             Slot s = h.GetComponent<Slot>();
-            if (s == null)
-                continue;
-            Unit u = s.Unit;
-            if (u == null)
-                continue;
-            u.TakeDamage(GetAttackDmg());
+            if (s != null)
+            {
+                Unit u = s.Unit;
+                if (u != null)
+                {
+                    u.TakeDamage(GetAttackDmg());
+                    return;
+                }
+            }
+
+            Player p = h.GetComponent<Player>();
+            if (p != null)
+            {
+                p.TakeDamage(GetAttackDmg());
+            }
         }
     }
 
@@ -171,18 +181,26 @@ public abstract class Unit
         GetSlot().ShootArrow(mask, targetPos, GetAttackDmg());
     }
 
+    protected void Block(bool active)
+    {
+        Blocking = active;
+    }
+
     public virtual int TakeDamage(int dmg)
     {
         int finalDmg = CalcDmgTaken(dmg, HasAttribute(Unit.Attributes.Piercing));
         int state = GetPostDmgState(finalDmg);
         Health = (int)CalcHpRemaining(finalDmg);
         Slot.UpdateHealthbar();
+        Brain.TookHit = true;
 
         // Don't trigger an out of sync animation.
         if (!Slot.Animator.GetCurrentAnimatorStateInfo(0).IsName("TakeDamage"))
         {
             Slot.Animator.SetTrigger("TakeDamage");
         }
+
+        Slot.PSBlood.Play();
         Debug.Log(Name + " took " + finalDmg + " from " + dmg + " with " + Health + " hp remaining.");
 
         if (state == DEAD)

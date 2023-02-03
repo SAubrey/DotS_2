@@ -144,7 +144,6 @@ public class PaddedArmor : Equipment
     {
         description = "+1 resilience for archers and inspirators";
         affected_unit_types.Add(PlayerUnit.ARCHER);
-        affected_unit_types.Add(PlayerUnit.INSPIRATOR);
         affected_stats.Add(Unit.HEALTH);
         affect_amount = 1;
     }
@@ -156,7 +155,6 @@ public class ChainmailGarb : Equipment
     {
         description = "+1 resilience for archers and inspirators";
         affected_unit_types.Add(PlayerUnit.WARRIOR);
-        affected_unit_types.Add(PlayerUnit.MINER);
         affected_stats.Add(Unit.HEALTH);
         affect_amount = 1;
     }
@@ -249,10 +247,7 @@ public class EmbeddedCrystalGarb : Equipment
     {
         description = "+1 resilience to archers, miners, inspirators, menders, and seekers";
         affected_unit_types.Add(PlayerUnit.ARCHER);
-        affected_unit_types.Add(PlayerUnit.MINER);
-        affected_unit_types.Add(PlayerUnit.INSPIRATOR);
         affected_unit_types.Add(PlayerUnit.MENDER);
-        affected_unit_types.Add(PlayerUnit.SEEKER);
         affected_stats.Add(Unit.HEALTH);
         affect_amount = 1;
     }
@@ -291,7 +286,6 @@ public class TitrumReinforcedArrowTips : Equipment
     public TitrumReinforcedArrowTips() : base(TITRUM_REINFORCED_ARROW_TIPS)
     {
         description = "+2 damage for arhcers and arbalest.\nAdds Piercing to archers and scouts";
-        affected_unit_types.Add(PlayerUnit.SCOUT);
         affected_unit_types.Add(PlayerUnit.ARCHER);
         affected_stats.Add(Unit.DAMAGE);
         affect_amount = 3;

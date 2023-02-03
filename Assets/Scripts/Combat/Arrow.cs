@@ -68,12 +68,12 @@ public class Arrow : MonoBehaviour
 
     void OnTriggerEnter(Collider collider) 
     {
-        if (!Flying || ColliderIsLayer(collider, "Player") || ColliderIsLayer(collider, "Slot")) 
+        if (!Flying || Statics.ColliderIsLayer(collider, "Player") || Statics.ColliderIsLayer(collider, "Slot")) 
             return;
 
         SoundManager.I.playerAudioPlayer.ArrowHit(gameObject);
         Flying = false;
-        if (ColliderIsLayer(collider, "Enemy"))
+        if (Statics.ColliderIsLayer(collider, "Enemy"))
         {
             Slot slot = collider.GetComponent<Slot>();
             if (slot == null)
@@ -118,10 +118,5 @@ public class Arrow : MonoBehaviour
             LineRenderer.SetPosition(i, linePoints[i + 1]);
         }
         LineRenderer.SetPosition(LineRenderer.positionCount - 1, transform.position);
-    }
-
-    private bool ColliderIsLayer(Collider collider, string layer)
-    {
-        return collider.gameObject.layer == LayerMask.NameToLayer(layer);
     }
 }

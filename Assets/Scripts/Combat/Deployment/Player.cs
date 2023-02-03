@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using System;
 
 public class Player : MonoBehaviour
 {
@@ -19,15 +20,15 @@ public class Player : MonoBehaviour
     public StarterAssets.ThirdPersonController PlayerController;
 
 
-        // Passed damage should have already accounted for possible defense reduction.
+    // Passed damage should have already accounted for possible defense reduction.
     public virtual int GetPostDmgState(int dmgAfterDef)
     {
         return CalcHpRemaining(dmgAfterDef) > 0 ? 1 : 0;
     }
 
-    public virtual int CalcHpRemaining(int dmg) { return Mathf.Max(Health - dmg, 0); }
-    public int Health = 100;
-    public int HealthMax { get; protected set; }
+    public virtual float CalcHpRemaining(int dmg) { return Mathf.Max(Health - dmg, 0); }
+    public float Health = 100;
+    public float HealthMax { get; protected set; } = 100;
     protected bool _blocking = false;
     public bool Blocking {
         get { return _blocking; }
@@ -55,6 +56,7 @@ public class Player : MonoBehaviour
             _DrawingArrow = value;
         }
     }
+    
     private float _DrawCharge = 0f;
     private float DrawCharge {
         get { return _DrawCharge; }
@@ -69,6 +71,49 @@ public class Player : MonoBehaviour
     private float DrawTime = 0f;
     private float DrawTimeMax = 1f;
 
+    // Stamina
+    public Slider staminabar;
+    public float StamMax = 100f;
+    private float _Stamina = 100f;
+    public float Stamina
+    {
+        get { return _Stamina; }
+        set
+        {
+            _Stamina = Mathf.Max(value, 0f);
+            if (staminabar != null)
+            {
+                UpdateSlider(staminabar, StamMax, _Stamina);
+            }
+        }
+    }
+    private Timer StamRegenTimer = new Timer(.0005f);
+    private bool CanRegenStamina {
+        get { return !DrawingArrow && !Blocking && !Sprinting; }
+    }
+    protected float StamRegenAmount = 5f;
+    protected float StamAttackCost = 20f;
+    protected float StamRangeCost = 10f;
+    protected float StamBlockCost = 20f;
+    protected float StamSprintCost = 10f;
+    public bool Sprinting = false;
+
+    public Slider Manabar;
+    private float ManaMax = 100f;
+    private float _Mana = 100f;
+    public float Mana
+    {
+        get { return _Mana; }
+        set
+        {
+            _Mana = Mathf.Max(value, 0f);
+            if (Manabar != null)
+            {
+                UpdateSlider(Manabar, ManaMax, Mana);
+            }
+        }
+    }
+
     protected float SmoothSpeed = .125f;
     protected int AttackDmg;
     protected int Defense;
@@ -82,6 +127,23 @@ public class Player : MonoBehaviour
         set { return; }
     }
 
+    public event Action<Vector3> OnPositionChange;
+    private Vector3 _position;
+    public Vector3 Position { 
+        get 
+        {
+            return transform.position;
+        } 
+        protected set 
+        {
+            if (value == _position)
+                return;
+            _position = value;
+            if (OnPositionChange != null)
+                OnPositionChange(Position);
+        } 
+    }
+
      private void Awake()
     {
         if (I == null)
@@ -93,28 +155,108 @@ public class Player : MonoBehaviour
             Destroy(gameObject);
         }
     }
-    
+
     void Start()
     {
-
+        Health = HealthMax;
+        Mana = ManaMax;
+        Stamina = StamMax;
     }
 
     void Update()
     {
         if (CamSwitcher.I.current_cam != CamSwitcher.BATTLE)
             return;
+     
+        Position = transform.position;
+        ManageInput();
+        UpdateStamina(Time.deltaTime);
+        ToggleDustPs(PlayerController.GetVelocityMagnitude());
+    }
+
+    private void ManageInput()
+    {
+        if (Stamina < 5f)
+            return; 
 
         DrawingArrow = Controller.I.DrawArrow.phase == InputActionPhase.Performed;
-        UpdateTimers(Time.deltaTime);
+        Sprinting = !Blocking && !DrawingArrow && Controller.I.sprint;
 
-/*
-        if (Controller.I.FireArrow.triggered)
+        if (Controller.I.Block.phase == InputActionPhase.Performed && !DrawingArrow)
         {
-            Vector3 target = Statics.GetScreenCenterWorldPos(CamSwitcher.I.BattleCamCaster, LayerMaskGround);
-            if (target != Vector3.zero)
-                ShootArrow(LayerMaskTarget, target, 40f);
+            //Block(true);
         }
-        */
+        else if (Controller.I.Block.phase == InputActionPhase.Canceled) 
+        {
+            //Block(false);
+        }
+    }
+
+    protected void Init()
+    {
+        Stamina = StamMax;
+        Mana = ManaMax;
+        UpdateSlider(staminabar, StamMax, Stamina);
+    }
+
+    public void UpdateStamina(float dt)
+    {
+        RegenStamina(StamRegenAmount);
+
+        if (BlockTimer.Increase(dt))
+        {
+            Blocking = false;
+        }
+
+        Sprint();
+        DrawBow();
+    }
+
+    private void Sprint()
+    {
+        if (Sprinting)
+        {
+            if (Stamina >= StamSprintCost * Time.deltaTime)
+            {
+                Stamina -= StamSprintCost * Time.deltaTime;
+
+            } else
+            {
+                Sprinting = false;
+            }
+        }
+    }
+
+    private void DrawBow()
+    {
+        if (DrawingArrow && DrawTime < DrawTimeMax)
+        {
+            if (Stamina > StamRangeCost * Time.deltaTime)
+            {
+                if (DrawTime < DrawTimeMax) // Draw
+                {
+                    DrawTime += Time.deltaTime;
+                    DrawCharge = DrawTime / DrawTimeMax;
+                    Stamina -= StamRangeCost * Time.deltaTime;
+                } else { // Hold fully drawn bow
+                    Stamina -= StamRangeCost / 2f * Time.deltaTime;
+                }
+            } else
+            {
+                DrawingArrow = false;
+            }
+        }
+
+        // Release arrow
+        if (!DrawingArrow && DrawCharge > 0) {
+            Vector3 target = Statics.GetScreenCenterWorldPos(CamSwitcher.I.BattleCamCaster, LayerMaskGround);
+            if (target != Vector3.zero) 
+            {
+                ShootArrow(LayerMaskTarget, target, 40f);
+            }
+            DrawTime = 0;
+            DrawCharge = 0;
+        }
     }
 
     public void ShootArrow(LayerMask mask, Vector3 targetPos, float attackDmg)
@@ -128,41 +270,16 @@ public class Player : MonoBehaviour
             Animator.SetTrigger("Attack");
     }
 
-    public void UpdateTimers(float dt)
+    public void RegenStamina(float amount)
     {
-
-        if (BlockTimer.Increase(dt))
-        {
-            Blocking = false;
-        }
-
-        if (DrawingArrow && DrawTime < DrawTimeMax)
-        {
-            DrawTime += dt;
-            DrawCharge = DrawTime / DrawTimeMax;
-
-        } else if (!DrawingArrow) {
-            if (DrawCharge > 0)
-            {
-                Vector3 target = Statics.GetScreenCenterWorldPos(CamSwitcher.I.BattleCamCaster, LayerMaskGround);
-                if (target != Vector3.zero) 
-                {
-                    ShootArrow(LayerMaskTarget, target, 40f);
-                }
-                DrawTime = 0;
-                DrawCharge = 0;
-            }
-        }
-    }
-
-    private void SetDrawCharge()
-    {
-
+        if (Stamina >= StamMax - amount * Time.deltaTime || !CanRegenStamina)
+            return;
+        //stamina += StaticOps.GetAdjustedIncrease(stamina, amount, MAX_STAMINA);
+        Stamina += amount * Time.deltaTime;
     }
 
     public void MeleeAttack(LayerMask layerMask)
     {
-        //AnimateAttackEffect();
         Animator.SetTrigger("Attack");
         Collider[] hits = Physics.OverlapBox(MeleeAttackPoint.transform.position, MeleeAttackHalfSize, Quaternion.identity, layerMask);
         
@@ -208,9 +325,9 @@ public class Player : MonoBehaviour
         return dmg > 0 ? dmg : 0;
     }
     
-    public void ToggleDustPs(Vector2 v)
+    public void ToggleDustPs(float velMagnitude)
     {
-        if (v.magnitude > 0)
+        if (velMagnitude > .1f)
         {
             PSDust.Play();
         } else 
@@ -229,6 +346,12 @@ public class Player : MonoBehaviour
             Animator.SetFloat("Health", Health);
     }
 
+    public void UpdateSlider(Slider slider, float maxValue, float value)
+    {
+        slider.maxValue = maxValue;
+        slider.value = value;
+    }
+
     public void Die() 
     {
         // Game over scenario
@@ -237,5 +360,5 @@ public class Player : MonoBehaviour
 
     public virtual int GetAttackDmg() { return AttackDmg; }
     public virtual int GetDefense() { return Defense; }
-    public virtual int GetHealth() { return Health; }
+    public virtual float GetHealth() { return Health; }
 }

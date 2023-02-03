@@ -63,8 +63,8 @@ public class CityUI : MonoBehaviour
     // Unit quantity TextMeshProUGUIs - Hiring
     public IDictionary<int, TextMeshProUGUI> unit_counts = new Dictionary<int, TextMeshProUGUI>();
     public TextMeshProUGUI warriorT, spearmanT, archerT, minerT, inspiratorT, seekerT, guardianT,
-        arbalestT, skirmisherT, paladinT, menderT, carterT, dragoonT, scoutT,
-        drummerT, shield_maidenT, pikemanT;
+        arbalestT, skirmisherT, paladinT, menderT, carterT, scoutT,
+        shield_maidenT, pikemanT;
 
     public Dictionary<int, Button> hire_buttons = new Dictionary<int, Button>();
     public Button warriorB, spearmanB, archerB, inspiratorB, minerB, seekerB, guardianB,
@@ -126,39 +126,19 @@ public class CityUI : MonoBehaviour
         unit_counts.Add(PlayerUnit.WARRIOR, warriorT);
         unit_counts.Add(PlayerUnit.SPEARMAN, spearmanT);
         unit_counts.Add(PlayerUnit.ARCHER, archerT);
-        unit_counts.Add(PlayerUnit.MINER, minerT);
-        unit_counts.Add(PlayerUnit.INSPIRATOR, inspiratorT);
-        unit_counts.Add(PlayerUnit.SEEKER, seekerT);
         unit_counts.Add(PlayerUnit.GUARDIAN, guardianT);
         unit_counts.Add(PlayerUnit.ARBALEST, arbalestT);
-        unit_counts.Add(PlayerUnit.SKIRMISHER, skirmisherT);
         unit_counts.Add(PlayerUnit.PALADIN, paladinT);
         unit_counts.Add(PlayerUnit.MENDER, menderT);
-        unit_counts.Add(PlayerUnit.CARTER, carterT);
-        unit_counts.Add(PlayerUnit.DRAGOON, dragoonT);
-        unit_counts.Add(PlayerUnit.SCOUT, scoutT);
-        unit_counts.Add(PlayerUnit.DRUMMER, drummerT);
-        unit_counts.Add(PlayerUnit.SHIELD_MAIDEN, shield_maidenT);
-        unit_counts.Add(PlayerUnit.PIKEMAN, pikemanT);
         cityP.SetActive(visible);
 
         hire_buttons.Add(PlayerUnit.WARRIOR, warriorB);
         hire_buttons.Add(PlayerUnit.SPEARMAN, spearmanB);
         hire_buttons.Add(PlayerUnit.ARCHER, archerB);
-        hire_buttons.Add(PlayerUnit.MINER, minerB);
-        hire_buttons.Add(PlayerUnit.INSPIRATOR, inspiratorB);
-        hire_buttons.Add(PlayerUnit.SEEKER, seekerB);
         hire_buttons.Add(PlayerUnit.GUARDIAN, guardianB);
         hire_buttons.Add(PlayerUnit.ARBALEST, arbalestB);
-        hire_buttons.Add(PlayerUnit.SKIRMISHER, skirmisherB);
         hire_buttons.Add(PlayerUnit.PALADIN, paladinB);
         hire_buttons.Add(PlayerUnit.MENDER, menderB);
-        hire_buttons.Add(PlayerUnit.CARTER, carterB);
-        hire_buttons.Add(PlayerUnit.DRAGOON, dragoonB);
-        hire_buttons.Add(PlayerUnit.SCOUT, scoutB);
-        hire_buttons.Add(PlayerUnit.DRUMMER, drummerB);
-        hire_buttons.Add(PlayerUnit.SHIELD_MAIDEN, shield_maidenB);
-        hire_buttons.Add(PlayerUnit.PIKEMAN, pikemanB);
 
         //                            SC, M, AR, MR, ER
         upgrades.Add(0, new Upgrade(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
@@ -256,8 +236,6 @@ public class CityUI : MonoBehaviour
         UnlockUnitPurchase(PlayerUnit.WARRIOR);
         UnlockUnitPurchase(PlayerUnit.SPEARMAN);
         UnlockUnitPurchase(PlayerUnit.ARCHER);
-        UnlockUnitPurchase(PlayerUnit.MINER);
-        UnlockUnitPurchase(PlayerUnit.INSPIRATOR);
 
         // Reset upgrades
         foreach (Button b in upgrade_buttons.Values)
@@ -476,12 +454,8 @@ public class CityUI : MonoBehaviour
     {
         if (is_purchased(FORGE2))
         {
-            if (is_purchased(STABLE, BARRACKS2))
-                UnlockUnitPurchase(PlayerUnit.DRAGOON);
             if (is_purchased(CRAFT_SHOP, BARRACKS2))
                 UnlockUnitPurchase(PlayerUnit.GUARDIAN);
-            if (ID == BARRACKS2)
-                UnlockUnitPurchase(PlayerUnit.SCOUT);
 
         }
         else if (is_purchased(FORGE))
@@ -490,23 +464,15 @@ public class CityUI : MonoBehaviour
             {
                 UnlockUnitPurchase(PlayerUnit.GUARDIAN);
                 UnlockUnitPurchase(PlayerUnit.ARBALEST);
-                UnlockUnitPurchase(PlayerUnit.SKIRMISHER);
             }
             else if (ID == BARRACKS2)
                 UnlockUnitPurchase(PlayerUnit.PALADIN);
             else if (ID == TEMPLE2)
                 UnlockUnitPurchase(PlayerUnit.MENDER);
-            else if (ID == STABLE)
-                UnlockUnitPurchase(PlayerUnit.CARTER);
-            if (is_purchased(CRAFT_SHOP2, TEMPLE))
-            {
-                UnlockUnitPurchase(PlayerUnit.DRUMMER);
-            }
         }
 
         if (ID == TEMPLE)
         {
-            UnlockUnitPurchase(PlayerUnit.SEEKER);
         }
         if (ID == RUNE_PORT)
         {

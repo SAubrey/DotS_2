@@ -191,4 +191,9 @@ public class Statics
         transform.LookAt(target);
         transform.rotation = Quaternion.Euler(0f, transform.rotation.eulerAngles.y, 0f);
     }
+
+    public static bool ColliderIsLayer(Collider collider, string layer)
+    {
+        return collider.gameObject.layer == LayerMask.NameToLayer(layer);
+    }
 }

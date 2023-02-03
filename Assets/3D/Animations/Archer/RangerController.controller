@@ -11,9 +11,6 @@ AnimatorStateTransition:
   - m_ConditionMode: 1
     m_ConditionEvent: Block
     m_EventTreshold: 0
-  - m_ConditionMode: 4
-    m_ConditionEvent: Velocity
-    m_EventTreshold: 0.1
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -2768412176602361311}
   m_Solo: 0
@@ -1096,7 +1093,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Blend Tree 0
+  m_Name: Standing Aim
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -1491,7 +1488,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: New State 0
+  m_Name: Draw
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -1569,7 +1566,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: New State 1
+  m_Name: Draw Idle
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:

@@ -87,7 +87,7 @@ public class BattlePhaser : MonoBehaviour
 
         Debug.Log("loading enemies");
         CamSwitcher.I.SetActive(CamSwitcher.BATTLE, true);
-        EnemyLoader.I.LoadEnemies(cell.GetEnemies(), 1);
+        EnemyLoader.I.SpawnEnemies(cell.GetEnemies());
         PlayerDeployment.I.PlaceUnits(ActiveBat);
         cell.HasSeenCombat = true;
     }

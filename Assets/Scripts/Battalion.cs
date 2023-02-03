@@ -149,13 +149,6 @@ public class Battalion
         }
     }
 
-    public bool HasMiner { get => GetUnit(PlayerUnit.MINER) != null; }
-
-    public bool HasSeeker { get => GetUnit(PlayerUnit.SEEKER) != null; }
-
-    public bool HasScout { get => GetUnit(PlayerUnit.SCOUT) != null; }
-
-
     public List<PlayerUnit> GetAllPlacedUnits()
     {
         List<PlayerUnit> punits = new List<PlayerUnit>();

@@ -24,29 +24,11 @@ public class PlayerDeployment : Deployment
     [SerializeField] private GameObject ZoneMageParent;
     [SerializeField] private Vector3 ZoneMageParentPos;
 
-    
-
     public Group[] ForwardZone;
     private Timer AttackDelayTimer = new Timer(.05f, true);
-    public Slider Manabar;
-    public float ManaMax = 100f;
-    private float _Mana = 100f;
-    public float Mana
-    {
-        get { return _Mana; }
-        set
-        {
-            _Mana = Mathf.Max(value, 0f);
-            if (Manabar != null)
-            {
-                UpdateSlider(Manabar, ManaMax, Mana);
-            }
-        }
-    }
     
     [SerializeField] private GameObject LightObject;
     public event Action<Slot> OnLockOn;
-    private float previousMouseX;
     
     protected override void Awake()
     {
@@ -70,10 +52,7 @@ public class PlayerDeployment : Deployment
     void Start()
     {
         Zones.Add(ZoneSword);
-       // Zones.Add(ZonePolearm);
-        //Zones.Add(ZoneCenter);
         Zones.Add(ZoneRange);
-        Stamina = StamMax;
         IsPlayer = true;
 
         Init();
@@ -81,11 +60,7 @@ public class PlayerDeployment : Deployment
 
     protected void Init()
     {
-        UpdateSlider(staminabar, StamMax, Stamina);
-        Stamina = StamMax;
-        Mana = ManaMax;
         ForwardZone = ZoneSword;
-        //Agent.destination = transform.position;
     }
 
     protected override void Update()
@@ -94,7 +69,6 @@ public class PlayerDeployment : Deployment
             return;
 
         base.Update();
-        PollControlScheme();
     }
     
     protected override void FixedUpdate()
@@ -103,36 +77,6 @@ public class PlayerDeployment : Deployment
             return;
 
         base.FixedUpdate();
-    }
-
-    private void PollControlScheme() 
-    {
-        AttackDelayTimer.Increase(Time.deltaTime);
-        if (Controller.I.Attack.triggered && AttackDelayTimer.Finished)
-        {
-            Debug.Log("Melee attack");
-            MeleeAttack(ForwardZone);
-            AttackDelayTimer.Reset();
-        }
-        else if (Controller.I.Block.phase == InputActionPhase.Performed)
-        {
-            Block(true);
-        }
-        else if (Controller.I.Block.phase == InputActionPhase.Canceled) 
-        {
-            Block(false);
-        }
-
-        /*if (Controller.I.FireArrow.triggered)
-        {
-            Vector3 p = Statics.GetMouseWorldPos(CamSwitcher.I.BattleCamCaster, GroundMask);
-            if (p != Vector3.zero)
-                RangeAttack(ZoneRange, p);
-        }*/
-        if (Controller.I.LockOn.triggered)
-        {
-            ToggleLockOn();
-        }
     }
 
     private void ToggleLockOn()
@@ -227,32 +171,6 @@ public class PlayerDeployment : Deployment
             }
         }
         MapUI.I.UpdateDeployment(b);
-    }
-
-    protected void Block(bool active)
-    {
-        if (Stamina < StamBlockCost)
-        {
-            Blocking = false;
-            return;
-        }
-        Blocking = active;
-
-        foreach (Group g in ForwardZone)
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                if (g.Slots[i].HasUnit)
-                {
-                    g.Slots[i].Unit.Blocking = active;
-                }
-            }
-        }
-    }
-
-    public override Group[] GetAttackingZone(bool melee)
-    {
-        return melee ? ForwardZone : ZoneRange;
     }
 
     private void ValidateAllPunits()

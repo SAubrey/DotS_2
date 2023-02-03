@@ -1,8 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using System;
 
 
 // This draws enemies and places them into combat slots. Enemy drawing
@@ -19,8 +17,8 @@ public class EnemyLoader : MonoBehaviour
     public const int T3 = 3;
 
     public SpawnZone SpawnZone;
-    public List<EnemyDeployment> EnemyDeployments = new List<EnemyDeployment>();
-    public GameObject SmallEnemyDeploymentPrefab;
+    public List<Slot> EnemySlots = new List<Slot>();
+    public GameObject SingleEnemySlotPrefab;
     public GameObject DeploymentParent;
     public List<Enemy> Enemies = new List<Enemy>();
 
@@ -89,16 +87,16 @@ public class EnemyLoader : MonoBehaviour
 
     private void Reset()
     {
-        RemoveEnemyDeployments();
+        RemoveEnemySlots();
     }
 
-    public void RemoveEnemyDeployments()
+    public void RemoveEnemySlots()
     {
-        foreach (EnemyDeployment ed in EnemyDeployments)
+        foreach (Slot slot in EnemySlots)
         {
-            ed.Delete();
+            slot.Empty();
         }
-        EnemyDeployments.Clear();
+        EnemySlots.Clear();
     }
 
     public void GenerateNewEnemies(MapCell cell, int quantity)
@@ -120,93 +118,26 @@ public class EnemyLoader : MonoBehaviour
         //reset();
     }
 
-    public void LoadEnemies(List<Enemy> enemies, int groupSize)
-    {
-        // Enemies are grouped by combat style and assigned to deployments with 75/25 distribution.
-        List<Enemy> meleeEnemies = ExtractEnemiesOfType(enemies, true);
-        List<Enemy> rangeEnemies = ExtractEnemiesOfType(enemies, false);
-        int numMeleeGroups =
-            (int)UnityEngine.Random.Range(meleeEnemies.Count / groupSize, meleeEnemies.Count / 2f) + 1;
-        int numRangeGroups =
-            (int)UnityEngine.Random.Range(rangeEnemies.Count / groupSize, rangeEnemies.Count / 2f) + 1;
-
-        DistributeEnemiesToGroups(meleeEnemies, numMeleeGroups);
-        DistributeEnemiesToGroups(rangeEnemies, numRangeGroups);
-    }
-
-    public void DistributeEnemiesToGroups(List<Enemy> enemies, int numGroups)
-    {
-        if (enemies.Count <= 0 || numGroups <= 0)
-        {
-            //Debug.Log("ERROR: CANNOT TAKE 0 AS INPUT");
-            return;
-        }
-        if (numGroups == 1)
-        {
-            Debug.Log("Spawning a single group w/ enemies: " + enemies.Count);
-            SpawnDeployments(enemies, enemies.Count, numGroups);
-            return;
-        }
-        // Half of groups take 3/4 of enemies. 
-        int num_enemies = Mathf.Max((int)(enemies.Count * .75f), 1);
-        int num_some_groups = Mathf.Max((int)(numGroups / 2f), 1);
-        Debug.Log("num groups: " + numGroups + "num_some_groups: " + num_some_groups);
-        enemies = SpawnDeployments(enemies, num_enemies, num_some_groups);
-
-        if (enemies.Count > 0)
-        {
-            // Other half takes 1/4 of enemies. 
-            num_some_groups = numGroups - num_some_groups;
-            enemies = SpawnDeployments(enemies, enemies.Count, num_some_groups);
-            //Debug.Log("Should equal zero: " + enemies.Count);
-        }
-    }
-
-    // Returns the remaining enemies not placed.
-    public List<Enemy> SpawnDeployments(List<Enemy> enemies, int numEnemies, int numGroups)
+    public void SpawnEnemies(List<Enemy> enemies)
     {
         Enemies.AddRange(enemies);
 
-        int enemiesPerGroup = (int)(numEnemies / numGroups);
         GameObject ed;
-        EnemyDeployment edScript;
+        Slot eScript;
 
-        int enemiesPlaced = 0;
-        for (int i = 0; i < numGroups; i++)
+        for (int i = 0; i < enemies.Count; i++)
         {
-            ed = Instantiate(SmallEnemyDeploymentPrefab, SpawnZone.GetSpawnPos(), Quaternion.identity, DeploymentParent.transform);
+            ed = Instantiate(SingleEnemySlotPrefab, SpawnZone.GetSpawnPos(), Quaternion.identity, DeploymentParent.transform);
 
-            Group g = ed.GetComponentInChildren<Group>();
+            Group g = ed.GetComponent<Group>();
             g.SlotParent = DeploymentParent;
             g.SpawnSlots();
 
-            edScript = ed.GetComponentInChildren<SmallEnemyDeployment>();
-            for (int j = 0; j < enemiesPerGroup; j++)
-            {
-                edScript.PlaceUnit(enemies[(i * enemiesPerGroup) + j]);
-                enemiesPlaced++;
-            }
-            EnemyDeployments.Add(edScript);
-            //SpawnZone.PlaceDeployment(ed, DeploymentParent);
+            //eScript = ed.GetComponentInChildren<Slot>();
+            eScript = g.Slots[0];
+            eScript.Fill(enemies[i]);
+            EnemySlots.Add(eScript);
         }
-        // Remove placed enemies.
-        Debug.Log("before: " + enemies.Count);
-        enemies.RemoveRange(0, enemiesPlaced);
-        Debug.Log("after: " + enemies.Count);
-        return enemies;
-    }
-
-    public List<Enemy> ExtractEnemiesOfType(List<Enemy> enemies, bool isMelee)
-    {
-        List<Enemy> units = new List<Enemy>();
-        foreach (Enemy e in enemies)
-        {
-            if (e.IsMelee == isMelee)
-            {
-                units.Add(e);
-            }
-        }
-        return units;
     }
 
     private int RollRarity()
@@ -237,31 +168,6 @@ public class EnemyLoader : MonoBehaviour
         //biome + ", " + tier + ", " + rarity + ", " + r);
         return Biomes[biome][tier][rarity][r];
     }
-
-    private void SlotEnemy(Enemy enemy)
-    {
-        //Zone zone = get_appropriate_zone(enemy);
-        //if (fill_slot(enemy, zone.get_spawn_pos()))
-        //  zone.increment_pos();
-    }
-
-    //private Zone get_appropriate_zone(Enemy enemy) {
-    //}
-
-    /*  private bool fill_slot(Enemy enemy, Pos pos) {
-          //Debug.Log(pos.x + " : " + pos.y);
-          //Formation.I.check_groups();
-          Group g = Formation.I.get_group(pos.x, pos.y);
-          if (g == null) {
-              //Debug.Log("null group")
-          }
-          Slot s = Formation.I.get_group(pos.x, pos.y).get_highest_empty_slot();
-          if (s != null) {
-              s.fill(enemy);
-              return true;
-          }
-          return false;
-      }*/
 
     private void PopulateBiomes()
     {

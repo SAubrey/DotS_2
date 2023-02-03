@@ -15,11 +15,11 @@ namespace StarterAssets
 	public class ThirdPersonController : MonoBehaviour
 	{
 		[Header("Player")]
-		public float AimSpeed = 50.335f;
+		public float AimSpeed = 5f;
 		[Tooltip("Move speed of the character in m/s")]
-		public float MoveSpeed = 20.0f;
+		public float MoveSpeed = 15.0f;
 		[Tooltip("Sprint speed of the character in m/s")]
-		public float SprintSpeed = 50.335f;
+		public float SprintSpeed = 25f;
 		[Tooltip("How fast the character turns to face movement direction")]
 		[Range(0.0f, 0.3f)]
 		public float RotationSmoothTime = 0.12f;
@@ -176,7 +176,7 @@ namespace StarterAssets
 			else if (Player.I.DrawingArrow)
 				targetSpeed = AimSpeed;
 			else
-				targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+				targetSpeed = Player.I.Sprinting ? SprintSpeed : MoveSpeed;
 
 			// a reference to the players current horizontal velocity
 			float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
@@ -228,8 +228,8 @@ namespace StarterAssets
 			_controller.Move(targetDirection * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
 
             if (_hasAnimator) {
-                _animator.SetFloat("VelocityX", inputDirection.x, 1f, _animationBlend / 8f);
-                _animator.SetFloat("VelocityZ", inputDirection.z, 1f, _animationBlend / 8f);
+                _animator.SetFloat("VelocityX", inputDirection.x, .1f, _animationBlend);
+                _animator.SetFloat("VelocityZ", inputDirection.z, .1f, _animationBlend);
                 _animator.SetFloat("Velocity", _controller.velocity.magnitude, .1f, _animationBlend);
             }
 		}
@@ -328,6 +328,11 @@ namespace StarterAssets
 				//Cursor.lockState = CursorLockMode.None;
 				//CamSwitcher.I.Pause();
 			}
+		}
+
+		public float GetVelocityMagnitude()
+		{
+			return _controller.velocity.magnitude;
 		}
 	}
 }

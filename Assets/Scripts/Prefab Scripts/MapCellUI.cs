@@ -140,7 +140,7 @@ public class MapCellUI : MonoBehaviour
         TravelCardUnlockable u = cell.GetUnlockable();
         if (u.RequiresSeeker)
         {
-            return TurnPhaser.I.ActiveDisc.Bat.HasSeeker;
+            return TurnPhaser.I.ActiveDisc.HasSeeker;
         }
         // Must be a resource requirement.
         if (TurnPhaser.I.ActiveDisc.GetResource(u.ResourceType) >=

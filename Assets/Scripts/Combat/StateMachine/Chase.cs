@@ -4,21 +4,21 @@ using UnityEngine;
 
 public class Chase : IState
 {
-    private EnemyDeployment d;
+    private AIBrain Brain;
 
-    public Chase(EnemyDeployment d)
+    public Chase(AIBrain brain)
     {
-        this.d = d;
+        Brain = brain;
     }
 
     public void Tick()
     {
-        d.SetAgentDestination(d.PlayerPos); 
+        Brain.SetDestinationToTarget();
     }
 
     public void OnEnter()
     {
-        Debug.Log("chase w/ PD: " + d.PlayerDistance);
+        Debug.Log("chase w/ PD: " + Brain.TargetDistance);
         
     }
 

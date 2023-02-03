@@ -3,13 +3,13 @@ using UnityEngine;
 // Idle, relatively safe distance from player where the enemy decides what and when to do.
 public class Comfortable : IState
 {
-    private EnemyDeployment D;
+    private AIBrain Brain;
     private Timer PendingAttackTimer;
     public bool MoveToAttack = false;
 
-    public Comfortable(EnemyDeployment d)
+    public Comfortable(AIBrain brain)
     {
-        D = d;
+        Brain = brain;
     }
 
     public void Tick()
@@ -23,8 +23,7 @@ public class Comfortable : IState
     public void OnEnter()
     {
         PendingAttackTimer = new Timer(Random.Range(0.6f, 2f));
-        D.SetAgentDestination(D.transform.position);
-        Debug.Log("comfortable w/ PD: " + D.PlayerDistance);
+        Debug.Log("comfortable w/ PD: " + Brain.TargetDistance);
     }
 
     public void OnExit()

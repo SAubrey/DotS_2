@@ -4,25 +4,28 @@ using UnityEngine;
 
 public class BackingUp : IState
 {
-    private EnemyDeployment d;
+    private AIBrain Brain;
+    float r;
 
-    public BackingUp(EnemyDeployment d)
+    public BackingUp(AIBrain brain)
     {
-        this.d = d;
+        Brain = brain;
     }
 
     public void Tick()
     {
-        
+        if (Brain.Target == null)
+            return;
+        // Make it active to avoid choosing out of date comfy distance
+        Vector3 v = Statics.CalcPositionInDirection(Brain.Slot.transform.position, Brain.GetDirectionToTarget(), r);
+        Brain.Slot.SetAgentDestination(v);
     }
 
     public void OnEnter()
     {
-        Debug.Log("Backing up w/ PD: " + d.PlayerDistance);
+        Debug.Log("Backing up w/ TD: " + Brain.TargetDistance);
         // Move some distance along a line opposite the direction to the player.
-        var r = Random.Range(d.ComfortablePlayerDistanceMin + 1f, d.ComfortablePlayerDistanceMax - 1f);
-        Vector3 v = Statics.CalcPositionInDirection(d.transform.position, d.GetDirectionToPlayer(), r);
-        d.SetAgentDestination(v);
+        r = Random.Range(Brain.ComfortableTargetDistanceMin + 1f, Brain.ComfortableTargetDistanceMax - 1f);
     }
 
     public void OnExit()

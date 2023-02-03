@@ -8,6 +8,7 @@ TagManager:
   - Group
   - MapWindow
   - Enemy
+  - Combatant
   layers:
   - Default
   - TransparentFX

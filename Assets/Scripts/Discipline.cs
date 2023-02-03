@@ -15,11 +15,14 @@ public class Discipline : Storeable, ISaveLoad
     private int MineQtyMultiplier = 3;
     public int MineQty
     {
-        get => MineQtyMultiplier *= Bat.CountUnits(PlayerUnit.MINER);
+        get => MineQtyMultiplier *= CountMiner;
     }
     public bool HasMinedInTurn, HasMovedInTurn, HasScoutedInTurn = false;
     public bool HasActedInTurn { get => HasMovedInTurn || HasScoutedInTurn; }
     public bool Dead { get; private set; } = false;
+    public int CountScout = 1;
+    public int CountMiner = 1;
+    public int CountSeeker = 1;
     private MapCell _cell;
     // Change cells to change piece location on the map.
     public MapCell Cell
@@ -280,4 +283,10 @@ public class Discipline : Storeable, ISaveLoad
             Bat.AddUnits(type, data.sbat.unit_types[type]);
         }
     }
+
+    public bool HasMiner { get => CountMiner > 0; }
+
+    public bool HasSeeker { get => CountSeeker > 0; }
+
+    public bool HasScout { get => CountScout > 0; }
 }
