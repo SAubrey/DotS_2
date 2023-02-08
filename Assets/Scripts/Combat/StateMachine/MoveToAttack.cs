@@ -22,7 +22,7 @@ public class MoveToAttack : IState
 
     public void OnEnter()
     {
-        //Debug.Log("Move to attack w/ PD: " + Brain.TargetDistance);
+        Debug.Log("Move to attack w/ TD: " + Brain.TargetDistance);
     }
 
     public void OnExit()

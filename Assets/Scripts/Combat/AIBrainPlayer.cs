@@ -41,12 +41,14 @@ public class AIBrainPlayer : AIBrain
 
 
         StateMachine.AddAnyTransition(follow, TooFarFromPlayer());
+        StateMachine.AddAnyTransition(follow, DeadTarget());
 
         Func<bool> CanApproach() => () => TargetDistance <= ChaseDistance && Target != null && !follow.Returning;
         Func<bool> TookHitTrue() => () => TookHit == true;
         Func<bool> DoneAttacking() => () => !attack.Attacking;
 
         Func<bool> TooFarFromPlayer() => () => GetPlayerDistance() > TooFarFromPlayerDistance;// && !attack.Attacking;
+        Func<bool> DeadTarget() => () => Target == null;
         /*var chase = new Chase(this);
         var comfortable = new Comfortable(this);
         var moveToAttack = new MoveToAttack(this);

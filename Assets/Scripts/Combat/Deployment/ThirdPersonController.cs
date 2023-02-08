@@ -215,12 +215,16 @@ namespace StarterAssets
 				right = right.normalized * inputDirection.x;
 				targetDirection = forward + right;
 			}
-			else 
+			else if (_input.move == Vector2.zero)
 			{
 				_targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + _mainCamera.transform.eulerAngles.y;
 
 				// rotate to face input direction relative to camera position
 				targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+			} else // Maintain momentum once input stops.
+			{
+				_targetRotation = 0f;
+				targetDirection = transform.forward;
 			}
 
 			float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);

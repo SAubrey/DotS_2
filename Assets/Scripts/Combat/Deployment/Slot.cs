@@ -64,14 +64,13 @@ public class Slot : AgentBody
     protected virtual void FixedUpdate() {
         OnVelocityChange(Agent.velocity);
         Move();
-        Rotate();        
         FaceUIToCam();
     }
 
     private void Move() 
     {
         worldDeltaPosition = Agent.nextPosition - transform.position;
-        Agent.speed = Unit.Blocking ? BlockSpeed : MaxSpeed;
+        Agent.speed = DetermineMoveSpeed();
 /*
         if (Vector3.Distance(SlotPointTransform.position, transform.position) > 1f)
         {
@@ -100,6 +99,7 @@ public class Slot : AgentBody
             Animator.SetFloat("Velocity", Velocity.magnitude, .1f, Time.fixedDeltaTime);
         }
 
+        Rotate(Velocity);
         GenerateMovementEffects(Velocity.magnitude);
 
         if (Agent.hasPath) // & arrived
@@ -107,23 +107,56 @@ public class Slot : AgentBody
         transform.position = Agent.nextPosition;
     }
 
-    private void Rotate()
+    private float DetermineMoveSpeed() 
     {
+        if (Unit.Blocking)
+        {
+            return BlockSpeed;
+        } else if (Unit.IsPlayer)
+        {
+            if (Player.I.Sprinting)
+            {
+                return Player.I.PlayerController.SprintSpeed;
+            } else
+            {
+                return Player.I.PlayerController.MoveSpeed;
+            }
+        }
+        return MaxSpeed;
+    }
+
+    private float rotationVelocity;
+    private void Rotate(Vector2 velocity)
+    {
+        Vector3 targetDirection = new Vector3();
         // Correct for rotation error by aligning with deployment.
-        if (Agent.remainingDistance < Agent.stoppingDistance)
+       /* if (Agent.remainingDistance < Agent.stoppingDistance)
         {
             //transform.rotation = Deployment.transform.rotation;
             if (Deployment != null)
                 transform.rotation = Quaternion.Lerp(transform.rotation, Deployment.transform.rotation, .15f);
             return;
         }
+        //float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
+			//transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
 
         if (LockedOnTarget != null)
         {
             Statics.RotateToPoint(transform, LockedOnTarget.transform.position);
         } else {
             Statics.RotateWithVelocity(transform, Agent.velocity);
+        }*/
+
+        if (Brain.Target)
+        {
+            targetDirection = Brain.GetDirectionToTarget();
+        } else
+        {
+            targetDirection = velocity.normalized;
         }
+        float targetRotation = Mathf.Atan2(targetDirection.x, targetDirection.z) * Mathf.Rad2Deg;// + _mainCamera.transform.eulerAngles.y;
+        float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref rotationVelocity, .12f);
+		transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
     }
 
     public virtual bool Fill(Unit u)

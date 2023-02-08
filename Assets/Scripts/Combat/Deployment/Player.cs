@@ -43,6 +43,8 @@ public class Player : MonoBehaviour
     protected float TimeArrowDrawMax = 1f;
     protected float TimeArrowDraw = 0f;
     protected Timer TimerArrowDraw = new Timer(1f, true);
+    private float ArrowSpeedMax = 170f;
+    private float ArrowDamageMax = 40f;
     private bool _DrawingArrow = false;
     public bool DrawingArrow { 
         get { return _DrawingArrow; }
@@ -214,16 +216,16 @@ public class Player : MonoBehaviour
 
     private void Sprint()
     {
-        if (Sprinting)
+        if (!Sprinting)
+            return;
+        
+        if (Stamina >= StamSprintCost * Time.deltaTime)
         {
-            if (Stamina >= StamSprintCost * Time.deltaTime)
-            {
-                Stamina -= StamSprintCost * Time.deltaTime;
+            Stamina -= StamSprintCost * Time.deltaTime;
 
-            } else
-            {
-                Sprinting = false;
-            }
+        } else
+        {
+            Sprinting = false;
         }
     }
 
@@ -247,24 +249,24 @@ public class Player : MonoBehaviour
             }
         }
 
-        // Release arrow
+        // Release arrow. Damage and speed scales linearly with charge.
         if (!DrawingArrow && DrawCharge > 0) {
-            Vector3 target = Statics.GetScreenCenterWorldPos(CamSwitcher.I.BattleCamCaster, LayerMaskGround);
+            Vector3 target = Statics.GetScreenCenterWorldPos(CamSwitcher.I.BattleCamCaster, LayerMaskGround | LayerMaskTarget);
             if (target != Vector3.zero) 
             {
-                ShootArrow(LayerMaskTarget, target, 40f);
+                ShootArrow(LayerMaskTarget, target, ArrowDamageMax * DrawCharge, ArrowSpeedMax * DrawCharge);
             }
             DrawTime = 0;
             DrawCharge = 0;
         }
     }
 
-    public void ShootArrow(LayerMask mask, Vector3 targetPos, float attackDmg)
+    public void ShootArrow(LayerMask mask, Vector3 targetPos, float attackDmg, float speed)
     {
         GameObject a = Instantiate(PrefabArrow, ArrowOriginTransform);
         a.transform.localPosition = Vector3.zero;
         Arrow arrowScript = a.GetComponent<Arrow>();
-        arrowScript.Fly(ArrowOriginTransform.position, targetPos, attackDmg, 170f);
+        arrowScript.Fly(ArrowOriginTransform.position, targetPos, attackDmg, speed);
 
         if (Animator != null)
             Animator.SetTrigger("Attack");

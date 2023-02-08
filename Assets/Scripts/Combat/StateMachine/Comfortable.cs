@@ -23,7 +23,7 @@ public class Comfortable : IState
     public void OnEnter()
     {
         PendingAttackTimer = new Timer(Random.Range(0.6f, 2f));
-        Debug.Log("comfortable w/ PD: " + Brain.TargetDistance);
+        Debug.Log("comfortable w/ TD: " + Brain.TargetDistance);
     }
 
     public void OnExit()

@@ -76,4 +76,9 @@ public class StateMachine
 
         return null;
     }
+
+    public IState GetState()
+    {
+        return _currentState;
+    }
 }

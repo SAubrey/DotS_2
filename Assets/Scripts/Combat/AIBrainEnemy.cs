@@ -28,7 +28,7 @@ public class AIBrainEnemy : AIBrain
         // Add transitions from state, to state, if condition.
         At(roam, chase, InChaseRange());
         
-        At(chase, roam, InRoamRange());
+       // At(chase, roam, InRoamRange());
         //At(chase, backingUp, InActRange());
         At(chase, comfortable, InComfyRange());
         
@@ -43,11 +43,14 @@ public class AIBrainEnemy : AIBrain
         StateMachine.AddAnyTransition(backingUp, BackUp());
         At(backingUp, comfortable, InComfyRange());
 
+        StateMachine.AddAnyTransition(roam, InRoamRange());
+
         Func<bool> InRoamRange() => () => GetBehaviorZone() == BehaviorZone.Roam;
         Func<bool> InChaseRange() => () => GetBehaviorZone() == BehaviorZone.Chase;
         Func<bool> InComfyRange() => () => GetBehaviorZone() == BehaviorZone.Comfortable;
         //Func<bool> InActRange() => () => GetBehaviorZone() == BehaviorZone.Act;
-        Func<bool> BackUp() => () => GetBehaviorZone() == BehaviorZone.Act && !moveToAttack.BeginAttack && !comfortable.MoveToAttack && !Attacking;
+        Func<bool> BackUp() => () => GetBehaviorZone() == BehaviorZone.Act && !moveToAttack.BeginAttack && !comfortable.MoveToAttack && 
+            !Attacking && StateMachine.GetState() != moveToAttack;
         Func<bool> MoveToAttack() => () => comfortable.MoveToAttack;
         Func<bool> TimeToAttack() => () => moveToAttack.BeginAttack;
         //Func<bool> DoneAttacking() => () => !attack.Attacking;
