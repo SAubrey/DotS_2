@@ -19,11 +19,12 @@ public class Chase : IState
     public void OnEnter()
     {
         Debug.Log("chase w/ PD: " + Brain.TargetDistance);
+        Brain.Chase = true;
         
     }
 
     public void OnExit()
     {
-
+        Brain.Chase = false;
     }
 }

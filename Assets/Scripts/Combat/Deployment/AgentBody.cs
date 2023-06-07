@@ -6,7 +6,7 @@ public class AgentBody : MonoBehaviour
 {
     protected NavMeshAgent Agent { get; private set; }
     public float MaxAcceleration { get; private set; } = 20f;
-    public float MaxSpeed { get; protected set; }
+    public float MaxSpeed { get { return Agent.speed; } set { Agent.speed = value; } }
     public event Action<Vector3> OnPositionChange;
     private Vector3 _position;
     public Vector3 Position { 
@@ -28,7 +28,6 @@ public class AgentBody : MonoBehaviour
     {
         Agent = GetComponent<NavMeshAgent>();
         MaxAcceleration = Agent.acceleration;
-        MaxSpeed = Agent.speed;
     }
 
     protected virtual void Update()

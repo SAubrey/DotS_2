@@ -19,12 +19,13 @@ public class Enemy : Unit
         MELD_WARRIOR = 29, MELD_SPEARMAN = 30,
         T1_GUARDIAN = 31, T2_GUARDIAN = 32;
 
+    protected const int BaseSpeed = 5;
     public int xp;
     public bool xp_taken = false;
 
-    public Enemy(string name, int ID, int att, int def, int hp, int xp, Style style,
+    public Enemy(string name, int ID, int speed, int att, int def, int hp, int xp, Style style,
             Attributes atr1=Attributes.Null, Attributes atr2=Attributes.Null, Attributes atr3=Attributes.Null) :
-            base(name, ID, att, def, hp, style, atr1, atr2, atr3)
+            base(name, ID, speed, att, def, hp, style, atr1, atr2, atr3)
     {
         IsPlayer = false;
         OwnerID = -1;
@@ -70,16 +71,6 @@ public class Enemy : Unit
         return e;
     }
 
-    public bool CanTarget(Slot slot)
-    {
-        if (!slot.HasPunit)
-            return false;
-
-        bool meleeVsFlying = IsMelee &&
-                    slot.Unit.HasAttribute(Unit.Attributes.Flying);
-        return !meleeVsFlying;
-    }
-
     public override void Die()
     {
         Map.I.GetCurrentCell().KillEnemy(this);
@@ -101,49 +92,49 @@ public class Enemy : Unit
 // Plains
 public class Galtsa : Enemy
 {
-    public Galtsa() : base("Galtsa", GALTSA, 20, 0, 100, 2, Style.Claw, Attributes.Charge)
+    public Galtsa() : base("Galtsa", GALTSA, BaseSpeed, 20, 0, 100, 2, Style.Claw, Attributes.Charge)
     {
     }
 }
 public class Grem : Enemy
 {
-    public Grem() : base("Grem", GREM, 10, 0, 100, 1, Style.Claw)
+    public Grem() : base("Grem", GREM, BaseSpeed, 10, 0, 100, 1, Style.Claw)
     {
     }
 }
 public class Endu : Enemy
 {
-    public Endu() : base("Endu", ENDU, 40, 0, 100, 3, Style.Claw, Attributes.Charge)
+    public Endu() : base("Endu", ENDU, BaseSpeed, 40, 0, 100, 3, Style.Claw, Attributes.Charge)
     {
     }
 }
 public class Korote : Enemy
 {
-    public Korote() : base("Korote", KOROTE, 10, 0, 100, 2, Style.Claw, Attributes.Flanking)
+    public Korote() : base("Korote", KOROTE, BaseSpeed, 10, 0, 100, 2, Style.Claw, Attributes.Flanking)
     {
     }
 }
 public class Molner : Enemy
 {
-    public Molner() : base("Molner", MOLNER, 20, 0, 100, 2, Style.Claw, Attributes.Flanking, Attributes.Charge)
+    public Molner() : base("Molner", MOLNER, BaseSpeed, 20, 0, 100, 2, Style.Claw, Attributes.Flanking, Attributes.Charge)
     {
     }
 }
 public class Etuena : Enemy
 {
-    public Etuena() : base("Etuena", ETUENA, 20, 0, 100, 3, Style.Claw, Attributes.Flying, Attributes.Charge)
+    public Etuena() : base("Etuena", ETUENA, BaseSpeed, 20, 0, 100, 3, Style.Claw, Attributes.Flying, Attributes.Charge)
     {
     }
 }
 public class Clypte : Enemy
 {
-    public Clypte() : base("Clypte", CLYPTE, 30, 0, 100, 3, Style.Range)
+    public Clypte() : base("Clypte", CLYPTE, BaseSpeed, 30, 0, 100, 3, Style.Range)
     {
     }
 }
 public class Goliath : Enemy
 {
-    public Goliath() : base("Goliath", GOLIATH, 100, 0, 250, 12, Style.Claw, Attributes.Charge)
+    public Goliath() : base("Goliath", GOLIATH, BaseSpeed, 100, 0, 250, 12, Style.Claw, Attributes.Charge)
     {
     }
 }
@@ -151,49 +142,49 @@ public class Goliath : Enemy
 // Forest
 public class Kverm : Enemy
 {
-    public Kverm() : base("Kverm", KVERM, 20, 0, 100, 1, Style.Claw, Attributes.Stalk)
+    public Kverm() : base("Kverm", KVERM, BaseSpeed, 20, 0, 100, 1, Style.Claw, Attributes.Stalk)
     {
     }
 }
 public class Latu : Enemy
 {
-    public Latu() : base("Latu", LATU, 30, 0, 100, 3, Style.Claw, Attributes.Stalk, Attributes.Aggressive)
+    public Latu() : base("Latu", LATU, BaseSpeed, 30, 0, 100, 3, Style.Claw, Attributes.Stalk, Attributes.Aggressive)
     {
     }
 }
 public class Eke_tu : Enemy
 {
-    public Eke_tu() : base("Eke Tu", EKE_TU, 10, 0, 100, 2, Style.Claw, Attributes.Aggressive)
+    public Eke_tu() : base("Eke Tu", EKE_TU, BaseSpeed, 10, 0, 100, 2, Style.Claw, Attributes.Aggressive)
     {
     }
 }
 public class Oetem : Enemy
 {
-    public Oetem() : base("Oetem", OETEM, 40, 0, 100, 3, Style.Claw)
+    public Oetem() : base("Oetem", OETEM, BaseSpeed, 40, 0, 100, 3, Style.Claw)
     {
     }
 }
 public class Eke_fu : Enemy
 {
-    public Eke_fu() : base("Eke Fu", EKE_FU, 30, 0, 100, 2, Style.Claw, Attributes.Flanking)
+    public Eke_fu() : base("Eke Fu", EKE_FU, BaseSpeed, 30, 0, 100, 2, Style.Claw, Attributes.Flanking)
     {
     }
 }
 public class Eke_shi_ami : Enemy
 {
-    public Eke_shi_ami() : base("Eke Shi Ami", EKE_SHI_AMI, 30, 0, 100, 4, Style.Range, Attributes.Piercing, Attributes.Stun)
+    public Eke_shi_ami() : base("Eke Shi Ami", EKE_SHI_AMI, BaseSpeed, 30, 0, 100, 4, Style.Range, Attributes.Piercing, Attributes.Stun)
     {
     }
 }
 public class Eke_Lord : Enemy
 {
-    public Eke_Lord() : base("Eke Lord", EKE_LORD, 6, 0, 1100, 12, Style.Claw, Attributes.ArcingStrike, Attributes.Stun)
+    public Eke_Lord() : base("Eke Lord", EKE_LORD, BaseSpeed, 6, 0, 1100, 12, Style.Claw, Attributes.ArcingStrike, Attributes.Stun)
     {
     }
 }
 public class Ketemcol : Enemy
 {
-    public Ketemcol() : base("Ketemcol", KETEMCOL, 2, 1, 100, 6, Style.Claw, Attributes.ArcingStrike, Attributes.Stun)
+    public Ketemcol() : base("Ketemcol", KETEMCOL, BaseSpeed, 2, 1, 100, 6, Style.Claw, Attributes.ArcingStrike, Attributes.Stun)
     {
     }
 }
@@ -201,37 +192,37 @@ public class Ketemcol : Enemy
 // Titrum
 public class Mahukin : Enemy
 {
-    public Mahukin() : base("Mahukin", MAHUKIN, 2, 2, 100, 4, Style.Claw)
+    public Mahukin() : base("Mahukin", MAHUKIN, BaseSpeed, 2, 2, 100, 4, Style.Claw)
     {
     }
 }
 public class Drongo : Enemy
 {
-    public Drongo() : base("Drongo", DRONGO, 3, 3, 100, 6, Style.Claw)
+    public Drongo() : base("Drongo", DRONGO, BaseSpeed, 3, 3, 100, 6, Style.Claw)
     {
     }
 }
 public class Maheket : Enemy
 {
-    public Maheket() : base("Maheket", MAHEKET, 3, 2, 100, 5, Style.Claw)
+    public Maheket() : base("Maheket", MAHEKET, BaseSpeed, 3, 2, 100, 5, Style.Claw)
     {
     }
 }
 public class Calute : Enemy
 {
-    public Calute() : base("Calute", CALUTE, 6, 0, 100, 5, Style.Claw, Attributes.Stalk, Attributes.Aggressive)
+    public Calute() : base("Calute", CALUTE, BaseSpeed, 6, 0, 100, 5, Style.Claw, Attributes.Stalk, Attributes.Aggressive)
     {
     }
 }
 public class Etalket : Enemy
 {
-    public Etalket() : base("Etalket", ETALKET, 2, 0, 100, 4, Style.Claw, Attributes.Stalk)
+    public Etalket() : base("Etalket", ETALKET, BaseSpeed, 2, 0, 100, 4, Style.Claw, Attributes.Stalk)
     {
     }
 }
 public class Muatem : Enemy
 {
-    public Muatem() : base("Muatem", MUATEM, 7, 5, 100, 12, Style.Claw)
+    public Muatem() : base("Muatem", MUATEM, BaseSpeed, 7, 5, 100, 12, Style.Claw)
     {
     }
 }
@@ -239,19 +230,19 @@ public class Muatem : Enemy
 // Mountain/Cliff
 public class Drak : Enemy
 {
-    public Drak() : base("Drak", DRAK, 3, 0, 100, 3, Style.Claw, Attributes.Flying)
+    public Drak() : base("Drak", DRAK, BaseSpeed, 3, 0, 100, 3, Style.Claw, Attributes.Flying)
     {
     }
 }
 public class Zerrku : Enemy
 {
-    public Zerrku() : base("Zerrku", ZERRKU, 3, 0, 100, 4, Style.Range)
+    public Zerrku() : base("Zerrku", ZERRKU, BaseSpeed, 3, 0, 100, 4, Style.Range)
     {
     }
 }
 public class Gokin : Enemy
 {
-    public Gokin() : base("Gokin", GOKIN, 2, 0, 100, 2, Style.Claw, Attributes.Flanking)
+    public Gokin() : base("Gokin", GOKIN, BaseSpeed, 2, 0, 100, 2, Style.Claw, Attributes.Flanking)
     {
     }
 }
@@ -259,46 +250,46 @@ public class Gokin : Enemy
 // Cave
 public class Tajaqar : Enemy
 {
-    public Tajaqar() : base("Tajaqar", TAJAQAR, 3, 1, 100, 5, Style.Claw, Attributes.Flanking)
+    public Tajaqar() : base("Tajaqar", TAJAQAR, BaseSpeed, 3, 1, 100, 5, Style.Claw, Attributes.Flanking)
     {
     }
 }
 public class Tajaero : Enemy
 {
-    public Tajaero() : base("Tajaero", TAJAERO, 3, 0, 100, 4, Style.Range, Attributes.Flying)
+    public Tajaero() : base("Tajaero", TAJAERO, BaseSpeed, 3, 0, 100, 4, Style.Range, Attributes.Flying)
     {
     }
 }
 public class Terra_Qual : Enemy
 {
-    public Terra_Qual() : base("Terra Qual", TERRA_QUAL, 5, 2, 1100, 12, Style.Claw, Attributes.ArcingStrike)
+    public Terra_Qual() : base("Terra Qual", TERRA_QUAL, BaseSpeed, 5, 2, 1100, 12, Style.Claw, Attributes.ArcingStrike)
     {
     }
 }
 public class Duale : Enemy
 {
-    public Duale() : base("Duale", DUALE, 2, 0, 100, 5, Style.Range, Attributes.Aggressive, Attributes.Flanking)
+    public Duale() : base("Duale", DUALE, BaseSpeed, 2, 0, 100, 5, Style.Range, Attributes.Aggressive, Attributes.Flanking)
     {
     }
 }
 
 public class Meld_Warrior : Enemy
 {
-    public Meld_Warrior() : base("Meld Warrior", MELD_WARRIOR, 1, 1, 100, 3, Style.Claw, Attributes.Charge)
+    public Meld_Warrior() : base("Meld Warrior", MELD_WARRIOR, BaseSpeed, 1, 1, 100, 3, Style.Claw, Attributes.Charge)
     {
     }
 }
 
 public class Meld_Spearman : Enemy
 {
-    public Meld_Spearman() : base("Meld Spearman", MELD_SPEARMAN, 1, 2, 100, 3, Style.Claw, Attributes.Charge)
+    public Meld_Spearman() : base("Meld Spearman", MELD_SPEARMAN, BaseSpeed, 1, 2, 100, 3, Style.Claw, Attributes.Charge)
     {
     }
 }
 
 public class t1_Guardian : Enemy
 {
-    public t1_Guardian() : base("Guardian", T1_GUARDIAN, 100, 0, 1000, 30, Style.Claw)
+    public t1_Guardian() : base("Guardian", T1_GUARDIAN, BaseSpeed, 100, 0, 1000, 30, Style.Claw)
     {
         // 5 terror
         // swipes front and left tile, hits front and behind
@@ -307,7 +298,7 @@ public class t1_Guardian : Enemy
 
 public class t2_Guardian : Enemy
 {
-    public t2_Guardian() : base("Deep Guardian", T2_GUARDIAN, 130, 5, 4000, 60, Style.Range)
+    public t2_Guardian() : base("Deep Guardian", T2_GUARDIAN, BaseSpeed, 130, 5, 4000, 60, Style.Range)
     {
 
     }

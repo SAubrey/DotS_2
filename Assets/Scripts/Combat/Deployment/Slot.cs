@@ -32,10 +32,11 @@ public class Slot : AgentBody
     [SerializeField] private GameObject SwordsmanPrefab, PolearmPrefab, RangerPrefab, MagePrefab, CenterCharPrefab;
     [SerializeField] private GameObject EyelessPrefab;
     public event Action<Vector2> OnVelocityChange;
-    private PlayerDeployment PlayerDeployment;
     private Slot LockedOnTarget;
     public AIBrain Brain;
-    protected float BlockSpeed = 5f;
+    protected float BlockSpeed = 1.8f;
+    protected float ArrowLaunchSpeed = 70f;
+    private bool Dead = false;
 
     protected override void Awake()
     {
@@ -43,8 +44,6 @@ public class Slot : AgentBody
         Cam = GameObject.Find("BattleCamera").GetComponent<Camera>();
         FaceUIToCam();
         gameObject.SetActive(false);
-        PlayerDeployment = GameObject.Find("PlayerSPDeployment").GetComponent<PlayerDeployment>();
-        PlayerDeployment.OnLockOn += LockOn;
     }
 
     protected virtual void Start()
@@ -94,9 +93,9 @@ public class Slot : AgentBody
         Vector2 normalVelX = new Vector2(Velocity.x, MaxSpeed).normalized;
         Vector2 normalVelY = new Vector2(Velocity.y, MaxSpeed).normalized;
         if (Animator != null) {
-            Animator.SetFloat("VelocityX", normalVelX.x, .1f, Time.fixedDeltaTime);
-            Animator.SetFloat("VelocityZ", normalVelY.x, .1f, Time.fixedDeltaTime);
-            Animator.SetFloat("Velocity", Velocity.magnitude, .1f, Time.fixedDeltaTime);
+            Animator.SetFloat("VelocityX", normalVelX.x, .1f, Time.deltaTime);
+            Animator.SetFloat("VelocityZ", normalVelY.x, .1f, Time.deltaTime);
+            Animator.SetFloat("Velocity", Velocity.magnitude, .1f, Time.deltaTime);
         }
 
         Rotate(Velocity);
@@ -114,13 +113,7 @@ public class Slot : AgentBody
             return BlockSpeed;
         } else if (Unit.IsPlayer)
         {
-            if (Player.I.Sprinting)
-            {
-                return Player.I.PlayerController.SprintSpeed;
-            } else
-            {
-                return Player.I.PlayerController.MoveSpeed;
-            }
+            return Player.I.Sprinting ? Player.I.PlayerController.SprintSpeed : Player.I.PlayerController.MoveSpeed;
         }
         return MaxSpeed;
     }
@@ -173,7 +166,6 @@ public class Slot : AgentBody
         if (u.IsPlayer)
         {
             Brain = gameObject.AddComponent<AIBrainPlayer>();
-            //MaxSpeed *= 1.2f;
         } else 
         {
             Brain = gameObject.AddComponent<AIBrainEnemy>();
@@ -181,6 +173,7 @@ public class Slot : AgentBody
         Unit.Brain = Brain;
         Brain.Slot = this;
         Brain.enabled = true;
+        MaxSpeed = u.Speed;
         return true;
     }
 
@@ -209,14 +202,7 @@ public class Slot : AgentBody
     {
         if (u == null)
             return;
-        if (u.IsPlayer)
-        {
-            Unit = u as PlayerUnit;
-        }
-        else if (!u.IsPlayer)
-        {
-            Unit = u as Enemy;
-        }
+        Unit = u.IsPlayer ? u as PlayerUnit : u as Enemy;
         Unit.SetSlot(this);
     }
 
@@ -227,14 +213,12 @@ public class Slot : AgentBody
 
     private void GenerateMovementEffects(float velocity)
     {
-        if (velocity <= 1f)
+        if (velocity <= 2f)
         {
-            PSDust.Stop();
-            // Footstep audio off
+            PSDust.gameObject.SetActive(false);
         } else 
         {
-            PSDust.Play();
-
+            PSDust.gameObject.SetActive(true);
         }
     }
 
@@ -274,7 +258,7 @@ public class Slot : AgentBody
         //a.transform.position = ArrowOriginTransform.position;
         a.transform.localPosition = Vector3.zero;
         Arrow arrowScript = a.GetComponent<Arrow>();
-        arrowScript.Fly(ArrowOriginTransform.position, targetPos, attackDmg, 60f);
+        arrowScript.Fly(ArrowOriginTransform.position, targetPos, attackDmg, ArrowLaunchSpeed);
 
         if (Animator != null)
             Animator.SetTrigger("Attack");

@@ -34,6 +34,7 @@ public class FollowDeployment : IState
 
     public void OnExit()
     {
+        Returning = false;
     }
 }
 

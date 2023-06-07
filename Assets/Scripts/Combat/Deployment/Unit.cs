@@ -32,6 +32,7 @@ public abstract class Unit
     {
         Sword, Polearm, Range, Mage, Claw
     }
+    public int Speed { get; protected set; } = 7;
     protected int AttackDmg;
     protected int Defense;
     protected float BlockRatingBase = .25f;
@@ -105,11 +106,12 @@ public abstract class Unit
         return attribute_active;
     }
 
-    public Unit(string name, int ID, int att, int def, int hp, Style style,
+    public Unit(string name, int ID, int speed, int att, int def, int hp, Style style,
             Attributes atr1, Attributes atr2, Attributes atr3)
     {
         this.Name = name;
         this.ID = ID;
+        Speed = speed;
         AttackDmg = att;
         Defense = def;
         CombatStyle = style;
@@ -219,11 +221,6 @@ public abstract class Unit
         return dmg > 0 ? dmg : 0;
     }
 
-    public bool CanDefend()
-    {
-        return Defense > 0;
-    }
-
     public virtual int GetDynamicMaxHealth()
     {
         return HealthMax + GetBonusHealth() + get_stat_buff(HEALTH);
@@ -299,16 +296,6 @@ public abstract class Unit
         if (PassiveAttribute)
             return false;
         return true;
-    }
-
-    public int get_raw_attack_dmg()
-    {
-        return AttackDmg;
-    }
-
-    public int get_raw_defense()
-    {
-        return Defense;
     }
 
     public string GetName()

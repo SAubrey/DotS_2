@@ -44,6 +44,7 @@ public class AIBrainEnemy : AIBrain
         At(backingUp, comfortable, InComfyRange());
 
         StateMachine.AddAnyTransition(roam, InRoamRange());
+        StateMachine.AddAnyTransition(roam, DeadTarget());
 
         Func<bool> InRoamRange() => () => GetBehaviorZone() == BehaviorZone.Roam;
         Func<bool> InChaseRange() => () => GetBehaviorZone() == BehaviorZone.Chase;
@@ -53,10 +54,30 @@ public class AIBrainEnemy : AIBrain
             !Attacking && StateMachine.GetState() != moveToAttack;
         Func<bool> MoveToAttack() => () => comfortable.MoveToAttack;
         Func<bool> TimeToAttack() => () => moveToAttack.BeginAttack;
+        Func<bool> DeadTarget() => () => Target == null;
         //Func<bool> DoneAttacking() => () => !attack.Attacking;
         //Func<bool> time_to_attack() => () => move_to_attack.begin_attack;
 
         StateMachine.SetState(roam);
+    }
+
+    protected override Slot FindNearestEnemyInSight()
+    {
+        var playerUnits = TurnPhaser.I.ActiveDisc.Bat.GetAllPlacedUnits();
+        Slot nearest = null;
+        float nearestDistance = Vector3.Distance(transform.position, Player.I.transform.position);
+        float distance = 0;
+
+        foreach (PlayerUnit p in playerUnits)
+        {
+            distance = Vector3.Distance(transform.position, p.Slot.transform.position);
+            if (distance < nearestDistance)
+            {
+                nearest = p.Slot;
+                nearestDistance = distance;
+            }
+        }
+        return nearest;
     }
 
     public override void Delete()

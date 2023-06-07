@@ -24,10 +24,12 @@ public class Comfortable : IState
     {
         PendingAttackTimer = new Timer(Random.Range(0.6f, 2f));
         Debug.Log("comfortable w/ TD: " + Brain.TargetDistance);
+        Brain.Comfortable = true;
     }
 
     public void OnExit()
     {
         MoveToAttack = false;
+        Brain.Comfortable = false;
     }
 }

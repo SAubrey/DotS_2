@@ -33,7 +33,7 @@ public class Attack : IState
     public void OnEnter()
     {
         Timer = new Timer(0.5f, true, .4f, .6f);
-        AttackRecoveryTimer = new Timer(1f, true);
+        AttackRecoveryTimer = new Timer(1.5f, true);
         Debug.Log("attack w/ PD: " + Brain.TargetDistance);
         Brain.Attacking = true;
     }

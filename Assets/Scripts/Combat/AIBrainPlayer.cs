@@ -49,43 +49,27 @@ public class AIBrainPlayer : AIBrain
 
         Func<bool> TooFarFromPlayer() => () => GetPlayerDistance() > TooFarFromPlayerDistance;// && !attack.Attacking;
         Func<bool> DeadTarget() => () => Target == null;
-        /*var chase = new Chase(this);
-        var comfortable = new Comfortable(this);
-        var moveToAttack = new MoveToAttack(this);
-        var attack = new Attack(this);
-        var backingUp = new BackingUp(this);
-
-        // Add transitions from state, to state, if condition.
-        StateMachine.AddAnyTransition(follow, );
-
-        At(follow, chase, InChaseRange());
-        
-        At(chase, follow, InFollowRange());
-        //At(chase, backingUp, InActRange());
-        
-        At(comfortable, chase, InChaseRange());
-        At(comfortable, moveToAttack, MoveToAttack());
-
-        StateMachine.AddAnyTransition(attack, TimeToAttack());
-        At(moveToAttack, attack, TimeToAttack());
-
-        //At(attack, backingUp, DoneAttacking());
-
-        StateMachine.AddAnyTransition(backingUp, BackUp());
-        At(backingUp, follow, AlwaysFollow());
-
-        Func<bool> InFollowRange() => () => GetBehaviorZone() == BehaviorZone.Follow;
-        Func<bool> AlwaysFollow() => () => true;
-        Func<bool> InChaseRange() => () => GetBehaviorZone() == BehaviorZone.Chase;
-        //Func<bool> InActRange() => () => GetBehaviorZone() == BehaviorZone.Act;
-        Func<bool> BackUp() => () => GetBehaviorZone() == BehaviorZone.Act && !moveToAttack.BeginAttack && !comfortable.MoveToAttack && !attack.Attacking;
-        Func<bool> MoveToAttack() => () => comfortable.MoveToAttack;
-        Func<bool> TimeToAttack() => () => moveToAttack.BeginAttack;
-        //Func<bool> DoneAttacking() => () => !attack.Attacking;
-        //Func<bool> time_to_attack() => () => move_to_attack.begin_attack;
-        */
 
         StateMachine.SetState(follow);
+    }
+
+    protected override Slot FindNearestEnemyInSight()
+    {
+        var enemies = TurnPhaser.I.ActiveDisc.Cell.GetEnemies();
+        Slot nearest = null;
+        float nearestDistance = Mathf.Infinity;
+        float distance = 0;
+
+        foreach (Enemy e in enemies)
+        {
+            distance = Vector3.Distance(transform.position, e.Slot.transform.position);
+            if (distance < nearestDistance)
+            {
+                nearest = e.Slot;
+                nearestDistance = distance;
+            }
+        }
+        return nearest;
     }
 
     public float GetPlayerDistance() 

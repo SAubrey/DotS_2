@@ -27,19 +27,21 @@ public class Roam : IState
         // Set random target, update when target entered
         TargetPos = GetRandomTargetPos();
         Debug.Log("Roam: " + TargetPos + " Time: " + Time.time);
+        Brain.Roam = true;
     }
 
     public void OnExit()
     {
         TargetPos = Vector3.zero;
         T.Reset();
+        Brain.Roam = false;
     }
 
     private Vector3 GetRandomTargetPos()
     {
         Vector3 v = Brain.transform.position;
-        v.x += UnityEngine.Random.Range(-50f, 50f);
-        v.z += UnityEngine.Random.Range(-50f, 50f);
+        v.x += UnityEngine.Random.Range(-40f, 40f);
+        v.z += UnityEngine.Random.Range(-40f, 40f);
         return v;
     }
 }

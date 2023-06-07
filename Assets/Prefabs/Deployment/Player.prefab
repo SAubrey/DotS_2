@@ -397,7 +397,6 @@ MonoBehaviour:
   - {fileID: 5524143313625076390}
   - {fileID: 5471073146432152562}
   - {fileID: 4794237598491731848}
-  Deployment: {fileID: 2285079504894214453}
   PrefabSlot: {fileID: 4785489105868869231, guid: 87e1be6ca8d3f9449a295e3185b72b94,
     type: 3}
   SlotParent: {fileID: 0}
@@ -508,7 +507,6 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 5265894451347032748}
   - {fileID: 0}
-  Deployment: {fileID: 2285079504894214453}
   PrefabSlot: {fileID: 4785489105868869231, guid: 87e1be6ca8d3f9449a295e3185b72b94,
     type: 3}
   SlotParent: {fileID: 0}
@@ -1918,7 +1916,6 @@ MonoBehaviour:
   - {fileID: 6217243790796505671}
   - {fileID: 5840198195318190867}
   - {fileID: 6370668138387666793}
-  Deployment: {fileID: 2285079504894214453}
   PrefabSlot: {fileID: 4785489105868869231, guid: 87e1be6ca8d3f9449a295e3185b72b94,
     type: 3}
   SlotParent: {fileID: 0}
@@ -2243,7 +2240,6 @@ MonoBehaviour:
   - {fileID: 7661748218799339037}
   - {fileID: 7860862107833108297}
   - {fileID: 7238060632889033523}
-  Deployment: {fileID: 2285079504894214453}
   PrefabSlot: {fileID: 4785489105868869231, guid: 87e1be6ca8d3f9449a295e3185b72b94,
     type: 3}
   SlotParent: {fileID: 0}
@@ -2760,7 +2756,6 @@ MonoBehaviour:
   - {fileID: 6993413876566262222}
   - {fileID: 7370426419638808730}
   - {fileID: 8010960890873918688}
-  Deployment: {fileID: 2285079504894214453}
   PrefabSlot: {fileID: 4785489105868869231, guid: 87e1be6ca8d3f9449a295e3185b72b94,
     type: 3}
   SlotParent: {fileID: 0}
@@ -2896,13 +2891,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df7ae91b1c3d8b24e9dfc18ef33b9d16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  staminabar: {fileID: 0}
-  StamMax: 100
-  Stunned: 0
-  Attacking: 0
-  target_layer_mask:
-    serializedVersion: 2
-    m_Bits: 8192
   GroundMask:
     serializedVersion: 2
     m_Bits: 262144
@@ -2926,8 +2914,6 @@ MonoBehaviour:
   ZoneMageParentPos: {x: 0, y: 0, z: 0}
   ForwardZone:
   - {fileID: 6630768485906232042}
-  Manabar: {fileID: 0}
-  ManaMax: 100
   LightObject: {fileID: 1731541571381319300}
 --- !u!195 &8777187570309606310
 NavMeshAgent:
@@ -3720,7 +3706,6 @@ MonoBehaviour:
   - {fileID: 9059284074354594729}
   - {fileID: 8862399927280395005}
   - {fileID: 8329465220843005575}
-  Deployment: {fileID: 2285079504894214453}
   PrefabSlot: {fileID: 4785489105868869231, guid: 87e1be6ca8d3f9449a295e3185b72b94,
     type: 3}
   SlotParent: {fileID: 0}
@@ -5627,7 +5612,6 @@ MonoBehaviour:
   - {fileID: 394277842310265352}
   - {fileID: 161103204225469276}
   - {fileID: 817965429630095142}
-  Deployment: {fileID: 2285079504894214453}
   PrefabSlot: {fileID: 4785489105868869231, guid: 87e1be6ca8d3f9449a295e3185b72b94,
     type: 3}
   SlotParent: {fileID: 0}
@@ -9970,7 +9954,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f1c67d42f2849946802311ee1fc4bb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AimSpeed: 5
+  AimSpeed: 4
   MoveSpeed: 15
   SprintSpeed: 25
   RotationSmoothTime: 0.12
@@ -10017,7 +10001,11 @@ MonoBehaviour:
     m_Bits: 262144
   PlayerController: {fileID: 0}
   Health: 100
-  DrawPowerSlider: {fileID: 0}
+  DrawReticule: {fileID: 0}
+  staminabar: {fileID: 0}
+  StamMax: 100
+  Sprinting: 0
+  Manabar: {fileID: 0}
 --- !u!95 &8611041998741669097
 Animator:
   serializedVersion: 5

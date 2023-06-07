@@ -58,14 +58,16 @@ public class CamSwitcher : MonoBehaviour
         {
             QualitySettings.SetQualityLevel(2, true); // REMOVE
         }
-    }
 
-    void FixedUpdate()
-    {
         if (Controller.I.Escape.triggered)
         {
             Pause();
         }
+    }
+
+    void FixedUpdate()
+    {
+        
     }
 
     void Cycle()
@@ -89,6 +91,8 @@ public class CamSwitcher : MonoBehaviour
 
     public void Pause()
     {
+        Debug.Log("Pausing");
+        Time.timeScale = 0f;
         if (current_cam == MAP)
         {
             pause_panel.SetActive(true);
@@ -98,7 +102,6 @@ public class CamSwitcher : MonoBehaviour
             battle_pause_panel.SetActive(true);
             Cursor.lockState = CursorLockMode.None;
         }
-        Time.timeScale = 0f;
     }
 
     public void Unpause()

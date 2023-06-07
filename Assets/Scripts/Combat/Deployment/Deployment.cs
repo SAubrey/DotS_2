@@ -8,22 +8,9 @@ public abstract class Deployment : AgentBody
     public bool IsEnemy { get; protected set; } = false;
     protected Slot LockedOnTarget;
 
-    public bool Stunned = false;
-    public bool Attacking = false;
-    private bool _Blocking = false;
-    public bool Blocking {
-        get { return _Blocking; }
-        set {
-            _Blocking = value;
-            //Agent.ve = Blocking ? MaxSpeed * .5f : MaxSpeed;
-        }
-    }   
-
     protected List<Group[]> Zones = new List<Group[]>();
-    public LayerMask target_layer_mask;
     
     public abstract void PlaceUnit(Unit unit);
-    protected virtual void AnimateSlotAttack(bool melee) { }
 
     protected override void Awake() 
     {

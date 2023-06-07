@@ -166,7 +166,7 @@ namespace StarterAssets
 			// Cinemachine will follow this target
 			CinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride, _cinemachineTargetYaw, 0.0f);
 		}
-
+		Vector3 previousDirection = new Vector3();
 		private void Move()
 		{
 			// Set target speed depending if no input, aiming, running, or sprinting
@@ -215,7 +215,7 @@ namespace StarterAssets
 				right = right.normalized * inputDirection.x;
 				targetDirection = forward + right;
 			}
-			else if (_input.move == Vector2.zero)
+			else if (_input.move != Vector2.zero)
 			{
 				_targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + _mainCamera.transform.eulerAngles.y;
 
@@ -224,13 +224,16 @@ namespace StarterAssets
 			} else // Maintain momentum once input stops.
 			{
 				_targetRotation = 0f;
-				targetDirection = transform.forward;
+				targetDirection = previousDirection;
 			}
 
+			GroundedCheck();
+			ApplyGravity();
 			float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
 			transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
 			_controller.Move(targetDirection * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
 
+			previousDirection = targetDirection;
             if (_hasAnimator) {
                 _animator.SetFloat("VelocityX", inputDirection.x, .1f, _animationBlend);
                 _animator.SetFloat("VelocityZ", inputDirection.z, .1f, _animationBlend);
@@ -238,6 +241,7 @@ namespace StarterAssets
             }
 		}
 
+/*
 		private void JumpAndGravity()
 		{
 			if (Grounded)
@@ -298,6 +302,25 @@ namespace StarterAssets
 
 				// if we are not grounded, do not jump
 				_input.jump = false;
+			}
+
+			// apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
+			if (_verticalVelocity < _terminalVelocity)
+			{
+				_verticalVelocity += Gravity * Time.deltaTime;
+			}
+		}*/
+
+		private void ApplyGravity()
+		{
+			if (Grounded)
+			{
+				// stop our velocity dropping infinitely when grounded
+				if (_verticalVelocity < 0.0f)
+				{
+					_verticalVelocity = -2f;
+				}
+
 			}
 
 			// apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)

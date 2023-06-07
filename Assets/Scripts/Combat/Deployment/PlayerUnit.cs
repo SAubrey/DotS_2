@@ -31,9 +31,9 @@ public class PlayerUnit : Unit
         return pu;
     }
 
-    public PlayerUnit(string name, int ID, int att, int def, int hp, Style style,
+    public PlayerUnit(string name, int ID, int speed, int att, int def, int hp, Style style,
             Attributes atr1=Attributes.Null, Attributes atr2=Attributes.Null, Attributes atr3=Attributes.Null) :
-            base(name, ID, att, def, hp, style, atr1, atr2, atr3)
+            base(name, ID, speed, att, def, hp, style, atr1, atr2, atr3)
     {
         IsPlayer = true;
         TargetMask = "Enemy";
@@ -84,7 +84,7 @@ public class PlayerUnit : Unit
 
 public class Warrior : PlayerUnit
 {
-    public Warrior() : base("Warrior", WARRIOR, 20, 1, 100, Unit.Style.Sword)
+    public Warrior() : base("Warrior", WARRIOR, 7, 20, 1, 100, Unit.Style.Sword)
     {
         AttributeRequiresAction = true;
         BlockRating = .9f;
@@ -93,7 +93,7 @@ public class Warrior : PlayerUnit
 
 public class Spearman : PlayerUnit
 {
-    public Spearman() : base("Spearman", SPEARMAN, 15, 2, 70, Style.Polearm, Attributes.Piercing, Attributes.CounterCharge)
+    public Spearman() : base("Spearman", SPEARMAN, 7, 15, 2, 70, Style.Polearm, Attributes.Piercing, Attributes.CounterCharge)
     {
         PassiveAttribute = true;
     }
@@ -101,7 +101,7 @@ public class Spearman : PlayerUnit
 
 public class Archer : PlayerUnit
 {
-    public Archer() : base("Archer", ARCHER, 15, 0, 60, Style.Range)
+    public Archer() : base("Archer", ARCHER, 7, 15, 0, 60, Style.Range)
     {
         PassiveAttribute = true;
     }
@@ -109,7 +109,7 @@ public class Archer : PlayerUnit
 
 public class Guardian : PlayerUnit
 {
-    public Guardian() : base("Guardian", GUARDIAN, 20, 3, 120, Style.Sword)
+    public Guardian() : base("Guardian", GUARDIAN, 7, 20, 3, 120, Style.Sword)
     {
         BlockRating = .9f;
     }
@@ -117,7 +117,7 @@ public class Guardian : PlayerUnit
 
 public class Arbalest : PlayerUnit
 {
-    public Arbalest() : base("Arbalest", ARBALEST, 30, 0, 75, Style.Range, Attributes.Piercing)
+    public Arbalest() : base("Arbalest", ARBALEST, 7, 30, 0, 75, Style.Range, Attributes.Piercing)
     {
         PassiveAttribute = true;
     }
@@ -125,7 +125,7 @@ public class Arbalest : PlayerUnit
 
 public class Mender : PlayerUnit
 {
-    public Mender() : base("Mender", MENDER, 5, 3, 40, Style.Mage, Attributes.Heal)
+    public Mender() : base("Mender", MENDER, 7, 5, 3, 40, Style.Mage, Attributes.Heal)
     {
     }
 
@@ -143,7 +143,7 @@ public class Mender : PlayerUnit
 
 public class Paladin : PlayerUnit
 {
-    public Paladin() : base("Paladin", PALADIN, 20, 2, 160, Style.Sword)
+    public Paladin() : base("Paladin", PALADIN, 7, 20, 2, 160, Style.Sword)
     {
         AttributeRequiresAction = true;
     }

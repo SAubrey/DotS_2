@@ -43,7 +43,7 @@ public class Player : MonoBehaviour
     protected float TimeArrowDrawMax = 1f;
     protected float TimeArrowDraw = 0f;
     protected Timer TimerArrowDraw = new Timer(1f, true);
-    private float ArrowSpeedMax = 170f;
+    private float ArrowSpeedMax = 130f;
     private float ArrowDamageMax = 40f;
     private bool _DrawingArrow = false;
     public bool DrawingArrow { 
@@ -65,13 +65,14 @@ public class Player : MonoBehaviour
         set 
         {
             _DrawCharge = value;
-            DrawPowerSlider.value = DrawCharge;
             Animator.SetFloat("DrawCharge", DrawCharge);
+            // Want 0 scaling when 0 charge, .3 scaling when f
+            DrawReticule.transform.localScale = Vector3.one * (1f - (1f - .3f) * value);
         }
     }
-    public Slider DrawPowerSlider;
     private float DrawTime = 0f;
     private float DrawTimeMax = 1f;
+    public GameObject DrawReticule;
 
     // Stamina
     public Slider staminabar;
@@ -331,13 +332,12 @@ public class Player : MonoBehaviour
     {
         if (velMagnitude > .1f)
         {
-            PSDust.Play();
+            PSDust.gameObject.SetActive(true);
         } else 
         {
-            PSDust.Pause();
+            PSDust.gameObject.SetActive(false);
         }
     }
-
     
     public void UpdateHealthbar()
     {
@@ -357,6 +357,7 @@ public class Player : MonoBehaviour
     public void Die() 
     {
         // Game over scenario
+        
 
     }
 

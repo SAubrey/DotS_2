@@ -71,11 +71,14 @@ public class Arrow : MonoBehaviour
         if (!Flying || Statics.ColliderIsLayer(collider, "Player") || Statics.ColliderIsLayer(collider, "Slot")) 
             return;
 
-        SoundManager.I.playerAudioPlayer.ArrowHit(gameObject);
+        Stick(collider.transform);
         Flying = false;
+        SoundManager.I.playerAudioPlayer.ArrowHit(gameObject);
+        LineRenderer.enabled = false;
         if (Statics.ColliderIsLayer(collider, "Enemy"))
         {
-            Slot slot = collider.GetComponent<Slot>();
+            //Slot slot = collider.GetComponent<Slot>();
+            Slot slot = collider.GetComponentInParent<Slot>();
             if (slot == null)
                 return;
 
@@ -84,12 +87,12 @@ public class Arrow : MonoBehaviour
                 slot.Unit.TakeDamage((int)Damage);
             }
         }
-        Stick(collider.transform);
+        
     }
 
     private void Stick(Transform t)
     {
-        Debug.Log("STICKING!");
+        Debug.Log("STICKING! to: " + t.name);
         Rigidbody.velocity = Vector3.zero;
         Rigidbody.angularVelocity = Vector3.zero;
         Rigidbody.isKinematic = true;

@@ -11,21 +11,17 @@ public abstract class AIBrain : MonoBehaviour
     }
 
     public Slot Slot;
-    public Transform Target;
+    public Slot Target;
     public Vector3 TargetPos {
         get { 
-            if (Target == null)
-                return Vector3.zero;
-            return Target.position;
+            return Target ? Target.transform.position : Vector3.zero;
         }
         private set {}
     }
     public float TargetDistance
     {
         get { 
-            if (Target == null)
-                return 9999f;
-            return Vector3.Distance(transform.position, Target.position); 
+            return Target ? Vector3.Distance(transform.position, Target.transform.position) : 9999f;
         }
         private set {}
     }
@@ -41,6 +37,7 @@ public abstract class AIBrain : MonoBehaviour
     protected bool LockedOn = false;
     public bool TookHit = false;
     public bool Attacking = false;
+    public bool Comfortable, Chase, Roam = false; 
     public bool CanRetarget { get => !Attacking; }
     // Can retarget: Not attacking or movign to attack
 
@@ -76,7 +73,12 @@ public abstract class AIBrain : MonoBehaviour
         } 
     }
 
-    private Transform FindNearestEnemyInSight()
+    protected virtual Slot FindNearestEnemyInSight()
+    {
+        return null;
+    }
+/*
+    protected virtual Transform FindNearestEnemyInSight()
     {
         Collider[] hits = Physics.OverlapSphere(transform.position, ChaseDistance, LayerMask.GetMask(Slot.Unit.TargetMask));
         Transform nearest = null;
@@ -95,6 +97,7 @@ public abstract class AIBrain : MonoBehaviour
         }
         return nearest;
     }
+    */
 
     public BehaviorZone GetBehaviorZone()
     {
