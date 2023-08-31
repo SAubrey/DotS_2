@@ -71,7 +71,7 @@ public class AIBrainEnemy : AIBrain
         foreach (PlayerUnit p in playerUnits)
         {
             distance = Vector3.Distance(transform.position, p.Slot.transform.position);
-            if (distance < nearestDistance)
+            if (distance < nearestDistance && distance < ChaseDistance && !p.Slot.Unit.IsDead)
             {
                 nearest = p.Slot;
                 nearestDistance = distance;

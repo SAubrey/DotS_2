@@ -34,7 +34,9 @@ public class Attack : IState
     {
         Timer = new Timer(0.5f, true, .4f, .6f);
         AttackRecoveryTimer = new Timer(1.5f, true);
-        Debug.Log("attack w/ PD: " + Brain.TargetDistance);
+        #if DEBUG_AI 
+        Debug.Log("attack w/ target distance: " + Brain.TargetDistance);
+        #endif
         Brain.Attacking = true;
     }
 

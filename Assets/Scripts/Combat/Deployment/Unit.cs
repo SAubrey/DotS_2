@@ -85,7 +85,14 @@ public abstract class Unit
     public virtual void RemoveBoost() { }
     public virtual void Die()
     {
-        Slot.Animator.SetFloat("Health", 0f);
+        Dead = true;
+        Slot.Animator.SetFloat("Health", 0f); // Trigger animation
+        Slot.MeleeTriggerBox.enabled = false;
+        Slot.Invoke("CleanupDeadObject", 3f);
+    }
+
+    public virtual void CleanupDeadObject() 
+    {
         Slot.Empty();
         GameObject.Destroy(Slot);
         Slot = null;
@@ -144,7 +151,7 @@ public abstract class Unit
         }
     }
 
-    public void MeleeAttack()
+    /*public void MeleeAttack()
     {
         if (GetSlot() == null)
             return;
@@ -153,10 +160,11 @@ public abstract class Unit
 
         Slot.Animator.SetTrigger("Attack");
         Collider[] hits = Physics.OverlapBox(Slot.MeleeAttackPoint.transform.position, MeleeAttackHalfSize, Quaternion.identity, LayerMask.GetMask(TargetMask));
-        
+        Debug.Log("hits count for target mask: " + TargetMask + " : " + hits.Length);
         foreach (Collider h in hits)
         {
             Slot s = h.GetComponent<Slot>();
+            Debug.Log(s.Unit.GetName());
             if (s != null)
             {
                 Unit u = s.Unit;
@@ -173,6 +181,17 @@ public abstract class Unit
                 p.TakeDamage(GetAttackDmg());
             }
         }
+    }*/
+
+    public void MeleeAttack()
+    {
+        if (GetSlot() == null)
+            return;
+        if (Slot.MeleeTriggerBox == null)
+            return;
+
+        Slot.Animator.SetTrigger("Attack");
+        Slot.MeleeTriggerBox.enabled = true;
     }
 
     public void RangeAttack(LayerMask mask, Vector3 targetPos)

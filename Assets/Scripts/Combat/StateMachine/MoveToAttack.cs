@@ -22,7 +22,9 @@ public class MoveToAttack : IState
 
     public void OnEnter()
     {
+        #if DEBUG_AI 
         Debug.Log("Move to attack w/ TD: " + Brain.TargetDistance);
+        #endif
     }
 
     public void OnExit()

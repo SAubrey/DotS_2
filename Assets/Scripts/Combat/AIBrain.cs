@@ -21,19 +21,19 @@ public abstract class AIBrain : MonoBehaviour
     public float TargetDistance
     {
         get { 
-            return Target ? Vector3.Distance(transform.position, Target.transform.position) : 9999f;
+            return Target ? Vector3.Distance(transform.position, Target.transform.position) : 8192f;
         }
         private set {}
     }
 
     protected StateMachine StateMachine = new StateMachine();
-    protected float ComfortableDistanceMin = 20f;
-    protected float ComfortableDistanceMax = 60f;
-    protected float TargetDistanceOffset = 5f; // Should never intend to be closer than this.
+    protected float ComfortableDistanceMin = 10f;
+    protected float ComfortableDistanceMax = 15f;
+    protected float TargetDistanceOffset = 3f; // Should never intend to be closer than this.
     public float ComfortableTargetDistanceMax { get => TargetDistanceOffset + ComfortableDistanceMax; }
     public float ComfortableTargetDistanceMin { get => TargetDistanceOffset + ComfortableDistanceMin; }
-    protected float ChaseDistance = 200f;
-    public float AttackDistance = 5f;
+    protected float ChaseDistance = 30f;
+    public float AttackDistance = 3f;
     protected bool LockedOn = false;
     public bool TookHit = false;
     public bool Attacking = false;

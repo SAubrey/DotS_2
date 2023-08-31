@@ -14,9 +14,9 @@ GameObject:
   - component: {fileID: 7170682017987239525}
   - component: {fileID: 3048803239231714546}
   - component: {fileID: 675908756489305050}
+  - component: {fileID: 2314366423527234708}
   - component: {fileID: 5074364702173052173}
   - component: {fileID: 5522089344886546500}
-  - component: {fileID: 2314366423527234708}
   m_Layer: 20
   m_Name: Arrow
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4337473355369303557}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 20, z: 0}
   m_LocalScale: {x: 4, y: 4, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -114,7 +114,7 @@ BoxCollider:
   m_GameObject: {fileID: 4337473355369303557}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 0.04613344, y: 0.039952736, z: 0.66580886}
   m_Center: {x: 0, y: 0.0066587864, z: 0.027295148}
@@ -127,10 +127,24 @@ BoxCollider:
   m_GameObject: {fileID: 4337473355369303557}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 0.04546707, y: 0.039233077, z: 0.31292793}
   m_Center: {x: -0.00006619096, y: 0.007534014, z: 0.5218407}
+--- !u!136 &2314366423527234708
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4337473355369303557}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  m_Radius: 0.04
+  m_Height: 0.25
+  m_Direction: 2
+  m_Center: {x: 0, y: 0, z: 0.52}
 --- !u!120 &5074364702173052173
 LineRenderer:
   m_ObjectHideFlags: 0
@@ -243,17 +257,3 @@ MonoBehaviour:
   Rigidbody: {fileID: 7170682017987239525}
   LineRenderer: {fileID: 5074364702173052173}
   TargetTag: Enemy
---- !u!136 &2314366423527234708
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4337473355369303557}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  m_Radius: 0.04
-  m_Height: 0.25
-  m_Direction: 2
-  m_Center: {x: 0, y: 0, z: 0.52}

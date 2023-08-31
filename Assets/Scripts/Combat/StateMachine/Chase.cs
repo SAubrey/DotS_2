@@ -18,7 +18,9 @@ public class Chase : IState
 
     public void OnEnter()
     {
+        #if DEBUG_AI 
         Debug.Log("chase w/ PD: " + Brain.TargetDistance);
+        #endif
         Brain.Chase = true;
         
     }

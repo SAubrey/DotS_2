@@ -5,13 +5,13 @@ using System;
 
 public class AIBrainPlayer : AIBrain
 {
-    float TooFarFromPlayerDistance = 35f;
+    public float TooFarFromPlayerDistance = 15f;
     
     protected override void Awake()
     {
         base.Awake();
 
-        ChaseDistance = 30f;
+        ChaseDistance = 10f;
     }
     
     protected override void Update()
@@ -63,7 +63,7 @@ public class AIBrainPlayer : AIBrain
         foreach (Enemy e in enemies)
         {
             distance = Vector3.Distance(transform.position, e.Slot.transform.position);
-            if (distance < nearestDistance)
+            if (distance < nearestDistance && distance < ChaseDistance && !e.Slot.Unit.IsDead)
             {
                 nearest = e.Slot;
                 nearestDistance = distance;

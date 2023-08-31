@@ -26,6 +26,7 @@ public class Slot : AgentBody
     [SerializeField] private Transform ArrowOriginTransform;
     public Deployment Deployment;
     [SerializeField] public GameObject MeleeAttackPoint;
+    [SerializeField] public Collider MeleeTriggerBox;
     [SerializeField] public GameObject PrefabArrow;
     public Animator Animator;
     private GameObject CharacterModel;
@@ -60,16 +61,21 @@ public class Slot : AgentBody
     Vector2 SmoothDeltaPosition = Vector2.zero;
     Vector2 Velocity = Vector2.zero;
     Vector3 worldDeltaPosition;
+    Vector3 PreviousPosition, CurrentPosition = new Vector3();
     protected virtual void FixedUpdate() {
+        FaceUIToCam();
+        if (Unit.IsDead)
+        {
+            return;
+        }
         OnVelocityChange(Agent.velocity);
         Move();
-        FaceUIToCam();
     }
 
     private void Move() 
     {
         worldDeltaPosition = Agent.nextPosition - transform.position;
-        Agent.speed = DetermineMoveSpeed();
+        MaxSpeed = DetermineMoveSpeed(); // Agent speed is its max speed after acceleration.
 /*
         if (Vector3.Distance(SlotPointTransform.position, transform.position) > 1f)
         {
@@ -89,21 +95,32 @@ public class Slot : AgentBody
         if (Time.deltaTime > 1e-5f)
             Velocity = SmoothDeltaPosition / Time.deltaTime;
 
-        // Send animator speed from 0-1 relative to max speed
-        Vector2 normalVelX = new Vector2(Velocity.x, MaxSpeed).normalized;
-        Vector2 normalVelY = new Vector2(Velocity.y, MaxSpeed).normalized;
-        if (Animator != null) {
-            Animator.SetFloat("VelocityX", normalVelX.x, .1f, Time.deltaTime);
-            Animator.SetFloat("VelocityZ", normalVelY.x, .1f, Time.deltaTime);
-            Animator.SetFloat("Velocity", Velocity.magnitude, .1f, Time.deltaTime);
-        }
-
+        UpdateAnimatorVelocity();
         Rotate(Velocity);
         GenerateMovementEffects(Velocity.magnitude);
 
         if (Agent.hasPath) // & arrived
             Agent.acceleration = (Agent.remainingDistance < 4f) ? 4 * MaxAcceleration : MaxAcceleration;
         transform.position = Agent.nextPosition;
+    }
+
+    private void UpdateAnimatorVelocity()
+    {
+        // Update velocity animation based on previous frame. Useful?
+        Vector3 v = (transform.position - PreviousPosition) / Time.deltaTime;
+        v = transform.InverseTransformDirection(v); // Convert to local space.
+        PreviousPosition = transform.position;
+
+        // Send animator speed from 0-1 relative to max speed
+        //Vector2 normalVelX = new Vector2(Velocity.x, MaxSpeed).normalized;
+        //Vector2 normalVelY = new Vector2(Velocity.y, MaxSpeed).normalized;
+        Vector2 normalVelX = new Vector2(v.x, MaxSpeedStatic).normalized;
+        Vector2 normalVelY = new Vector2(v.z, MaxSpeedStatic).normalized;
+        if (Animator != null) {
+            Animator.SetFloat("VelocityX", normalVelX.x, .1f, Time.deltaTime);
+            Animator.SetFloat("VelocityZ", normalVelY.x, .1f, Time.deltaTime);
+            Animator.SetFloat("Velocity", Velocity.magnitude, .1f, Time.deltaTime);
+        }
     }
 
     private float DetermineMoveSpeed() 
@@ -140,18 +157,94 @@ public class Slot : AgentBody
             Statics.RotateWithVelocity(transform, Agent.velocity);
         }*/
 
+        // If targeting an enemy, always face it. Otherwise rotate to the direction of travel.
         if (Brain.Target)
         {
             targetDirection = Brain.GetDirectionToTarget();
+            
         } else
         {
-            targetDirection = velocity.normalized;
+            //Statics.RotateWithVelocity(transform, Agent.velocity);
+            targetDirection = Agent.velocity.normalized;
+            
         }
         float targetRotation = Mathf.Atan2(targetDirection.x, targetDirection.z) * Mathf.Rad2Deg;// + _mainCamera.transform.eulerAngles.y;
         float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref rotationVelocity, .12f);
 		transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+        
     }
 
+    // Melee attack collided with enemy
+    /*void OnTriggerEnter(Collider collider)
+    {
+        Debug.Log("Obj in trigger zone");
+        if (gameObject.layer == collider.gameObject.layer || 
+        !(Statics.ColliderIsLayer(collider, "Player") || 
+        Statics.ColliderIsLayer(collider, "Enemy") || 
+        Statics.ColliderIsLayer(collider, "Slot")))
+        {
+            MeleeTriggerBox.enabled = false;
+            return;
+        }
+
+        Slot s = collider.GetComponentInParent<Slot>();
+        if (s != null)
+        {
+                Unit u = s.Unit;
+                if (u != null)
+                {
+                    u.TakeDamage(Unit.GetAttackDmg());
+                }
+        }
+
+        Player p = collider.GetComponent<Player>();
+        if (p != null)
+        {
+            p.TakeDamage(Unit.GetAttackDmg());
+        }
+
+        MeleeTriggerBox.enabled = false;
+    }*/
+
+    public void OnCollisionEnter(Collision collision)
+    {
+        Collider collider = collision.collider;
+        Debug.Log("Obj in trigger zone");
+        if (gameObject.layer == collider.gameObject.layer || 
+        !(Statics.ColliderIsLayer(collider, "Player") || 
+        Statics.ColliderIsLayer(collider, "Enemy") || 
+        Statics.ColliderIsLayer(collider, "Slot")))
+        {
+            MeleeTriggerBox.enabled = false;
+            return;
+        }
+
+        Slot s = collider.GetComponentInParent<Slot>();
+        if (s != null)
+        {
+                Unit u = s.Unit;
+                if (u != null)
+                {
+                    u.TakeDamage(Unit.GetAttackDmg());
+                }
+        }
+
+        Player p = collider.GetComponent<Player>();
+        if (p != null)
+        {
+            p.TakeDamage(Unit.GetAttackDmg());
+        }
+        Unit.MeleeAttack();
+        MeleeTriggerBox.enabled = false;
+    }
+
+    public void AnimationEventMeleeAttack()
+    {
+        Debug.Log("ANIMATION EVENT TRIGGERED ######################################################");
+        
+    }
+
+    // Add a unit to the empty slot.
     public virtual bool Fill(Unit u)
     {
         if (u == null)
@@ -174,6 +267,7 @@ public class Slot : AgentBody
         Brain.Slot = this;
         Brain.enabled = true;
         MaxSpeed = u.Speed;
+        MaxSpeedStatic = u.Speed;
         return true;
     }
 

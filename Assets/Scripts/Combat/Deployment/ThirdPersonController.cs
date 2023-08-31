@@ -223,7 +223,7 @@ namespace StarterAssets
 				targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
 			} else // Maintain momentum once input stops.
 			{
-				_targetRotation = 0f;
+				_targetRotation = _mainCamera.transform.eulerAngles.y;
 				targetDirection = previousDirection;
 			}
 

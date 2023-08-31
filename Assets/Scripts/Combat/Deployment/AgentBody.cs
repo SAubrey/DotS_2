@@ -7,6 +7,7 @@ public class AgentBody : MonoBehaviour
     protected NavMeshAgent Agent { get; private set; }
     public float MaxAcceleration { get; private set; } = 20f;
     public float MaxSpeed { get { return Agent.speed; } set { Agent.speed = value; } }
+    public float MaxSpeedStatic = 7f;
     public event Action<Vector3> OnPositionChange;
     private Vector3 _position;
     public Vector3 Position { 
@@ -40,8 +41,7 @@ public class AgentBody : MonoBehaviour
     public virtual void SetAgentDestination(Vector3 pos)
     {
         Agent.SetDestination(pos);
-        if (Agent.updateRotation == false)
-            Statics.RotateToPoint(transform, pos);
+
     }
 
     public virtual void SetAgentDestinationAndRotation(Vector3 movePos, Vector3 lookPos)

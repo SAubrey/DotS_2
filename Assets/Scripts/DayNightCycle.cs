@@ -9,7 +9,7 @@ public class DayNightCycle : MonoBehaviour
     public Transform SunTransform, MoonTransform;
     public Light Sun, Moon;
 
-    public const int DayDuration = 1200; // num seconds
+    public const int DayDuration = 600; // num seconds
     public const int DayDurationHalf = DayDuration / 2;
     public float intensity;
     public Color fogday = Color.gray;

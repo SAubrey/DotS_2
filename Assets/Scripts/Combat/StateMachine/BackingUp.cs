@@ -23,7 +23,9 @@ public class BackingUp : IState
 
     public void OnEnter()
     {
+        #if DEBUG_AI 
         Debug.Log("Backing up w/ TD: " + Brain.TargetDistance);
+        #endif
         // Move some distance along a line opposite the direction to the player.
         r = Random.Range(Brain.ComfortableTargetDistanceMin + 1f, Brain.ComfortableTargetDistanceMax - 1f);
     }

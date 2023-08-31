@@ -183,7 +183,12 @@ public class Statics
     
     public static void RotateToPoint(Transform t, Vector3 point)
     {   
-        t.rotation = Quaternion.LookRotation(Statics.CalcDirection(t.position, point));
+        //float targetRotation = Quaternion.LookRotation(Statics.CalcDirection(t.position, point));
+        Vector3 targetDirection = Statics.CalcDirection(t.position, point);
+        float targetRotation = Mathf.Atan2(targetDirection.x, targetDirection.z) * Mathf.Rad2Deg;// + _mainCamera.transform.eulerAngles.y;
+        float rotationVelocity = 0f;
+        float rotation = Mathf.SmoothDampAngle(t.eulerAngles.y, targetRotation, ref rotationVelocity, .12f);
+		t.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
     }
 
     public static void RotateToTargetOnY(Transform transform, Vector3 target)

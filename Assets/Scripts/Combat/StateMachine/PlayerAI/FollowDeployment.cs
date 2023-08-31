@@ -28,7 +28,9 @@ public class FollowDeployment : IState
 
     public void OnEnter()
     {
+        #if DEBUG_AI 
         Debug.Log("Follow");
+        #endif
         Returning = true;
     }
 

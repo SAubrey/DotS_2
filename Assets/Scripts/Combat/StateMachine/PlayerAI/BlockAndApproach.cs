@@ -22,7 +22,9 @@ public class BlockAndApproach : IState
     public void OnEnter()
     {
         Brain.Slot.Unit.Blocking = true;
+        #if DEBUG_AI 
         Debug.Log("BlockAndApproach");
+        #endif
     }
 
     public void OnExit()

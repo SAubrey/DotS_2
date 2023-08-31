@@ -26,7 +26,9 @@ public class Roam : IState
     {
         // Set random target, update when target entered
         TargetPos = GetRandomTargetPos();
+        #if DEBUG_AI 
         Debug.Log("Roam: " + TargetPos + " Time: " + Time.time);
+        #endif
         Brain.Roam = true;
     }
 

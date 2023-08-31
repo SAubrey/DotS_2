@@ -66,12 +66,25 @@ public class Arrow : MonoBehaviour
         LineRenderer.enabled = true;
     }
 
+    // Triggers on continuous rigidbodies only trigger with static objects.
     void OnTriggerEnter(Collider collider) 
     {
         if (!Flying || Statics.ColliderIsLayer(collider, "Player") || Statics.ColliderIsLayer(collider, "Slot")) 
             return;
 
-        Stick(collider.transform);
+        Stick(collider.transform, false);
+        Flying = false;
+        SoundManager.I.playerAudioPlayer.ArrowHit(gameObject);
+        LineRenderer.enabled = false;
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        Collider collider = collision.collider;
+        if (!Flying || Statics.ColliderIsLayer(collider, "Player") || Statics.ColliderIsLayer(collider, "Slot") || Statics.ColliderIsLayer(collider, "Default")) 
+            return;
+
+        Stick(collider.transform, Statics.ColliderIsLayer(collider, "Enemy"));
         Flying = false;
         SoundManager.I.playerAudioPlayer.ArrowHit(gameObject);
         LineRenderer.enabled = false;
@@ -87,16 +100,21 @@ public class Arrow : MonoBehaviour
                 slot.Unit.TakeDamage((int)Damage);
             }
         }
-        
     }
 
-    private void Stick(Transform t)
+    private void Stick(Transform t, bool isEnemy)
     {
         Debug.Log("STICKING! to: " + t.name);
         Rigidbody.velocity = Vector3.zero;
         Rigidbody.angularVelocity = Vector3.zero;
         Rigidbody.isKinematic = true;
         transform.SetParent(t);
+        if (isEnemy) // Set arrow through center of mass, preserving height. Workaround for speculative collision.
+        {
+            transform.position = new Vector3(0, t.position.y, 0);
+        }
+
+        transform.position = t.position;
     }
 
     private void Despawn()
